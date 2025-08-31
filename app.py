@@ -26,6 +26,7 @@ def load_data():
         open_tickets_df = pd.read_csv(open_tickets_file, encoding='latin1', engine='python', on_bad_lines='skip')
         
         all_tickets_df = pd.concat([closed_tickets_df, open_tickets_df], ignore_index=True)
+        # Rename columns that are known to exist
         all_tickets_df.rename(columns={'Summary': 'summary', 'Custom field (RCA - Root Cause Analysis)': 'rca'}, inplace=True)
         return oem_df, all_tickets_df
     except FileNotFoundError as e:
@@ -62,25 +63,17 @@ def create_room_visualization(room_width, room_length, capacity):
     fig, ax = plt.subplots(figsize=(6, 6 * (room_length / room_width)))
     ax.set_aspect('equal', adjustable='box')
 
-    # 1. Draw the Room
     ax.add_patch(Rectangle((0, 0), room_width, room_length, fill=None, edgecolor='black', linewidth=2))
-
-    # 2. Draw the Display
     display_x = room_width * 0.25
     ax.add_patch(Rectangle((display_x, room_length - 0.05), room_width * 0.5, 0.05, facecolor='darkblue', edgecolor='black'))
-
-    # 3. Draw the Camera & Field of View (FOV)
     camera_pos = (room_width / 2, room_length - 0.1)
     ax.add_patch(Circle(camera_pos, radius=0.1, facecolor='black'))
-
-    # Draw a 90-degree horizontal FOV cone
     fov_angle = 90
     ax.add_patch(Wedge(camera_pos, r=room_length * 1.2, 
                          theta1=270 - fov_angle / 2, 
                          theta2=270 + fov_angle / 2, 
                          facecolor='lightcyan', alpha=0.5))
 
-    # 4. Draw Seats
     num_seats_per_side = int(np.ceil(capacity / 2))
     table_length = max(1, room_length * 0.6)
     table_width = max(1, room_width * 0.4)
@@ -89,9 +82,7 @@ def create_room_visualization(room_width, room_length, capacity):
 
     for i in range(num_seats_per_side):
         y_pos = table_y + (i * table_length / (num_seats_per_side - 1 if num_seats_per_side > 1 else 1))
-        # Left side seats
         ax.add_patch(Circle((table_x - 0.3, y_pos), radius=0.25, facecolor='gray'))
-        # Right side seats
         ax.add_patch(Circle((table_x + table_width + 0.3, y_pos), radius=0.25, facecolor='gray'))
     
     ax.set_xlim(-1, room_width + 1)
@@ -99,10 +90,8 @@ def create_room_visualization(room_width, room_length, capacity):
     ax.set_xticks([])
     ax.set_yticks([])
     plt.title(f"{capacity}-Person Room Layout")
-    
     return fig
 
-# --- The rest of your functions (generate_proposal, etc.) remain the same ---
 def generate_proposal(capacity, farthest_viewer, use_case, has_direct_light, tier="Standard"):
     """The core engine that runs compliance checks and generates tiered BOQs."""
     min_height_m = farthest_viewer / 15 if use_case == "Analytical Decision Making" else farthest_viewer / 20
@@ -110,24 +99,15 @@ def generate_proposal(capacity, farthest_viewer, use_case, has_direct_light, tie
     sizes = [55, 65, 75, 85, 98]
     rec_size = min(sizes, key=lambda x:abs(x-min_diagonal_inches))
     discas_report = f"Recommended display is {rec_size}\" based on viewing distance."
-
     light_report, light_status = ("FAIL: High risk of screen glare.", "❌") if has_direct_light else ("PASS: No lighting conflicts.", "✅")
-
     compliance_df = pd.DataFrame([
         {"Standard": "Display Size (DISCAS)", "Result": discas_report, "Status": "✅"},
         {"Standard": "Lighting & Glare", "Result": light_report, "Status": light_status}
     ])
-
-    brand_tiers = {
-        "Budget": ["Yealink", "BenQ", "Aver"],
-        "Standard": ["Logitech", "Poly", "Samsung"],
-        "Premium": ["Cisco", "Crestron", "Shure", "Biamp"]
-    }
-    
+    brand_tiers = {"Budget": ["Yealink", "BenQ", "Aver"],"Standard": ["Logitech", "Poly", "Samsung"],"Premium": ["Cisco", "Crestron", "Shure", "Biamp"]}
     if capacity <= 6: template = ["UC & Collaboration Devices", "Displays & Projectors"]
     elif capacity <= 14: template = ["UC & Collaboration Devices", "Displays & Projectors", "Audio: Microphones & Conferencing"]
     else: template = ["PTZ & Pro Video Cameras", "Video Wall Technology", "Audio: DSP & Mixing", "Control Systems", "Acoustics & Sound Masking"]
-
     boq_items = []
     for category in template:
         brands = oem_list_df[oem_list_df['Category'] == category]
@@ -135,66 +115,55 @@ def generate_proposal(capacity, farthest_viewer, use_case, has_direct_light, tie
         brand = selected_brand['OEM / Brand'].iloc[0] if not selected_brand.empty else (brands['OEM / Brand'].iloc[0] if not brands.empty else "N/A")
         desc = f"{rec_size}\" Display" if "Display" in category else f"{brand} Solution"
         boq_items.append({"Category": category, "Brand Recommendation": brand, "Description": desc, "Tier": tier, "Qty": 1})
-
     return compliance_df, pd.DataFrame(boq_items)
 
 # --- Streamlit User Interface ---
 if oem_list_df is not None:
-    if 'capacity' not in st.session_state or not isinstance(st.session_state.capacity, (int, float)):
-        st.session_state.capacity = 10
-    if 'farthest_viewer' not in st.session_state or not isinstance(st.session_state.farthest_viewer, (int, float)):
-        st.session_state.farthest_viewer = 6.0
-
+    if 'capacity' not in st.session_state or not isinstance(st.session_state.capacity, (int, float)): st.session_state.capacity = 10
+    if 'farthest_viewer' not in st.session_state or not isinstance(st.session_state.farthest_viewer, (int, float)): st.session_state.farthest_viewer = 6.0
     st.sidebar.header("1. Start a New Project")
     st.sidebar.info("Upload a Need Analysis Doc (.docx) to auto-fill.")
     uploaded_file = st.sidebar.file_uploader("Upload Document", type=['docx'])
-    
     if uploaded_file:
         extracted = parse_docx(io.BytesIO(uploaded_file.getvalue()))
-        if extracted:
-            st.session_state.update(extracted)
-            st.sidebar.success(f"Analyzed: **{st.session_state.get('room_name', '')}**")
-
+        if extracted: st.session_state.update(extracted); st.sidebar.success(f"Analyzed: **{st.session_state.get('room_name', '')}**")
     st.sidebar.text_input("Room Name", key="room_name")
     st.sidebar.number_input("Seating Capacity", min_value=1, key="capacity")
     st.sidebar.number_input("Farthest Viewer (meters)", key="farthest_viewer")
     use_case = st.sidebar.selectbox("Primary Use Case", ["Analytical Decision Making", "Basic Decision Making"])
     has_light = st.sidebar.checkbox("Light source above display?")
-
     if st.sidebar.button("🚀 Generate AI Proposal"):
         st.session_state.compliance, st.session_state.boq = generate_proposal(st.session_state.capacity, st.session_state.farthest_viewer, use_case, has_light, "Standard")
         st.session_state.proposal_generated = True
-
-    # --- Main Display Area ---
     if 'proposal_generated' in st.session_state:
         st.header("2. AI-Generated Proposal")
-        
-        # Display the BOQ and Visualization side-by-side
         col1, col2 = st.columns(2)
-        
         with col1:
             st.subheader("Bill of Quantities (BOQ)")
             st.table(st.session_state.boq)
-            
             st.subheader("AVIXA Compliance Report")
             st.dataframe(st.session_state.compliance.style.apply(lambda row: ['color:red' if row.Status == '❌' else '' for v in row], axis=1))
-
         with col2:
             st.subheader("Room Layout Visualization")
-            # Use farthest viewer to estimate room dimensions
-            room_length = st.session_state.farthest_viewer
-            room_width = room_length * 0.75 # Assume a common aspect ratio
-            fig = create_room_visualization(room_width, room_length, st.session_state.capacity)
-            st.pyplot(fig)
-
-    else:
-        st.info("Upload a document or fill in the details on the left and click 'Generate'.")
-
-    # --- Support Chatbot ---
+            room_length = st.session_state.farthest_viewer; room_width = room_length * 0.75
+            fig = create_room_visualization(room_width, room_length, st.session_state.capacity); st.pyplot(fig)
+    else: st.info("Upload a document or fill in details on the left and click 'Generate'.")
     if tickets_df is not None:
         st.header("3. Historical Support Ticket Search")
         query = st.text_input("Search past tickets (e.g., 'projector image', 'Crestron'):")
         if query:
-            results = tickets_df[tickets_df.apply(lambda r: query.lower() in str(r['summary']).lower() or query.lower() in str(r['rca']).lower(), axis=1)]
+            # --- FIX IS HERE: Check if 'rca' column exists before searching ---
+            def search_row(r):
+                summary_match = query.lower() in str(r['summary']).lower()
+                rca_match = False
+                if 'rca' in r and pd.notna(r['rca']):
+                    rca_match = query.lower() in str(r['rca']).lower()
+                return summary_match or rca_match
+
+            results = tickets_df[tickets_df.apply(search_row, axis=1)]
             if not results.empty:
-                st.dataframe(results[['Issue key', 'Status', 'summary', 'rca']].head())
+                # Display only columns that are guaranteed to exist
+                display_cols = ['Issue key', 'Status', 'summary']
+                if 'rca' in results.columns:
+                    display_cols.append('rca')
+                st.dataframe(results[display_cols].head())
