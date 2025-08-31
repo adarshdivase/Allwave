@@ -12,16 +12,17 @@ st.title("🚀 All Wave AI-Powered Design & Estimation Engine")
 
 @st.cache_data
 def load_data():
-    """Loads and prepares all necessary data files from the user's directory."""
+    """Loads and prepares all necessary data files with specific encoding."""
     try:
         # Define the exact filenames to look for
         oem_file = "av_oem_list_2025.csv"
         closed_tickets_file = "Closed tickets(Last 10 days).xlsx - Jira Export Excel CSV (my defau.csv"
         open_tickets_file = "Open Tickets(last 10 days).xlsx - Jira Export Excel CSV (my defau.csv"
 
-        oem_df = pd.read_csv(oem_file)
-        closed_tickets_df = pd.read_csv(closed_tickets_file)
-        open_tickets_df = pd.read_csv(open_tickets_file)
+        # --- FIX IS HERE: Added encoding='latin1' to handle the file format ---
+        oem_df = pd.read_csv(oem_file, encoding='latin1')
+        closed_tickets_df = pd.read_csv(closed_tickets_file, encoding='latin1')
+        open_tickets_df = pd.read_csv(open_tickets_file, encoding='latin1')
         
         all_tickets_df = pd.concat([closed_tickets_df, open_tickets_df], ignore_index=True)
         all_tickets_df.rename(columns={'Summary': 'summary', 'Custom field (RCA - Root Cause Analysis)': 'rca'}, inplace=True)
