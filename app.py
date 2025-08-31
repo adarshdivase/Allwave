@@ -14,13 +14,10 @@ st.title("🚀 All Wave AI-Powered Design & Estimation Engine")
 def load_data():
     """Loads and prepares all necessary data files with robust parsing."""
     try:
-        # Define the exact filenames to look for
-        oem_file = "av_oem_list_2025.csv"
+        oem_file = "av_o_em_list_2025.csv"
         closed_tickets_file = "Closed tickets(Last 10 days).xlsx - Jira Export Excel CSV (my defau.csv"
         open_tickets_file = "Open Tickets(last 10 days).xlsx - Jira Export Excel CSV (my defau.csv"
 
-        # --- FINAL FIX: Use the 'python' engine and add error handling ---
-        # This is the most robust way to read CSVs that might be malformed.
         oem_df = pd.read_csv(oem_file, encoding='latin1', engine='python', on_bad_lines='skip')
         closed_tickets_df = pd.read_csv(closed_tickets_file, encoding='latin1', engine='python', on_bad_lines='skip')
         open_tickets_df = pd.read_csv(open_tickets_file, encoding='latin1', engine='python', on_bad_lines='skip')
@@ -45,12 +42,15 @@ def parse_docx(file_stream):
         text = "\n".join([para.text for para in doc.paragraphs])
         
         length_ft = re.search(r'Length\s*-\s*(\d+(\.\d+)?)ft', text, re.IGNORECASE)
-        capacity = re.search(r'(\d+)\s*Pax', text, re.IGNORECASE)
+        capacity_search = re.search(r'(\d+)\s*Pax', text, re.IGNORECASE)
         
+        # --- FIX IS HERE: Ensure capacity is a valid integer ---
+        capacity = int(capacity_search.group(1)) if capacity_search else 12
+
         return {
             "room_name": doc.paragraphs[0].text.strip().replace(":", ""),
             "farthest_viewer": float(length_ft.group(1)) * 0.3048 if length_ft else 6.0,
-            "capacity": int(capacity.group(1)) if capacity else 12,
+            "capacity": capacity,
         }
     except Exception:
         st.warning("Could not fully parse the DOCX. Please review the extracted details.")
@@ -93,8 +93,14 @@ def generate_proposal(capacity, farthest_viewer, use_case, has_direct_light, tie
 
 # --- 3. Streamlit User Interface ---
 if oem_list_df is not None:
-    for key in ['room_name', 'capacity', 'farthest_viewer']:
-        if key not in st.session_state: st.session_state[key] = ""
+    # Initialize session state with valid defaults
+    if 'capacity' not in st.session_state or not isinstance(st.session_state.capacity, (int, float)):
+        st.session_state.capacity = 10
+    if 'room_name' not in st.session_state:
+        st.session_state.room_name = ""
+    if 'farthest_viewer' not in st.session_state:
+        st.session_state.farthest_viewer = 0.0
+
 
     st.sidebar.header("1. Start a New Project")
     st.sidebar.info("Upload a Need Analysis Doc (.docx) to auto-fill.")
