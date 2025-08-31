@@ -1,0 +1,698 @@
+Received: by 2002:a05:7010:6aa2:b0:445:9a8c:7b54 with SMTP id co34csp7851124mdb;
+        Wed, 9 Apr 2025 00:17:12 -0700 (PDT)
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id af79cd13be357-7c7a10a9c40sor46494885a.2.2025.04.09.00.17.11
+        for <sachin.bhosale@allwavegs.com>
+        (Google Transport Security);
+        Wed, 09 Apr 2025 00:17:11 -0700 (PDT)
+From: "Balasubramanian Selvam/AWAV/Bangalore" <bala.s@allwaveav.com>
+To: "Sachin Bhosale" <sachin.bhosale@allwavegs.com>
+References: <CAD=6t0ivnBupmTgk5BY54A0aN+T+FRXJb-_VRbtobPm3y4gYqA@mail.gmail.com> <CAGqyisUtvZVo2+aD6u1fatjunjefSJe4av_9RTdACg+g1s5+9Q@mail.gmail.com> <CAH0G8Q6PCL2UR0M9xO35FaMngpJJN=bj5GQfYvOx3B_26tX6zg@mail.gmail.com> <CAG-w=u4XswnaVMrJMi5kMM844C_HVf8VdgC=Fa88rwGUA2nibw@mail.gmail.com>
+In-Reply-To: <CAG-w=u4XswnaVMrJMi5kMM844C_HVf8VdgC=Fa88rwGUA2nibw@mail.gmail.com>
+Subject: Fwd: All-wave Enquiry Form
+Date: Wed, 9 Apr 2025 12:46:34 +0530
+Message-ID: <CAG-w=u4ObRqJ41JQthtRzcSA_aCvLU_ujJXh80uOvrgrpba+1Q@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+	boundary="----=_NextPart_000_0A68_01DC1917.59C30ED0"
+X-Mailer: Microsoft Outlook 16.0
+X-Google-Smtp-Source: AGHT+IGQ4nrxIQgSw7670fobl6C47Bj76uI1xG6bV3PeNpv2NBoXtVEJAxWpa4YO+5d2RuNvV/fNBanB/7GcGY9hLek=
+X-Received: by 2002:a05:620a:25c8:b0:7c5:5909:18d8 with SMTP id af79cd13be357-7c79cbd1604mr299564885a.14.1744183031752;
+        Wed, 09 Apr 2025 00:17:11 -0700 (PDT)
+X-Received: by 2002:a05:6214:403:b0:6e8:9cd3:80d5 with SMTP id
+ 6a1803df08f44-6f0dbb95402mr33731986d6.13.1744183031042; Wed, 09 Apr 2025
+ 00:17:11 -0700 (PDT)
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@allwaveav.com header.s=allwaveav header.b="OFd/asJm";
+       spf=pass (google.com: domain of bala.s@allwaveav.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=bala.s@allwaveav.com;
+       dmarc=pass (p=QUARANTINE sp=NONE dis=NONE) header.from=allwaveav.com;
+       dara=neutral header.i=@allwavegs.com
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1744183031; x=1744787831;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=jey8/f5jiGuG67ILLQRywd85jgbhpdQeJjVumDvVq80=;
+        b=WiC9a6dPXQVDmnVmyUht/C3FYxA7OJ5ZQ6fX2tcawzIwvEk5eBxSojEeC2h2kDKJvw
+         +7rGu8w+NNxYkZzMuejOW1Ox0QXmHv2wCYa6xoVMknvOctzfuz44Hu985FrPrUdVJXoG
+         psU+F7oikVmOMvw0Na4vpmZ3dI/K8Naub6J/joNdowsh52frLPMlvQGuSc8nCX+NG0+J
+         1or3Zr5nQydkWT/vTn52qKD9xLhupagtJNdVdpgWf6z6AqpooChZO8O9xtJNijv8Csys
+         5J2HqeK3Aau/QAwGRaUVzBXzVuaeGhdSkXlfaYfFoBuy6Luh5s/s/JBmz1MP2+1eXuQe
+         Jv5A==
+X-Gm-Message-State: AOJu0Yx6dTKnlfTtNLzTLJRuNDJVdtKyh+WC/Dut0tw9n2b4+vULWVY8
+	yJCJMUiTx0xa/WrWGpWi/XTuY+jH99INKEBHshwB/JXkKUy7VoNG3kNebfmy4xOSBdfPCrIYLiH
+	WOwpERAgwTbzsUwcHs3caVpmimvh4zSjz4pvFepduv+NeCZvnYw==
+X-Gm-Gg: ASbGncuRWaHnptjCPb8yPpgPL78LxcJIDwvsx+rKHyehSkFEZFa+dYpRW8zjy3Ek8bs
+	sL1YofuN1NAFYS7geOMZErfeRyRH+Nl1OvIfO0mNBQFKJCUD/3PF0pmecng9BIYqW3DqUCdxNpr
+	djpPcal8QJAGoqhPWw8I5bNL9zx0dCPJW2
+X-Gm-Features: ATxdqUFmSRSzOnmBYznKDBYFwRE26CNdXn1UlFToIfXMkaF01zINmC1vAyXXSJA
+Thread-Index: AQJV2bxPpRcdDCSVglt1lHVyOebxuwFXk9n9AqLrLVUCRY6PBgIbVISr
+
+This is a multipart message in MIME format.
+
+------=_NextPart_000_0A68_01DC1917.59C30ED0
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+Hi Sachin,
+
+Below MoM mail for your ready reference.
+
+
+Warm Regards,=20
+
+
+
+
+
+  =
+<https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJdvuvdw-X6B-FMhdYVnerb=
+14gh13vI1f0z28PzwpbxvwgWVGSJ_zo_CL9HoGfbS-pB66P2WAdPD59KuhjG-sJB9dj7IFGLM=
+4-LEeFHoIx540CWOWal5_djf3fpJwV4TGqiXls?key=3D25EjYfqXXzGOrd5RdjmiL5AG>=20
+
+
+
+
+Balasubramanian S
+
+Manager - Design & Estimation
+
+
+
+
+Classic Arena, 4th Floor, Hosur Rd, AECS Layout - A Block, Singasandra, =
+Bengaluru, Karnataka 560068
+
+Phone: +91-9597300207
+
+Email ID:  <mailto:bala.s@allwaveav.com> bala.s@allwaveav.com
+
+
+MUMBAI  |  PUNE  |  NCR  |  BENGALURU  |  HYDERABAD  |  CHENNAI  |  =
+KOLKATA
+
+
+ <https://www.linkedin.com/company/allwave-av>    =
+<https://www.instagram.com/allwaveav>    =
+<https://www.facebook.com/Allwave.AV.Systems/>=20
+
+
+ <http://www.allwaveav.com>=20
+
+
+
+---------- Forwarded message ---------
+From: Balasubramanian Selvam/AWAV/Bangalore <bala.s@allwaveav.com =
+<mailto:bala.s@allwaveav.com> >
+Date: Mon, May 6, 2024 at 4:48=E2=80=AFPM
+Subject: Re: All-wave Enquiry Form
+To: Pravesh Agrawal/AWAV <pravesh.agrawal@allwaveav.com =
+<mailto:pravesh.agrawal@allwaveav.com> >
+Cc: Kuldip Kamat <kuldip.kamat@allwaveav.com =
+<mailto:kuldip.kamat@allwaveav.com> >
+
+
+
+Hi Pravesh,
+
+As discussed on the call and with reference to the below mail, I have =
+contacted the client on call directly for the Room Booking (software & =
+Hardware) requirement at Bangalore.
+
+- I asked the client for us to come to the site to take the requirement. =
+But, he asked me to make notes and told he will tell the requirements on =
+call itself
+- Client told that he wants both - room booking software for employees =
+and room booking hardware for the meeting rooms
+- Client is using Google calendars for their organization currently
+- Client's main requirement he told is - If the booked meeting room is =
+not used, then the room must automatically get released after a few =
+minutes. And, this room must be available for other users to book it =
+seems
+- Also, he told - if meeting is going to start, a reminder popup must =
+come to the meeting participants and it must remind them about the =
+upcoming meeting it seems
+
+* Client asked for a physical Demo of the room booking hardware & room =
+booking software at the client place
+* Client asked our team to come to site along with the required demo =
+hardware and demo software if available only (he asked not to come to =
+site just for taking the requirements)
+
+So, Kindly advise should we inform tanaji sir & krishnan sir that if the =
+demo unit of cue room booking panel hardware, demo of cue room booking =
+software and the programming team is available in bangalore to do the =
+needful.
+
+
+Client name: Samar Keshari
+
+Email: samara.keshari@chaitanyaindia.in =
+<mailto:samara.keshari@chaitanyaindia.in>=20
+
+Phone: 9110486500
+
+Site Address - https://maps.app.goo.gl/7noa7bGZowo9La82A
+
+Thanks & Regards,
+Balasubramanian S |  Manager - Design & Estimation=09
+
+
+
+  <https://media.allwaveav.com/call.png>   (+91) 9597300207
+=09
+  <https://media.allwaveav.com/telephone.png>   (+91) 22-22664937 | 1800 =
+2100 198=09
+  <https://media.allwaveav.com/mail.png>    bala.s@allwaveav.com =
+<mailto:bala.s@allwaveav.com> =09
+  =
+<https://ci3.googleusercontent.com/mail-sig/AIorK4xNuojfwVLX9R61hEm4vUaIL=
+Aa9KH_qWRwdxTl4tvDC3u9Em_AccWlYNlkG_ZT4Az_YKNSYY9M> 	=09
+  <https://media.allwaveav.com/placeholder.png>    Classic Arena, 4th =
+Floor, Hosur Rd, AECS Layout - A Block, Singasandra, Bengaluru, =
+Karnataka - 560068=20
+
+
+
+ <https://allwaveav.com/> www.allwaveav.com	 	 =
+<https://www.facebook.com/Allwave.AV.Systems/>     =
+<https://twitter.com/AllwaveAV>     =
+<https://www.linkedin.com/company/13404167/>     =
+<https://www.instagram.com/allwaveav/>  =09
+
+MUMBAI  |  PUNE  |  NCR  |  BENGALURU  |  HYDERABAD  |  CHENNAI  |  =
+KOLKATA
+
+
+On Mon, May 6, 2024 at 11:53=E2=80=AFAM Pravesh Agrawal/AWAV =
+<pravesh.agrawal@allwaveav.com <mailto:pravesh.agrawal@allwaveav.com> > =
+wrote:
+
+
+Hi Bala,=20
+
+I have spoken to client.
+
+Please meet him tommorrow along with Sandeep for site survey at their =
+office.
+
+Understand the requirements well.
+
+Cue solutions.
+
+
+Regards,
+
+Pravesh Agrawal
+Sent from my mobile device
+
+9819904655
+9014416348
+
+---------- Forwarded message ---------
+From: Kuldip Kamat <kuldip.kamat@allwaveav.com =
+<mailto:kuldip.kamat@allwaveav.com> >
+Date: Thu, 2 May 2024, 4:43=E2=80=AFpm
+Subject: Re: All-wave Enquiry Form
+To: Pravesh Agrawal/AWAV <pravesh.agrawal@allwaveav.com =
+<mailto:pravesh.agrawal@allwaveav.com> >
+Cc: <contact@allwaveav.com <mailto:contact@allwaveav.com> >, =
+<social@allwaveav.com <mailto:social@allwaveav.com> >, =
+<79kdh0uba_dww6mtjo@parser.zohocrm.in =
+<mailto:79kdh0uba_dww6mtjo@parser.zohocrm.in> >, =
+<rochelle.mudliar@allwaveav.com <mailto:rochelle.mudliar@allwaveav.com> =
+>
+
+
+
+
+Pravesh - see if Cue ecosystem (TouchOne by Cue) is interesting. There's =
+software as well
+https://www.cuesystem.com/reserve/
+
+
+
+Best, Kuldip
+
+
+
+
+
+On Thu, May 2, 2024 at 4:10=E2=80=AFPM AllWave <social@allwaveav.com =
+<mailto:social@allwaveav.com> > wrote:
+
+
+From: Samar Keshari=20
+
+Email: samara.keshari@chaitanyaindia.in =
+<mailto:samara.keshari@chaitanyaindia.in> =20
+
+Phone: 9110486500=20
+
+Organization: [your-organization]=20
+
+Designation: [your-designation]=20
+
+Project: [Project]=20
+
+Message: We need meeting room booking software application for 250+ =
+users and 20+ meeting room=20
+
+URL: =
+https://www.allwaveav.com/contact-us/?utm_source=3Dgoogle&utm_medium=3Dse=
+arch&utm_campaign=3Dallwave-gsn-campaign-5feb24&utm_content=3Dawav-projec=
+t-2&network=3Dg&placement=3D&utm_keyword=3Dvideo%20conference%20meeting%2=
+0room&utm_matchtype=3Db&utm_source=3Dgoogle&utm_medium=3Dsearch&utm_campa=
+ign=3Dallwave-gsn-campaign-5feb24&utm_content=3Dawav-project-2&network=3D=
+g&placement=3D&utm_keyword=3Dvideo%20conference%20meeting%20room&utm_matc=
+htype=3Db&gad_source=3D1&gclid=3DCjwKCAjw88yxBhBWEiwA7cm6pZf_yu1T7bEOu-AV=
+yLbR5DrjAz99lj8SMicIzVMOhB3F8j9JDC-vtRoCy_gQAvD_BwE=20
+
+Campaign Source:
+Campaign Medium:
+Campaign Name:
+Campaign Content:
+Campaign ID:
+Full URL:
+Keyword:
+Match Type:
+--
+This e-mail was sent from a contact form on AllWave =
+(https://www.allwaveav.com)=20
+
+
+------=_NextPart_000_0A68_01DC1917.59C30ED0
+Content-Type: text/html;
+	boundary="000000000000fd222606325341e5";
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div><div>Hi Sachin,</div><div><br></div><div>Below MoM =
+mail for your ready reference.</div></div><div><br></div><div><div =
+dir=3D"ltr" class=3D"gmail_signature" =
+data-smartmail=3D"gmail_signature"><div dir=3D"ltr"><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Arial,sans-serif;color:#000000;backgr=
+ound-color:transparent;font-weight:400;font-style:normal;font-variant:nor=
+mal;text-decoration:none;vertical-align:baseline;white-space:pre;white-sp=
+ace:pre-wrap">Warm Regards,=C2=A0</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.38;margin-top:0pt;margin-bottom:0pt"><span><br></s=
+pan></p><div dir=3D"ltr" style=3D"margin-left:0pt" align=3D"left"><table =
+style=3D"border:none;border-collapse:collapse"><colgroup><col =
+width=3D"203"><col width=3D"459"></colgroup><tbody><tr =
+style=3D"height:164.46386718749997pt"><td style=3D"border-left:solid =
+#ffffff 1pt;border-right:solid #ffffff 1pt;border-bottom:solid #ffffff =
+1pt;border-top:solid #ffffff 1pt;vertical-align:top;padding:5pt 5pt 5pt =
+5pt;overflow:hidden"><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:8pt;font-family:Arial,sans-serif;color:#000000;backgro=
+und-color:transparent;font-weight:400;font-style:normal;font-variant:norm=
+al;text-decoration:none;vertical-align:baseline;white-space:pre;white-spa=
+ce:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:163px;hei=
+ght:159px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJdvuvdw-X6B-FMhd=
+YVnerb14gh13vI1f0z28PzwpbxvwgWVGSJ_zo_CL9HoGfbS-pB66P2WAdPD59KuhjG-sJB9dj=
+7IFGLM4-LEeFHoIx540CWOWal5_djf3fpJwV4TGqiXls?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"163" height=3D"159" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></p></td><td =
+style=3D"border-left:solid #ffffff 1pt;border-right:solid #ffffff =
+1pt;border-bottom:solid #ffffff 1pt;border-top:solid #ffffff =
+1pt;vertical-align:top;padding:5pt 5pt 5pt 5pt;overflow:hidden"><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:700;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Balasubramanian S</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Manager - Design &amp; Estimation</span></p><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap"><br></span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><font =
+color=3D"#000000" face=3D"Roboto, sans-serif"><span =
+style=3D"font-size:13.3333px">Classic Arena, 4th Floor, Hosur Rd, AECS =
+Layout - A Block, Singasandra, Bengaluru, Karnataka =
+560068</span></font></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Phone: +91-9597300207</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Email ID: </span><a href=3D"mailto:bala.s@allwaveav.com" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap">bala.s@allwaveav.com</span></a></p><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:8pt;font-family:Roboto,sans-serif;color:#000000;backgr=
+ound-color:transparent;font-weight:400;font-style:normal;font-variant:nor=
+mal;text-decoration:none;vertical-align:baseline;white-space:pre;white-sp=
+ace:pre-wrap">MUMBAI=C2=A0 |=C2=A0 PUNE=C2=A0 |=C2=A0 NCR=C2=A0 |=C2=A0 =
+BENGALURU=C2=A0 |=C2=A0 HYDERABAD=C2=A0 |=C2=A0 CHENNAI=C2=A0 |=C2=A0 =
+KOLKATA</span></p><br><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><a =
+href=3D"https://www.linkedin.com/company/allwave-av" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:32px;heig=
+ht:31px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcGQZ1JVmPqfbCj4xN=
+QZPHrY_3ZM6e_0xbjID4UdDS0Lm7v6z9864QXMrKESZ8vC4A-RIGNJEvvTxIefrv-SpUY4FIn=
+v5foJwc0M84tQibq27an7fXbnJctByiLP8A38_u6x3rD?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"32" height=3D"31" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">=C2=A0 </span><a =
+href=3D"https://www.instagram.com/allwaveav" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:32px;heig=
+ht:32px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdAL4n3JgPc01QE_3v=
+-pfMctMtxcBM98T5L4vk-zuyY22IM8fJWkYUdbA4EpyhTBVaGklog_ryIP8DDrt_wetoQj_D7=
+ai7BypIYaScKbdUn5n23bEwkF7RgKccoGDGelzpoWsXraw?key=3D25EjYfqXXzGOrd5Rdjmi=
+L5AG" width=3D"32" height=3D"32" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">=C2=A0 </span><a =
+href=3D"https://www.facebook.com/Allwave.AV.Systems/" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:30px;heig=
+ht:29px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXflfIj7rdcGlSyPHml=
+t1G13q9Z54Kf0xiPml_NyRpb0UkPNMI2XfL6pMAFTEFxIh8LLPIa8IfJ8AXpBQfIBUi7XYMLC=
+LDa1TWlalG50CqNoIFNfgbt0F7y7y7cJFWkmlilkQWMj9Q?key=3D25EjYfqXXzGOrd5Rdjmi=
+L5AG" width=3D"30" height=3D"29" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a></p><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><a =
+href=3D"http://www.allwaveav.com" style=3D"text-decoration:none" =
+target=3D"_blank"><span =
+style=3D"font-size:8pt;font-family:Arial,sans-serif;color:#1155cc;backgro=
+und-color:transparent;font-weight:400;font-style:normal;font-variant:norm=
+al;text-decoration:underline;vertical-align:baseline;white-space:pre;whit=
+e-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:445px;hei=
+ght:67px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdqPdtfcRVlDqqP6im=
+nKEPV7PPzGBB_FGKx5ejpPcNegfexZq2mk0c5dZwqIiCkdM0LT5CVe8s_1IZdr5EqDOUFf6yL=
+8y3nLs_aZ7z9cKrUhEZevQv_OrGzK94HHhALVG7BokNb?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"445" height=3D"67" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a></p></td></tr>=
+</tbody></table></div></div></div></div><br><br><div =
+class=3D"gmail_quote gmail_quote_container"><div dir=3D"ltr" =
+class=3D"gmail_attr">---------- Forwarded message ---------<br>From: =
+<strong class=3D"gmail_sendername" dir=3D"auto">Balasubramanian =
+Selvam/AWAV/Bangalore</strong> <span dir=3D"auto">&lt;<a =
+href=3D"mailto:bala.s@allwaveav.com">bala.s@allwaveav.com</a>&gt;</span><=
+br>Date: Mon, May 6, 2024 at 4:48=E2=80=AFPM<br>Subject: Re: All-wave =
+Enquiry Form<br>To: Pravesh Agrawal/AWAV &lt;<a =
+href=3D"mailto:pravesh.agrawal@allwaveav.com">pravesh.agrawal@allwaveav.c=
+om</a>&gt;<br>Cc: Kuldip Kamat &lt;<a =
+href=3D"mailto:kuldip.kamat@allwaveav.com">kuldip.kamat@allwaveav.com</a>=
+&gt;<br></div><br><br><div dir=3D"ltr"><div><div>Hi =
+Pravesh,</div><div><br></div><div>As discussed on the call and with =
+reference=C2=A0to the below mail, I have contacted the client on call =
+directly for the Room Booking (software &amp; Hardware) =
+requirement=C2=A0at Bangalore.</div><div><br></div><div>- I asked the =
+client for=C2=A0us to come to the site to take the requirement. But, he =
+asked me to make notes and told he will tell the requirements on call =
+itself</div><div>- Client told that he wants both - room booking =
+software for employees and room booking hardware for the meeting =
+rooms</div><div>- Client is using Google calendars=C2=A0for their =
+organization currently</div><div>- Client&#39;s main requirement he told =
+is - If the booked meeting room is not used, then the room must =
+automatically=C2=A0get released after a few minutes. And, this room must =
+be available for other users to book it seems</div><div>- Also, he told =
+- if meeting is going to start, a reminder popup must come to the =
+meeting participants=C2=A0and it must remind=C2=A0them about the =
+upcoming=C2=A0meeting it seems</div><div><br></div><div>* Client asked =
+for a <b><u>physical Demo</u></b> of the room booking hardware &amp; =
+room booking software at the client place</div><div>* Client asked our =
+team to come to site along with the required demo hardware=C2=A0and demo =
+software if available only (he asked not to come to site just for taking =
+the requirements)</div><div><br></div><div>So, Kindly advise =
+should=C2=A0we=C2=A0inform tanaji sir &amp; krishnan sir that if the =
+demo unit of cue room booking panel hardware, demo of cue room booking =
+software and the=C2=A0programming team is available in bangalore to do =
+the needful.</div></div><div><br></div><div><div><p>Client name: Samar =
+Keshari</p><p>Email:=C2=A0<a =
+href=3D"mailto:samara.keshari@chaitanyaindia.in" rel=3D"noreferrer" =
+target=3D"_blank">samara.keshari@chaitanyaindia.in</a></p><p>Phone: =
+9110486500</p></div><div>Site Address -=C2=A0<a =
+href=3D"https://maps.app.goo.gl/7noa7bGZowo9La82A" =
+target=3D"_blank">https://maps.app.goo.gl/7noa7bGZowo9La82A</a></div></di=
+v><div><br></div><div><div dir=3D"ltr" class=3D"gmail_signature" =
+data-smartmail=3D"gmail_signature"><div dir=3D"ltr"><div =
+style=3D"color:rgb(34,34,34)"><font face=3D"arial, sans-serif">Thanks =
+&amp; Regards,</font></div><div style=3D"color:rgb(34,34,34)"><table =
+border=3D"0" cellspacing=3D"0" cellpadding=3D"0" =
+style=3D"color:rgb(0,0,0);max-width:600px;width:600px"><tbody><tr><td =
+valign=3D"top" style=3D"padding:0px 0px =
+5px;line-height:27px;vertical-align:top"><font face=3D"arial, =
+sans-serif"><span style=3D"color:rgb(34,34,34)"><font =
+color=3D"#500050"><b>Balasubramanian =
+S</b></font></span>=C2=A0|=C2=A0=C2=A0<b><span =
+style=3D"color:rgb(34,34,34)"><font color=3D"#2f2fff">Manager - Design =
+&amp; =
+Estimation</font></span></b></font></td></tr><tr></tr></tbody></table></d=
+iv><div style=3D"color:rgb(34,34,34)"><br></div><div =
+style=3D"color:rgb(34,34,34)"><table border=3D"0" cellspacing=3D"0" =
+cellpadding=3D"0" =
+style=3D"color:rgb(0,0,0);max-width:600px;width:600px"><tbody><tr><td><ta=
+ble border=3D"0" cellspacing=3D"0" cellpadding=3D"0" =
+style=3D"max-width:800px;width:600px"><tbody><tr><td valign=3D"middle" =
+width=3D"52%"><table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" =
+style=3D"width:312px"><tbody><tr><td style=3D"padding:3px 0px"><span =
+style=3D"display:block"><img =
+src=3D"https://media.allwaveav.com/call.png" alt=3D"mobile-icon" =
+width=3D"20" height=3D"20" border=3D"0" =
+style=3D"color:rgb(34,34,34);border:0px;width:16px;height:16px;float:left=
+"><font face=3D"arial, sans-serif"><span =
+style=3D"color:rgb(34,34,34)">=C2=A0=C2=A0(+91) =
+9597300207</span></font><font face=3D"arial, =
+sans-serif"><br></font></span></td></tr><tr><td style=3D"padding:3px =
+0px"><span style=3D"display:block"><img =
+src=3D"https://media.allwaveav.com/telephone.png" alt=3D"mobile-icon" =
+width=3D"20" height=3D"20" border=3D"0" =
+style=3D"border:0px;width:16px;height:16px;float:left"><font =
+face=3D"arial, sans-serif">=C2=A0=C2=A0(+91) 22-22664937 | 1800 2100 =
+198</font></span></td></tr><tr><td style=3D"padding:3px 0px"><span =
+style=3D"display:block"><img =
+src=3D"https://media.allwaveav.com/mail.png" alt=3D"phone-icon" =
+width=3D"20" height=3D"20" border=3D"0" =
+style=3D"border:0px;width:16px;height:16px;float:left"><font =
+face=3D"arial, sans-serif">=C2=A0 =C2=A0<a =
+href=3D"mailto:bala.s@allwaveav.com" style=3D"color:rgb(17,85,204)" =
+target=3D"_blank">bala.s@allwaveav.com</a></font></span></td></tr></tbody=
+></table></td><td><img width=3D"527" height=3D"72" =
+src=3D"https://ci3.googleusercontent.com/mail-sig/AIorK4xNuojfwVLX9R61hEm=
+4vUaILAa9KH_qWRwdxTl4tvDC3u9Em_AccWlYNlkG_ZT4Az_YKNSYY9M" =
+style=3D"margin-right:0px"></td><td valign=3D"top"></td></tr><tr><td =
+colspan=3D"3" style=3D"padding:3px 0px"><span =
+style=3D"display:block"><img =
+src=3D"https://media.allwaveav.com/placeholder.png" alt=3D"email-icon" =
+width=3D"20" height=3D"20" border=3D"0" =
+style=3D"border:0px;width:16px;height:16px;float:left"><font =
+face=3D"arial, sans-serif">=C2=A0 =C2=A0Classic Arena, 4th Floor, Hosur =
+Rd, AECS Layout - A Block, Singasandra, Bengaluru, Karnataka - =
+560068=C2=A0</font></span><span style=3D"display:block"><font =
+face=3D"arial, sans-serif"><br></font></span><table border=3D"0" =
+cellspacing=3D"0" cellpadding=3D"0" =
+style=3D"max-width:800px;width:600px"><tbody><tr><td colspan=3D"3" =
+style=3D"padding:2px 5px 2px =
+10px;background-color:rgb(22,43,188);border-radius:5px"><table =
+border=3D"0" cellspacing=3D"0" cellpadding=3D"0" =
+style=3D"width:585px"><tbody><tr><td><span =
+style=3D"color:rgb(255,255,255)"><a href=3D"https://allwaveav.com/" =
+style=3D"color:rgb(255,255,255)" target=3D"_blank"><font face=3D"arial, =
+sans-serif" size=3D"2">www.allwaveav.com</font></a></span></td><td><font =
+face=3D"arial, sans-serif" size=3D"2">=C2=A0</font></td><td =
+style=3D"padding-top:5px;text-align:right"><font face=3D"arial, =
+sans-serif" size=3D"2"><a =
+href=3D"https://www.facebook.com/Allwave.AV.Systems/" =
+style=3D"color:rgb(17,85,204)" target=3D"_blank"><img =
+src=3D"https://media.allwaveav.com/facebook.png" alt=3D"Facebook" =
+width=3D"28" height=3D"28">=C2=A0</a>=C2=A0=C2=A0<a =
+href=3D"https://twitter.com/AllwaveAV" style=3D"color:rgb(17,85,204)" =
+target=3D"_blank"><img src=3D"https://media.allwaveav.com/twitter.png" =
+alt=3D"Twitter" width=3D"28" height=3D"28">=C2=A0</a>=C2=A0=C2=A0<a =
+href=3D"https://www.linkedin.com/company/13404167/" =
+style=3D"color:rgb(17,85,204)" target=3D"_blank"><img =
+src=3D"https://media.allwaveav.com/linkedin.png" alt=3D"Linkedin" =
+width=3D"28" height=3D"28">=C2=A0</a>=C2=A0=C2=A0<a =
+href=3D"https://www.instagram.com/allwaveav/" =
+style=3D"color:rgb(17,85,204)" target=3D"_blank"><img =
+src=3D"https://media.allwaveav.com/instagram.png" alt=3D"Instagram" =
+width=3D"28" =
+height=3D"28">=C2=A0</a></font></td></tr></tbody></table></td></tr></tbod=
+y></table><font face=3D"arial, sans-serif" size=3D"2"><br>MUMBAI =
+=C2=A0|=C2=A0 PUNE =C2=A0|=C2=A0 NCR =C2=A0|=C2=A0 BENGALURU =
+=C2=A0|=C2=A0 HYDERABAD =C2=A0|=C2=A0 CHENNAI =C2=A0|=C2=A0 =
+KOLKATA</font></td></tr></tbody></table></td></tr></tbody></table></div><=
+/div></div></div><br></div><br><div class=3D"gmail_quote"><div =
+dir=3D"ltr" class=3D"gmail_attr">On Mon, May 6, 2024 at 11:53=E2=80=AFAM =
+Pravesh Agrawal/AWAV &lt;<a =
+href=3D"mailto:pravesh.agrawal@allwaveav.com" =
+target=3D"_blank">pravesh.agrawal@allwaveav.com</a>&gt; =
+wrote:<br></div><blockquote class=3D"gmail_quote" style=3D"margin:0px =
+0px 0px 0.8ex;border-left:1px solid =
+rgb(204,204,204);padding-left:1ex"><div dir=3D"auto"><div>Hi =
+Bala,=C2=A0</div><div dir=3D"auto"><br></div><div dir=3D"auto">I have =
+spoken to client.</div><div dir=3D"auto"><br></div><div =
+dir=3D"auto">Please meet him tommorrow along with Sandeep for site =
+survey at their office.</div><div dir=3D"auto"><br></div><div =
+dir=3D"auto">Understand the requirements well.</div><div =
+dir=3D"auto"><br></div><div dir=3D"auto">Cue solutions.</div><div =
+dir=3D"auto"><br></div><div><br></div><div>Regards,<br><br>Pravesh =
+Agrawal<br>Sent from my mobile =
+device<br><br>9819904655<br>9014416348</div></div><br><div =
+class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail_attr">---------- =
+Forwarded message ---------<br>From: <strong class=3D"gmail_sendername" =
+dir=3D"auto">Kuldip Kamat</strong> <span dir=3D"auto">&lt;<a =
+href=3D"mailto:kuldip.kamat@allwaveav.com" =
+target=3D"_blank">kuldip.kamat@allwaveav.com</a>&gt;</span><br>Date: =
+Thu, 2 May 2024, 4:43=E2=80=AFpm<br>Subject: Re: All-wave Enquiry =
+Form<br>To: Pravesh Agrawal/AWAV &lt;<a =
+href=3D"mailto:pravesh.agrawal@allwaveav.com" =
+target=3D"_blank">pravesh.agrawal@allwaveav.com</a>&gt;<br>Cc:  &lt;<a =
+href=3D"mailto:contact@allwaveav.com" =
+target=3D"_blank">contact@allwaveav.com</a>&gt;,  &lt;<a =
+href=3D"mailto:social@allwaveav.com" =
+target=3D"_blank">social@allwaveav.com</a>&gt;,  &lt;<a =
+href=3D"mailto:79kdh0uba_dww6mtjo@parser.zohocrm.in" =
+target=3D"_blank">79kdh0uba_dww6mtjo@parser.zohocrm.in</a>&gt;,  &lt;<a =
+href=3D"mailto:rochelle.mudliar@allwaveav.com" =
+target=3D"_blank">rochelle.mudliar@allwaveav.com</a>&gt;<br></div><br><br=
+><div dir=3D"ltr"><div dir=3D"ltr"><div =
+style=3D"font-family:&quot;trebuchet =
+ms&quot;,sans-serif"></div><div><div dir=3D"ltr" =
+class=3D"gmail_signature"><div dir=3D"ltr"><div dir=3D"ltr"><div =
+dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div =
+dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div =
+dir=3D"ltr"><div><div><div><div style=3D"font-size:small"><b =
+style=3D"font-size:12.8px"><b><b =
+style=3D"font-size:12.8px"><b><b><div><div =
+style=3D"font-family:Arial,Helvetica,sans-serif;font-size:small;font-weig=
+ht:400"><font color=3D"#0000ff">P<span class=3D"gmail_default" =
+style=3D"font-family:&quot;trebuchet ms&quot;,sans-serif">ravesh - see =
+if Cue ecosystem (TouchOne by Cue) is interesting. There&#39;s software =
+as well</span></font></div><div =
+style=3D"font-family:Arial,Helvetica,sans-serif;font-size:small;font-weig=
+ht:400"><font color=3D"#0000ff"><a =
+href=3D"https://www.cuesystem.com/reserve/" rel=3D"noreferrer" =
+target=3D"_blank">https://www.cuesystem.com/reserve/</a><span =
+class=3D"gmail_default" style=3D"font-family:&quot;trebuchet =
+ms&quot;,sans-serif"><br></span></font></div><div =
+style=3D"font-family:Arial,Helvetica,sans-serif;font-size:small;font-weig=
+ht:400"><span class=3D"gmail_default" =
+style=3D"font-family:&quot;trebuchet ms&quot;,sans-serif"><font =
+color=3D"#0000ff"><br></font></span></div><div =
+style=3D"font-size:small;font-weight:400"><font face=3D"trebuchet ms, =
+sans-serif" color=3D"#0000ff">B<span class=3D"gmail_default" =
+style=3D"font-family:&quot;trebuchet ms&quot;,sans-serif">est, =
+Kuldip</span></font></div></div><div =
+style=3D"font-family:arial,sans-serif"></div></b></b></b></b></b></div></=
+div><div style=3D"font-size:small;color:rgb(0,0,0)"><b =
+style=3D"color:rgb(80,0,80);font-size:12.8px"><div =
+style=3D"color:rgb(0,0,0);font-size:small;font-weight:400"><b></b></div><=
+/b><b =
+style=3D"font-family:verdana,sans-serif"></b></div></div></div></div></di=
+v></div></div></div></div></div></div></div></div></div></div><br></div><=
+br><div class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail_attr">On =
+Thu, May 2, 2024 at 4:10=E2=80=AFPM AllWave &lt;<a =
+href=3D"mailto:social@allwaveav.com" rel=3D"noreferrer" =
+target=3D"_blank">social@allwaveav.com</a>&gt; =
+wrote:<br></div><blockquote class=3D"gmail_quote" style=3D"margin:0px =
+0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+
+
+
+
+<div>
+<p>From: Samar Keshari
+</p>
+<p>Email: <a href=3D"mailto:samara.keshari@chaitanyaindia.in" =
+rel=3D"noreferrer" =
+target=3D"_blank">samara.keshari@chaitanyaindia.in</a>
+</p>
+<p>Phone: 9110486500
+</p>
+<p>Organization: [your-organization]
+</p>
+<p>Designation: [your-designation]
+</p>
+<p>Project: [Project]
+</p>
+<p>Message: We need meeting room booking software application for 250+ =
+users and 20+ meeting room
+</p>
+<p>URL: <a =
+href=3D"https://www.allwaveav.com/contact-us/?utm_source=3Dgoogle&amp;utm=
+_medium=3Dsearch&amp;utm_campaign=3Dallwave-gsn-campaign-5feb24&amp;utm_c=
+ontent=3Dawav-project-2&amp;network=3Dg&amp;placement=3D&amp;utm_keyword=3D=
+video%20conference%20meeting%20room&amp;utm_matchtype=3Db&amp;utm_source=3D=
+google&amp;utm_medium=3Dsearch&amp;utm_campaign=3Dallwave-gsn-campaign-5f=
+eb24&amp;utm_content=3Dawav-project-2&amp;network=3Dg&amp;placement=3D&am=
+p;utm_keyword=3Dvideo%20conference%20meeting%20room&amp;utm_matchtype=3Db=
+&amp;gad_source=3D1&amp;gclid=3DCjwKCAjw88yxBhBWEiwA7cm6pZf_yu1T7bEOu-AVy=
+LbR5DrjAz99lj8SMicIzVMOhB3F8j9JDC-vtRoCy_gQAvD_BwE" rel=3D"noreferrer" =
+target=3D"_blank">https://www.allwaveav.com/contact-us/?utm_source=3Dgoog=
+le&amp;utm_medium=3Dsearch&amp;utm_campaign=3Dallwave-gsn-campaign-5feb24=
+&amp;utm_content=3Dawav-project-2&amp;network=3Dg&amp;placement=3D&amp;ut=
+m_keyword=3Dvideo%20conference%20meeting%20room&amp;utm_matchtype=3Db&amp=
+;utm_source=3Dgoogle&amp;utm_medium=3Dsearch&amp;utm_campaign=3Dallwave-g=
+sn-campaign-5feb24&amp;utm_content=3Dawav-project-2&amp;network=3Dg&amp;p=
+lacement=3D&amp;utm_keyword=3Dvideo%20conference%20meeting%20room&amp;utm=
+_matchtype=3Db&amp;gad_source=3D1&amp;gclid=3DCjwKCAjw88yxBhBWEiwA7cm6pZf=
+_yu1T7bEOu-AVyLbR5DrjAz99lj8SMicIzVMOhB3F8j9JDC-vtRoCy_gQAvD_BwE</a>
+</p>
+<p>Campaign Source:<br>
+Campaign Medium:<br>
+Campaign Name:<br>
+Campaign Content:<br>
+Campaign ID:<br>
+Full URL:<br>
+Keyword:<br>
+Match Type:<br>
+--<br>
+This e-mail was sent from a contact form on AllWave (<a =
+href=3D"https://www.allwaveav.com" rel=3D"noreferrer" =
+target=3D"_blank">https://www.allwaveav.com</a>)
+</p></div>
+
+
+</blockquote></div></div>
+</div>
+</blockquote></div>
+</div></div>
+
+------=_NextPart_000_0A68_01DC1917.59C30ED0--

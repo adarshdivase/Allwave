@@ -1,0 +1,445 @@
+Received: by 2002:a05:7010:6aa2:b0:445:9a8c:7b54 with SMTP id co34csp7863802mdb;
+        Wed, 9 Apr 2025 00:53:43 -0700 (PDT)
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id af79cd13be357-7c79db14522sor63577885a.3.2025.04.09.00.53.43
+        for <sachin.bhosale@allwavegs.com>
+        (Google Transport Security);
+        Wed, 09 Apr 2025 00:53:43 -0700 (PDT)
+From: "Balasubramanian Selvam/AWAV/Bangalore" <bala.s@allwaveav.com>
+To: "Sachin Bhosale" <sachin.bhosale@allwavegs.com>
+References: <CAO74XWRE7PyhX+sE=N8zaknHSnGBdYtFRZysFstdnC+iVi_D=g@mail.gmail.com>
+In-Reply-To: <CAO74XWRE7PyhX+sE=N8zaknHSnGBdYtFRZysFstdnC+iVi_D=g@mail.gmail.com>
+Subject: Fwd: Minutes of Meeting of Today's Call with Architect | Forcepoint | Thane
+Date: Wed, 9 Apr 2025 13:23:06 +0530
+Message-ID: <CAG-w=u4wwWsHhe0GcNGLK76AO5m==E3bYfGNURPAhE5n5Bc5Nw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+	boundary="----=_NextPart_000_0A49_01DC1917.598DCE00"
+X-Mailer: Microsoft Outlook 16.0
+X-Google-Smtp-Source: AGHT+IEqBH8FaTJK8e/nQ5QwYcDNAK2WlUvWK3z/IUYK/omAUjUvfjJ6utQk+5MetVbt0fRI4hVVQY+kbafdz3CU97o=
+X-Received: by 2002:a05:620a:46a1:b0:7b7:142d:53a8 with SMTP id af79cd13be357-7c79cd95723mr275047585a.19.1744185223078;
+        Wed, 09 Apr 2025 00:53:43 -0700 (PDT)
+X-Received: by 2002:a05:6214:b61:b0:6eb:1c42:a14b with SMTP id
+ 6a1803df08f44-6f0d24de99cmr108316586d6.1.1744185222537; Wed, 09 Apr 2025
+ 00:53:42 -0700 (PDT)
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@allwaveav.com header.s=allwaveav header.b=EqBULgf3;
+       spf=pass (google.com: domain of bala.s@allwaveav.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=bala.s@allwaveav.com;
+       dmarc=pass (p=QUARANTINE sp=NONE dis=NONE) header.from=allwaveav.com;
+       dara=neutral header.i=@allwavegs.com
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1744185222; x=1744790022;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=43/p0QMHUTArg5RZt1dGgEQNkpwU9GpoD9md1J+O1UE=;
+        b=eddeHrtuBLyOEbmH6nzLAQs/Mn5EN2A6UzJkI6GdYXWFiJVFsKSh8g/5JVxtH70bfP
+         EDxdfzkVYxPxG3tnQZXCa/m6h6/YNZw6ASJDwJCz6EDRcFXIdr2TV/NFd4Ztuo3oXJwL
+         Or+rv6wiQC6SISv7lZOBulS+n5JKDPhSB4YaFvE3Z7B47GW4O89GjifThhkLpvdBkKLc
+         tote1bBcYFoeb5bQCRgDfDXYCptsrZZVtgTqeyv5+TWWMgPhYbkT7XBFoZccWQCPja4+
+         5SX7Njnd/ubRXA1uhX2PV7RL1hRdM3xAQhR/wrR3P2bjf6cY7pA1ukKKVxDnA91h0hKW
+         blJg==
+X-Gm-Message-State: AOJu0YzvZfCtL8LF/Tslmva3rW6X75U9PeLvtYGaSROIVCAiwZdXpKY5
+	WBDAtJvpZs9KK+zNA+AJSXTGHrT5uRy0zM1h/B0DXZeFHOenxExlaiqIhfefxUt9Bwz9s/7owv+
+	X7sGtAm/VWEbMJ5KO8SgAlkZ9jtIwPOEVD7saEF+Y2KoetDyyXw==
+X-Gm-Gg: ASbGncsByqLQ3lKDPL+9WzTuLUJ5le+T5aZ90BgcmwAJz2Wp16KLVN6jOb04EFsOUw5
+	JqHBep6TTP3wHAWWKBiLYp9JPfRJN3+RR+//D8ZlYIsi+EguI/W3scpfsKyrHrhGjJ9tJQ6IKz9
+	EJ6MSRPUwJdGr4y/GQcnwN/g==
+X-Gm-Features: ATxdqUGcDBnIcLzpzSp5YGZdu1p6RdlpH6Uy33m5MaxtGYQLvTlMmiUAejGPI-Y
+Thread-Index: AQJJFNFYCe5NTAh3oLdnfHjVLv/2yAE4L5co
+
+This is a multipart message in MIME format.
+
+------=_NextPart_000_0A49_01DC1917.598DCE00
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+Hi Sachin,
+
+Below MoM mail for your ready reference.
+
+
+Warm Regards,=20
+
+
+
+
+
+  =
+<https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJdvuvdw-X6B-FMhdYVnerb=
+14gh13vI1f0z28PzwpbxvwgWVGSJ_zo_CL9HoGfbS-pB66P2WAdPD59KuhjG-sJB9dj7IFGLM=
+4-LEeFHoIx540CWOWal5_djf3fpJwV4TGqiXls?key=3D25EjYfqXXzGOrd5RdjmiL5AG>=20
+
+
+
+
+Balasubramanian S
+
+Manager - Design & Estimation
+
+
+
+
+Classic Arena, 4th Floor, Hosur Rd, AECS Layout - A Block, Singasandra, =
+Bengaluru, Karnataka 560068
+
+Phone: +91-9597300207
+
+Email ID:  <mailto:bala.s@allwaveav.com> bala.s@allwaveav.com
+
+
+MUMBAI  |  PUNE  |  NCR  |  BENGALURU  |  HYDERABAD  |  CHENNAI  |  =
+KOLKATA
+
+
+ <https://www.linkedin.com/company/allwave-av>    =
+<https://www.instagram.com/allwaveav>    =
+<https://www.facebook.com/Allwave.AV.Systems/>=20
+
+
+ <http://www.allwaveav.com>=20
+
+
+
+---------- Forwarded message ---------
+From: Deepak Pandey <deepak.pandey@allwaveav.com =
+<mailto:deepak.pandey@allwaveav.com> >
+Date: Fri, Apr 8, 2022 at 2:27=E2=80=AFPM
+Subject: Minutes of Meeting of Today's Call with Architect | Forcepoint =
+| Thane
+To: Balasubramanian Selvam/AWAV/Bangalore <bala.s@allwaveav.com =
+<mailto:bala.s@allwaveav.com> >
+Cc: Siddharth Thakurdesai/AWAV/PROJECTS =
+<siddharth.thakurdesai@allwaveav.com =
+<mailto:siddharth.thakurdesai@allwaveav.com> >, Krishnan Paniker =
+<krishnan@allwaveav.com <mailto:krishnan@allwaveav.com> >, Projects =
+@AllWaveAV <projects@allwaveav.com <mailto:projects@allwaveav.com> >, =
+Sneha Khetle <sneha.khetle@allwaveav.co.in =
+<mailto:sneha.khetle@allwaveav.co.in> >
+
+
+
+Hi Balasubramanian,
+
+Please see below the MOM for today's virtual meeting with the Architect.
+
+1. 2/3/4- Seater Meeting Room: We have proposed for a Cable Cubby on the =
+table and shown VC for future provision, now the architect wants us to =
+change the cubby to HDMI faceplate/wall plate.
+
+2. Meeting Rooms having VC Solution: There is a confusion in the design =
+part regarding the wireless sharing and wired sharing, we have only =
+provided Wired sharing option in these areas during VC and as well as =
+for local presentation.
+
+3. Pantry / Training Rooms: The architect doesn't want to keep any =
+devices on the table and has asked us to suggest mounting table top =
+devices on the wall / inside the rack. We need to share the datasheet =
+for the following devices.
+a) Logitech SWYTCH
+b) Logitech IP Tap
+c) Table Hub
+d) Logitech Rally Mic Pod
+
+4. In the Open Area type, there will be rattan panelling and framing and =
+the HDMI faceplates to be mounted under the framing facing downside as =
+instructed by the architect.
+
+Please take this forward with Manoj(Architect) to resolve this design =
+related queries and do add imp points in case I have missed any.=20
+
+Kindly shoot MOM to Manoj regarding the above queries so that he can =
+take this ahead.
+
+
+With Regards,
+Deepak Pandey | Senior Project Engineer=09
+
+
+
+
+  <https://media.allwaveav.com/call.png>   (+91) 9819410027=09
+  <https://media.allwaveav.com/telephone.png>   (+91) 22-22664937=09
+  <https://media.allwaveav.com/mail.png>   deepak.pandey@allwaveav.com =
+<mailto:priyanka.dave@allwaveav.com> =09
+ 	  <https://media.allwaveav.com/signature.jpg> =09
+  <https://media.allwaveav.com/placeholder.png>    14/A, Onlooker =
+Building, Sir PM Road, Fort, Mumbai 400 001=09
+ =09
+
+www.allwaveav.com <https://allwaveav.com/> 	 	 =
+<https://www.facebook.com/Allwave.AV.Systems/>     =
+<https://twitter.com/AllwaveAV>     =
+<https://www.linkedin.com/company/13404167/>     =
+<https://www.instagram.com/allwaveav/>   =09
+  <https://media.allwaveav.com/banner1.png> =09
+MUMBAI  |  PUNE  |  NCR  |  BENGALURU  |  HYDERABAD  |  CHENNAI  |  =
+KOLKATA=09
+
+------=_NextPart_000_0A49_01DC1917.598DCE00
+Content-Type: text/html;
+	boundary="0000000000009cb26d063253c49a";
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div><div>Hi Sachin,</div><div><br></div><div>Below MoM =
+mail for your ready reference.</div></div><div><br></div><div><div =
+dir=3D"ltr" class=3D"gmail_signature" =
+data-smartmail=3D"gmail_signature"><div dir=3D"ltr"><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Arial,sans-serif;color:#000000;backgr=
+ound-color:transparent;font-weight:400;font-style:normal;font-variant:nor=
+mal;text-decoration:none;vertical-align:baseline;white-space:pre;white-sp=
+ace:pre-wrap">Warm Regards,=C2=A0</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.38;margin-top:0pt;margin-bottom:0pt"><span><br></s=
+pan></p><div dir=3D"ltr" style=3D"margin-left:0pt" align=3D"left"><table =
+style=3D"border:none;border-collapse:collapse"><colgroup><col =
+width=3D"203"><col width=3D"459"></colgroup><tbody><tr =
+style=3D"height:164.46386718749997pt"><td style=3D"border-left:solid =
+#ffffff 1pt;border-right:solid #ffffff 1pt;border-bottom:solid #ffffff =
+1pt;border-top:solid #ffffff 1pt;vertical-align:top;padding:5pt 5pt 5pt =
+5pt;overflow:hidden"><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:8pt;font-family:Arial,sans-serif;color:#000000;backgro=
+und-color:transparent;font-weight:400;font-style:normal;font-variant:norm=
+al;text-decoration:none;vertical-align:baseline;white-space:pre;white-spa=
+ce:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:163px;hei=
+ght:159px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJdvuvdw-X6B-FMhd=
+YVnerb14gh13vI1f0z28PzwpbxvwgWVGSJ_zo_CL9HoGfbS-pB66P2WAdPD59KuhjG-sJB9dj=
+7IFGLM4-LEeFHoIx540CWOWal5_djf3fpJwV4TGqiXls?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"163" height=3D"159" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></p></td><td =
+style=3D"border-left:solid #ffffff 1pt;border-right:solid #ffffff =
+1pt;border-bottom:solid #ffffff 1pt;border-top:solid #ffffff =
+1pt;vertical-align:top;padding:5pt 5pt 5pt 5pt;overflow:hidden"><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:700;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Balasubramanian S</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Manager - Design &amp; Estimation</span></p><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap"><br></span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><font =
+color=3D"#000000" face=3D"Roboto, sans-serif"><span =
+style=3D"font-size:13.3333px">Classic Arena, 4th Floor, Hosur Rd, AECS =
+Layout - A Block, Singasandra, Bengaluru, Karnataka =
+560068</span></font></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Phone: +91-9597300207</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Email ID: </span><a href=3D"mailto:bala.s@allwaveav.com" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap">bala.s@allwaveav.com</span></a></p><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:8pt;font-family:Roboto,sans-serif;color:#000000;backgr=
+ound-color:transparent;font-weight:400;font-style:normal;font-variant:nor=
+mal;text-decoration:none;vertical-align:baseline;white-space:pre;white-sp=
+ace:pre-wrap">MUMBAI=C2=A0 |=C2=A0 PUNE=C2=A0 |=C2=A0 NCR=C2=A0 |=C2=A0 =
+BENGALURU=C2=A0 |=C2=A0 HYDERABAD=C2=A0 |=C2=A0 CHENNAI=C2=A0 |=C2=A0 =
+KOLKATA</span></p><br><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><a =
+href=3D"https://www.linkedin.com/company/allwave-av" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:32px;heig=
+ht:31px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcGQZ1JVmPqfbCj4xN=
+QZPHrY_3ZM6e_0xbjID4UdDS0Lm7v6z9864QXMrKESZ8vC4A-RIGNJEvvTxIefrv-SpUY4FIn=
+v5foJwc0M84tQibq27an7fXbnJctByiLP8A38_u6x3rD?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"32" height=3D"31" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">=C2=A0 </span><a =
+href=3D"https://www.instagram.com/allwaveav" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:32px;heig=
+ht:32px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdAL4n3JgPc01QE_3v=
+-pfMctMtxcBM98T5L4vk-zuyY22IM8fJWkYUdbA4EpyhTBVaGklog_ryIP8DDrt_wetoQj_D7=
+ai7BypIYaScKbdUn5n23bEwkF7RgKccoGDGelzpoWsXraw?key=3D25EjYfqXXzGOrd5Rdjmi=
+L5AG" width=3D"32" height=3D"32" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">=C2=A0 </span><a =
+href=3D"https://www.facebook.com/Allwave.AV.Systems/" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:30px;heig=
+ht:29px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXflfIj7rdcGlSyPHml=
+t1G13q9Z54Kf0xiPml_NyRpb0UkPNMI2XfL6pMAFTEFxIh8LLPIa8IfJ8AXpBQfIBUi7XYMLC=
+LDa1TWlalG50CqNoIFNfgbt0F7y7y7cJFWkmlilkQWMj9Q?key=3D25EjYfqXXzGOrd5Rdjmi=
+L5AG" width=3D"30" height=3D"29" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a></p><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><a =
+href=3D"http://www.allwaveav.com" style=3D"text-decoration:none" =
+target=3D"_blank"><span =
+style=3D"font-size:8pt;font-family:Arial,sans-serif;color:#1155cc;backgro=
+und-color:transparent;font-weight:400;font-style:normal;font-variant:norm=
+al;text-decoration:underline;vertical-align:baseline;white-space:pre;whit=
+e-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:445px;hei=
+ght:67px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdqPdtfcRVlDqqP6im=
+nKEPV7PPzGBB_FGKx5ejpPcNegfexZq2mk0c5dZwqIiCkdM0LT5CVe8s_1IZdr5EqDOUFf6yL=
+8y3nLs_aZ7z9cKrUhEZevQv_OrGzK94HHhALVG7BokNb?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"445" height=3D"67" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a></p></td></tr>=
+</tbody></table></div></div></div></div><br><br><div =
+class=3D"gmail_quote gmail_quote_container"><div dir=3D"ltr" =
+class=3D"gmail_attr">---------- Forwarded message ---------<br>From: =
+<strong class=3D"gmail_sendername" dir=3D"auto">Deepak Pandey</strong> =
+<span dir=3D"auto">&lt;<a =
+href=3D"mailto:deepak.pandey@allwaveav.com">deepak.pandey@allwaveav.com</=
+a>&gt;</span><br>Date: Fri, Apr 8, 2022 at 2:27=E2=80=AFPM<br>Subject: =
+Minutes of Meeting of Today&#39;s Call with Architect | Forcepoint | =
+Thane<br>To: Balasubramanian Selvam/AWAV/Bangalore &lt;<a =
+href=3D"mailto:bala.s@allwaveav.com">bala.s@allwaveav.com</a>&gt;<br>Cc: =
+Siddharth Thakurdesai/AWAV/PROJECTS &lt;<a =
+href=3D"mailto:siddharth.thakurdesai@allwaveav.com">siddharth.thakurdesai=
+@allwaveav.com</a>&gt;, Krishnan Paniker &lt;<a =
+href=3D"mailto:krishnan@allwaveav.com">krishnan@allwaveav.com</a>&gt;, =
+Projects @AllWaveAV &lt;<a =
+href=3D"mailto:projects@allwaveav.com">projects@allwaveav.com</a>&gt;, =
+Sneha Khetle &lt;<a =
+href=3D"mailto:sneha.khetle@allwaveav.co.in">sneha.khetle@allwaveav.co.in=
+</a>&gt;<br></div><br><br><div =
+dir=3D"ltr">Hi=C2=A0Balasubramanian,<div><br></div><div>Please see below =
+the MOM for today&#39;s virtual meeting with the =
+Architect.</div><div><br></div><div>1. 2/3/4- Seater Meeting Room: We =
+have proposed=C2=A0for a Cable Cubby on the table and shown VC for =
+future provision, now the architect wants us to change the cubby to HDMI =
+faceplate/wall plate.</div><div><br></div><div>2. Meeting Rooms having =
+VC Solution: There is a confusion in the design part regarding the =
+wireless sharing and wired sharing, we have only provided Wired sharing =
+option in these areas during VC and as well as for local =
+presentation.</div><div><br></div><div>3. Pantry / Training Rooms: The =
+architect doesn&#39;t want to keep any devices on the table and has =
+asked us to suggest mounting table top devices on the wall / inside the =
+rack. We need to share the datasheet for the following =
+devices.</div><div>a) Logitech SWYTCH</div><div>b) Logitech IP =
+Tap</div><div>c) Table Hub</div><div>d) Logitech Rally Mic =
+Pod</div><div><br></div><div>4. In the Open Area type, there will be =
+rattan panelling and framing and the HDMI faceplates to be mounted under =
+the framing facing downside as instructed by the =
+architect.</div><div><br></div><div>Please take this forward with =
+Manoj(Architect) to resolve this design related queries and do add imp =
+points in case I have missed any.=C2=A0</div><div><br></div><div>Kindly =
+shoot MOM to Manoj regarding the above queries so that he can take this =
+ahead.<br clear=3D"all"><div><div dir=3D"ltr" class=3D"gmail_signature" =
+data-smartmail=3D"gmail_signature"><div dir=3D"ltr"><table border=3D"0" =
+cellspacing=3D"0" cellpadding=3D"0" style=3D"font-family:&quot;Times New =
+Roman&quot;;max-width:600px;width:600px;font-size:10pt;color:rgb(0,0,0)">=
+<tbody><tr><td valign=3D"top" =
+style=3D"font-family:Arial,sans-serif;padding:0px 0px =
+5px;line-height:27px;vertical-align:top"><font size=3D"2"><b><br>With =
+Regards,<br>Deepak Pandey | <span style=3D"color:rgb(47,47,255)">Senior =
+Project Engineer</span></b></font></td></tr><tr><td><br><table =
+border=3D"0" cellspacing=3D"0" cellpadding=3D"0" =
+style=3D"max-width:800px;width:600px;font-size:10pt"><tbody><tr><td =
+valign=3D"middle" width=3D"52%"><table border=3D"0" cellspacing=3D"0" =
+cellpadding=3D"0" style=3D"width:312px"><tbody><tr><td =
+style=3D"padding:3px 0px"><span =
+style=3D"font-family:Arial,sans-serif;font-size:10pt;display:block"><img =
+src=3D"https://media.allwaveav.com/call.png" alt=3D"mobile-icon" =
+width=3D"20" height=3D"20" border=3D"0" =
+style=3D"border:0px;width:16px;height:16px;float:left">=C2=A0=C2=A0(+91) =
+9819410027</span></td></tr><tr><td style=3D"padding:3px 0px"><span =
+style=3D"font-family:Arial,sans-serif;font-size:10pt;display:block"><img =
+src=3D"https://media.allwaveav.com/telephone.png" alt=3D"mobile-icon" =
+width=3D"20" height=3D"20" border=3D"0" =
+style=3D"border:0px;width:16px;height:16px;float:left">=C2=A0=C2=A0(+91) =
+22-22664937</span></td></tr><tr><td style=3D"padding:3px 0px"><span =
+style=3D"font-family:Arial,sans-serif;font-size:10pt;display:block"><img =
+src=3D"https://media.allwaveav.com/mail.png" alt=3D"phone-icon" =
+width=3D"20" height=3D"20" border=3D"0" =
+style=3D"border:0px;width:16px;height:16px;float:left">=C2=A0=C2=A0<a =
+href=3D"mailto:priyanka.dave@allwaveav.com" =
+style=3D"color:rgb(17,85,204)" =
+target=3D"_blank">deepak.pandey@allwaveav.com</a></span></td></tr></tbody=
+></table></td><td>=C2=A0</td><td valign=3D"top" =
+style=3D"font-size:9pt"><img =
+src=3D"https://media.allwaveav.com/signature.jpg" width=3D"281" =
+height=3D"57" style=3D"max-width:100%"></td></tr><tr><td colspan=3D"3" =
+style=3D"padding:3px 0px"><span =
+style=3D"font-family:Arial,sans-serif;font-size:10pt;display:block"><img =
+src=3D"https://media.allwaveav.com/placeholder.png" alt=3D"email-icon" =
+width=3D"20" height=3D"20" border=3D"0" =
+style=3D"border:0px;width:16px;height:16px;float:left">=C2=A0=C2=A0 =
+14/A, Onlooker Building, Sir PM Road, Fort, Mumbai 400 =
+001</span></td></tr><tr><td height=3D"10px">=C2=A0</td></tr><tr><td =
+colspan=3D"3" style=3D"padding:2px 5px 2px =
+10px;background-color:rgb(22,43,188);border-radius:5px"><table =
+border=3D"0" cellspacing=3D"0" cellpadding=3D"0" =
+style=3D"width:585px"><tbody><tr><td><span =
+style=3D"font-family:Arial,sans-serif;font-size:10pt"><span =
+style=3D"font-size:10pt;color:rgb(255,255,255)"><a =
+href=3D"https://allwaveav.com/" style=3D"color:rgb(255,255,255)" =
+target=3D"_blank">www.allwaveav.com</a></span></span></td><td>=C2=A0</td>=
+<td style=3D"padding-top:5px;text-align:right"><a =
+href=3D"https://www.facebook.com/Allwave.AV.Systems/" rel=3D"noopener" =
+style=3D"color:rgb(17,85,204)" target=3D"_blank"><img =
+src=3D"https://media.allwaveav.com/facebook.png" alt=3D"Facebook" =
+width=3D"28" height=3D"28">=C2=A0</a>=C2=A0=C2=A0<a =
+href=3D"https://twitter.com/AllwaveAV" rel=3D"noopener" =
+style=3D"color:rgb(17,85,204)" target=3D"_blank"><img =
+src=3D"https://media.allwaveav.com/twitter.png" alt=3D"Twitter" =
+width=3D"28" height=3D"28">=C2=A0</a>=C2=A0=C2=A0<a =
+href=3D"https://www.linkedin.com/company/13404167/" rel=3D"noopener" =
+style=3D"color:rgb(17,85,204)" target=3D"_blank"><img =
+src=3D"https://media.allwaveav.com/linkedin.png" alt=3D"Linkedin" =
+width=3D"28" height=3D"28">=C2=A0</a>=C2=A0=C2=A0<a =
+href=3D"https://www.instagram.com/allwaveav/" rel=3D"noopener" =
+style=3D"color:rgb(17,85,204)" target=3D"_blank"><img =
+src=3D"https://media.allwaveav.com/instagram.png" alt=3D"Instagram" =
+width=3D"28" =
+height=3D"28">=C2=A0</a>=C2=A0</td></tr></tbody></table></td></tr></tbody=
+></table></td></tr><tr><td style=3D"padding-top:10px"><img =
+src=3D"https://media.allwaveav.com/banner1.png" alt=3D"Banner" =
+width=3D"596" height=3D"96" border=3D"0" =
+style=3D"max-width:100%;border:0px"></td></tr><tr><td valign=3D"top" =
+style=3D"font-family:Arial,sans-serif;font-size:10pt;padding-top:15px;lin=
+e-height:20px;text-align:center">MUMBAI =C2=A0|=C2=A0 PUNE =C2=A0|=C2=A0 =
+NCR =C2=A0|=C2=A0 BENGALURU =C2=A0|=C2=A0 HYDERABAD =C2=A0|=C2=A0 =
+CHENNAI =C2=A0|=C2=A0 =
+KOLKATA</td></tr></tbody></table></div></div></div></div></div>
+</div></div>
+
+------=_NextPart_000_0A49_01DC1917.598DCE00--

@@ -1,0 +1,702 @@
+Received: by 2002:a05:7010:6aa2:b0:445:9a8c:7b54 with SMTP id co34csp7861559mdb;
+        Wed, 9 Apr 2025 00:46:35 -0700 (PDT)
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id 6a1803df08f44-6f0de9efaf2sor6494876d6.8.2025.04.09.00.46.34
+        for <sachin.bhosale@allwavegs.com>
+        (Google Transport Security);
+        Wed, 09 Apr 2025 00:46:34 -0700 (PDT)
+From: "Balasubramanian Selvam/AWAV/Bangalore" <bala.s@allwaveav.com>
+To: "Sachin Bhosale" <sachin.bhosale@allwavegs.com>
+References: <CAB8hayUnQDFQCrGLMjwLyuUvsip2twjSK5zV+_cCSm=hmWZXaw@mail.gmail.com> <CAB8hayXEq-F13R2VgTf=yOmvDU8HXMHpZjQT9D7TzwZMCOOM8g@mail.gmail.com> <CAM2hOAhP6OQC0aFmSjHuwj_tW3=t5ae+zZOy=Orsnr-sa0pHqg@mail.gmail.com>
+In-Reply-To: <CAM2hOAhP6OQC0aFmSjHuwj_tW3=t5ae+zZOy=Orsnr-sa0pHqg@mail.gmail.com>
+Subject: Fwd: Minutes of meeting - WeWork (Sakshi)-Outbrain.
+Date: Wed, 9 Apr 2025 13:15:56 +0530
+Message-ID: <CAG-w=u4H3R9K_8QrynVra-mkLGAinJGHZy9VFg-TzooLtH8Z4g@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+	boundary="----=_NextPart_000_0A64_01DC1917.59C1D650"
+X-Mailer: Microsoft Outlook 16.0
+X-Google-Smtp-Source: AGHT+IECn6obIP7mjd6kL6OnYiBvrWj4HZ3bQGaV7DeXmWnKTcZW3+5i/Mnm7/DkQUbW43m+Sv3MwDHfWkdNA0rXbkc=
+X-Received: by 2002:a05:6214:1315:b0:6ea:d090:6365 with SMTP id 6a1803df08f44-6f0dd7f0da3mr19179876d6.32.1744184794307;
+        Wed, 09 Apr 2025 00:46:34 -0700 (PDT)
+X-Received: by 2002:a05:6214:2349:b0:6e8:f2d2:f123 with SMTP id
+ 6a1803df08f44-6f0dd7328demr19167996d6.13.1744184792858; Wed, 09 Apr 2025
+ 00:46:32 -0700 (PDT)
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@allwaveav.com header.s=allwaveav header.b=nKKC6RKN;
+       spf=pass (google.com: domain of bala.s@allwaveav.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=bala.s@allwaveav.com;
+       dmarc=pass (p=QUARANTINE sp=NONE dis=NONE) header.from=allwaveav.com;
+       dara=neutral header.i=@allwavegs.com
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1744184794; x=1744789594;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=yfGVbV8FK5IwXb5N9t2bdd7g0AAx+fD8wdxOntn2iC4=;
+        b=dJ56JzOGlZujnuES++dUNmU4Px/ZlgK9DFmoEDI+cmNfIrX2iT6AvZPKe1ZpTYEfEg
+         Hvx9p6MnaQJ4JlQqxHqqDXhdVHV2lne/r/bCJxurt4P/zrdt5adcCE0f8IXjigAJv8dA
+         FJcrSfOjjNzn9UaZQb9uvWKTtijAAHGC5v9ppG5lvO7kPOlxGnLiBLQgt9csf+6RHjOV
+         coD+zjRhNIpNbP9/oMIYAd+sEA3WrgblXmFHv4BiwRepJHkSflXAXLqSACpzx5gEvyTG
+         vh8Ndz/9vhh1OgBDkwYpKTjFhK0n0kC7K5rCJd8lR+fucDBlAbzG53QJBlZWD7cD+yie
+         oEJw==
+X-Gm-Message-State: AOJu0YzWAIMWFuuauGaeSw2rU5yBTa2NzlLgqhsOPuoSBh7fLSxO1PPa
+	dg8M60i+zEsgVK8LLvlsRRY1ktYMM+X3pU8yR7p8dv/NDrn4Ap8Wi2gyKhSJC/C8Lyc4Lw7sjSk
+	d4yMm2Yk8vEv23qcAAtkoODyz5acj629SBgcebD5mUIYN+UeOqQ==
+X-Gm-Gg: ASbGncvmX9D7KSxVrlO01z1mzcnZlXwDEdcjULxwAvBztLgGb4VR39ixB6cn8pCjcYh
+	8OubNR+TXDlWBvmlAGi97JgoFkMNy7mbP0nCORIZCRjGGSaAMvPuXibcGuDTH5nAV6awvcG3Sjc
+	dDhn2pVM/82fr+EuB2XD2VtA==
+X-Gm-Features: ATxdqUH6q35dGeeGOOOXkTTxnTSWRXc2jzjjnW3_1MukKSdSMltM9dlCVOEbkdA
+Thread-Index: AQIAsBfBKWS0Vn8y7sFE12FT9QwolQJq6U6IAgVgLm0BmFEJ2g==
+
+This is a multipart message in MIME format.
+
+------=_NextPart_000_0A64_01DC1917.59C1D650
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+Hi Sachin,
+
+Below MoM mail for your ready reference.
+
+
+Warm Regards,=20
+
+
+
+
+
+  =
+<https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJdvuvdw-X6B-FMhdYVnerb=
+14gh13vI1f0z28PzwpbxvwgWVGSJ_zo_CL9HoGfbS-pB66P2WAdPD59KuhjG-sJB9dj7IFGLM=
+4-LEeFHoIx540CWOWal5_djf3fpJwV4TGqiXls?key=3D25EjYfqXXzGOrd5RdjmiL5AG>=20
+
+
+
+
+Balasubramanian S
+
+Manager - Design & Estimation
+
+
+
+
+Classic Arena, 4th Floor, Hosur Rd, AECS Layout - A Block, Singasandra, =
+Bengaluru, Karnataka 560068
+
+Phone: +91-9597300207
+
+Email ID:  <mailto:bala.s@allwaveav.com> bala.s@allwaveav.com
+
+
+MUMBAI  |  PUNE  |  NCR  |  BENGALURU  |  HYDERABAD  |  CHENNAI  |  =
+KOLKATA
+
+
+ <https://www.linkedin.com/company/allwave-av>    =
+<https://www.instagram.com/allwaveav>    =
+<https://www.facebook.com/Allwave.AV.Systems/>=20
+
+
+ <http://www.allwaveav.com>=20
+
+
+
+---------- Forwarded message ---------
+From: Chetan Ankalgi/AWAV/Bengaluru <chetan.ankalgi@allwaveav.com =
+<mailto:chetan.ankalgi@allwaveav.com> >
+Date: Mon, Dec 23, 2024 at 5:29=E2=80=AFPM
+Subject: Fwd: Minutes of meeting - WeWork (Sakshi)-Outbrain.
+To: Balasubramanian Selvam/AWAV/Bangalore <bala.s@allwaveav.com =
+<mailto:bala.s@allwaveav.com> >
+
+
+
+Hello Sir
+
+FYR=20
+
+Thanks & Regards,
+CHETAN ANKALGI | Junior Design & Estimation Engineer=09
+
+
+
+  <https://media.allwaveav.com/call.png>   (+91) 6361957818
+=09
+  <https://media.allwaveav.com/telephone.png>   (+91) 22-22664937 | 1800 =
+2100 198=09
+  <https://media.allwaveav.com/mail.png>    chetan.ankalgi@allwaveav.com =
+<mailto:chetan.ankalgi@allwaveav.com> =09
+  =
+<https://ci3.googleusercontent.com/mail-sig/AIorK4xNuojfwVLX9R61hEm4vUaIL=
+Aa9KH_qWRwdxTl4tvDC3u9Em_AccWlYNlkG_ZT4Az_YKNSYY9M> 	=09
+  <https://media.allwaveav.com/placeholder.png>    Classic Arena, 4th =
+Floor, Hosur Rd, AECS Layout - A Block, Singasandra, Bengaluru, =
+Karnataka - 560068=20
+
+
+
+ <https://allwaveav.com/> www.allwaveav.com	 	 =
+<https://www.facebook.com/Allwave.AV.Systems/>     =
+<https://twitter.com/AllwaveAV>     =
+<https://www.linkedin.com/company/13404167/>     =
+<https://www.instagram.com/allwaveav/>  =09
+
+MUMBAI  |  PUNE  |  NCR  |  BENGALURU  |  HYDERABAD  |  CHENNAI  |  =
+KOLKATA
+
+
+
+
+---------- Forwarded message ---------
+From: Shraddha Ojha <shraddha.ojha@allwavegs.com =
+<mailto:shraddha.ojha@allwavegs.com> >
+Date: Fri, Dec 20, 2024 at 10:28=E2=80=AFAM
+Subject: Fwd: Minutes of meeting - WeWork (Sakshi)-Outbrain.
+To: <chetan.ankalgi@allwaveav.com <mailto:chetan.ankalgi@allwaveav.com> =
+>
+
+
+
+Hi Chetan,=20
+This is the previous mom for out brain.
+
+---------- Forwarded message ---------
+From: Shraddha Ojha <shraddha.ojha@allwavegs.com =
+<mailto:shraddha.ojha@allwavegs.com> >
+Date: Tue, 12 Nov 2024, 7:00=E2=80=AFpm
+Subject: Minutes of meeting - WeWork (Sakshi)-Outbrain.
+To: Ganga Ram/AWAV/ NCR <ganga.ram@allwaveav.com =
+<mailto:ganga.ram@allwaveav.com> >, Pravesh Agrawal/AWAV =
+<pravesh.agrawal@allwaveav.com <mailto:pravesh.agrawal@allwaveav.com> >, =
+Naval Manchakatla/AWAV/Design <naval.manchakatla@allwaveav.com =
+<mailto:naval.manchakatla@allwaveav.com> >
+Cc: Kuldip Kamat <kuldip.kamat@allwaveav.com =
+<mailto:kuldip.kamat@allwaveav.com> >, Tanaji Dange =
+<tanaji.dange@allwaveav.com <mailto:tanaji.dange@allwaveav.com> >, =
+<krishnan@allwaveav.com <mailto:krishnan@allwaveav.com> >
+
+
+
+Hi Pravesh,
+
+Here's the Meeting Details:
+
+Date: 12 Nov=20
+Time: 11: 30 am=20
+
+Objective: Discuss Audio-Visual Requirements for Townhall,Conference =
+Rooms.
+
+Room 1: Town Hall (40-Seater)
+
+- Room Dimensions: Length - 11,500 mm, Width - 8,600 mm
+=20
+Screen space:=20
+ - height: 3340mm
+ - Diagonal space for display is : 2100 mm
+
+- Requirements:
+    1. Interactive Display with Hi-Tech Features
+    2. Big Screen with Camera
+    3. Signage Platform
+    4. Speaker (Wireless/Wi-Fi Connectivity)
+    5. Amazon Stick
+    6. Ceiling-Mounted Display
+    7. Marshall Speaker for Music
+    8. Audio:
+        - 4 Microphones (2 Handheld, 2 Head Mics)
+    9. Visual:
+        - Whiteboard Samsung Flip
+        - Wheel Stand for Movable Screen Mount
+    10. Conferencing:
+        - Speaker and cameras.
+        - Signage Software
+        - Wireless Network Connectivity
+        - HDMI Connectivity Workstation to Display.
+   =20
+Optional:
+        - Fire Stick
+
+
+Room 2: Conference Room (5-6 Seater)
+
+- Dimensions:
+    - Length: 2,560 mm
+    - Width: 2,900 mm
+    - Height: 2,400 mm
+
+- Table Dimensions:
+    - Length: 2 meters
+    - Width: 760 mm
+    - Height: 720 mm
+    - Length: 1,930 mm
+
+- Wall to Table Distance: 900 mm
+
+- Requirements:
+    1. Zoom Room Setup: BYOD (Wireless and Wired)
+    2. Polycom Unified Communication Solution
+    3. Room Scheduler (7-Inch)
+    4. Wall Mounting TV with USB-C to HDMI Adaptor
+    5. Zoom Setup: Native Solution with Wireless Connectivity
+    6. Google Meet, zoom Compatibility.
+
+
+Room 3: Gaming Room
+
+- Dimensions:
+    - Length: 2,400 mm
+    - Width: 3,100 mm
+    - Height: 2,260 mm
+
+- Table Dimensions:
+    - Distance from Wall: 1,020 mm
+    - Height: 760 mm
+
+- Requirements:
+    1. PS5 Gaming System (Optional)
+        -  With Controller
+        - Joystick
+    2. Zoom setup Native Solution with wireless connectivity.
+    3. Google Meet, zoom room compatibility should be there.
+    4.BYOD .
+
+
+Room 4 : workstation. (2 Townhall)- 20 seater room .
+
+- Dimensions:
+    - Height: 3,400 mm (bottom distance: 1,800 mm)
+
+- Requirements:
+
+    1. Display:
+        - Ceiling-Mounted Screen
+    2. Signage:
+        - Signage Platform (Essential)
+    3. Whiteboard:
+        - Samsung Flip Whiteboard
+        - Digital Whiteboard
+    4. Streaming:
+        - Fire Stick (Optional)
+    5. Connectivity:
+        - Wireless Network Connectivity (for seamless content sharing)
+
+-Client asked to prepare a quotation with the following specifications:
+
+- prepare Two quotation with comparison.
+- Room-wise breakdown (Room 1: Town Hall, Room 2: Conference Room, Room =
+3: Gaming Room, Room 4 : workstation)
+- one quotation must includes Prices for optional products and one =
+should not.
+- Total Amount should mention clearly in both quotation as per client.
+
+NOTE:=20
+
+- we must refer existing delhi customers.
+
+- Demo request for the client to experience our solutions
+
+Thanks.
+
+Best regards,
+
+Shraddha Ojha=20
+shraddha.ojha@allwavegs.com <mailto:shraddha.ojha@allwavegs.com> =20
+6260284943.
+
+
+
+
+
+
+
+------=_NextPart_000_0A64_01DC1917.59C1D650
+Content-Type: text/html;
+	boundary="000000000000005461063253abbb";
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div><div>Hi Sachin,</div><div><br></div><div>Below MoM =
+mail for your ready reference.</div></div><div><br></div><div><div =
+dir=3D"ltr" class=3D"gmail_signature" =
+data-smartmail=3D"gmail_signature"><div dir=3D"ltr"><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Arial,sans-serif;color:#000000;backgr=
+ound-color:transparent;font-weight:400;font-style:normal;font-variant:nor=
+mal;text-decoration:none;vertical-align:baseline;white-space:pre;white-sp=
+ace:pre-wrap">Warm Regards,=C2=A0</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.38;margin-top:0pt;margin-bottom:0pt"><span><br></s=
+pan></p><div dir=3D"ltr" style=3D"margin-left:0pt" align=3D"left"><table =
+style=3D"border:none;border-collapse:collapse"><colgroup><col =
+width=3D"203"><col width=3D"459"></colgroup><tbody><tr =
+style=3D"height:164.46386718749997pt"><td style=3D"border-left:solid =
+#ffffff 1pt;border-right:solid #ffffff 1pt;border-bottom:solid #ffffff =
+1pt;border-top:solid #ffffff 1pt;vertical-align:top;padding:5pt 5pt 5pt =
+5pt;overflow:hidden"><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:8pt;font-family:Arial,sans-serif;color:#000000;backgro=
+und-color:transparent;font-weight:400;font-style:normal;font-variant:norm=
+al;text-decoration:none;vertical-align:baseline;white-space:pre;white-spa=
+ce:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:163px;hei=
+ght:159px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJdvuvdw-X6B-FMhd=
+YVnerb14gh13vI1f0z28PzwpbxvwgWVGSJ_zo_CL9HoGfbS-pB66P2WAdPD59KuhjG-sJB9dj=
+7IFGLM4-LEeFHoIx540CWOWal5_djf3fpJwV4TGqiXls?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"163" height=3D"159" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></p></td><td =
+style=3D"border-left:solid #ffffff 1pt;border-right:solid #ffffff =
+1pt;border-bottom:solid #ffffff 1pt;border-top:solid #ffffff =
+1pt;vertical-align:top;padding:5pt 5pt 5pt 5pt;overflow:hidden"><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:700;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Balasubramanian S</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Manager - Design &amp; Estimation</span></p><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap"><br></span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><font =
+color=3D"#000000" face=3D"Roboto, sans-serif"><span =
+style=3D"font-size:13.3333px">Classic Arena, 4th Floor, Hosur Rd, AECS =
+Layout - A Block, Singasandra, Bengaluru, Karnataka =
+560068</span></font></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Phone: +91-9597300207</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Email ID: </span><a href=3D"mailto:bala.s@allwaveav.com" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap">bala.s@allwaveav.com</span></a></p><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:8pt;font-family:Roboto,sans-serif;color:#000000;backgr=
+ound-color:transparent;font-weight:400;font-style:normal;font-variant:nor=
+mal;text-decoration:none;vertical-align:baseline;white-space:pre;white-sp=
+ace:pre-wrap">MUMBAI=C2=A0 |=C2=A0 PUNE=C2=A0 |=C2=A0 NCR=C2=A0 |=C2=A0 =
+BENGALURU=C2=A0 |=C2=A0 HYDERABAD=C2=A0 |=C2=A0 CHENNAI=C2=A0 |=C2=A0 =
+KOLKATA</span></p><br><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><a =
+href=3D"https://www.linkedin.com/company/allwave-av" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:32px;heig=
+ht:31px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcGQZ1JVmPqfbCj4xN=
+QZPHrY_3ZM6e_0xbjID4UdDS0Lm7v6z9864QXMrKESZ8vC4A-RIGNJEvvTxIefrv-SpUY4FIn=
+v5foJwc0M84tQibq27an7fXbnJctByiLP8A38_u6x3rD?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"32" height=3D"31" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">=C2=A0 </span><a =
+href=3D"https://www.instagram.com/allwaveav" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:32px;heig=
+ht:32px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdAL4n3JgPc01QE_3v=
+-pfMctMtxcBM98T5L4vk-zuyY22IM8fJWkYUdbA4EpyhTBVaGklog_ryIP8DDrt_wetoQj_D7=
+ai7BypIYaScKbdUn5n23bEwkF7RgKccoGDGelzpoWsXraw?key=3D25EjYfqXXzGOrd5Rdjmi=
+L5AG" width=3D"32" height=3D"32" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">=C2=A0 </span><a =
+href=3D"https://www.facebook.com/Allwave.AV.Systems/" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:30px;heig=
+ht:29px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXflfIj7rdcGlSyPHml=
+t1G13q9Z54Kf0xiPml_NyRpb0UkPNMI2XfL6pMAFTEFxIh8LLPIa8IfJ8AXpBQfIBUi7XYMLC=
+LDa1TWlalG50CqNoIFNfgbt0F7y7y7cJFWkmlilkQWMj9Q?key=3D25EjYfqXXzGOrd5Rdjmi=
+L5AG" width=3D"30" height=3D"29" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a></p><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><a =
+href=3D"http://www.allwaveav.com" style=3D"text-decoration:none" =
+target=3D"_blank"><span =
+style=3D"font-size:8pt;font-family:Arial,sans-serif;color:#1155cc;backgro=
+und-color:transparent;font-weight:400;font-style:normal;font-variant:norm=
+al;text-decoration:underline;vertical-align:baseline;white-space:pre;whit=
+e-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:445px;hei=
+ght:67px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdqPdtfcRVlDqqP6im=
+nKEPV7PPzGBB_FGKx5ejpPcNegfexZq2mk0c5dZwqIiCkdM0LT5CVe8s_1IZdr5EqDOUFf6yL=
+8y3nLs_aZ7z9cKrUhEZevQv_OrGzK94HHhALVG7BokNb?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"445" height=3D"67" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a></p></td></tr>=
+</tbody></table></div></div></div></div><br><br><div =
+class=3D"gmail_quote gmail_quote_container"><div dir=3D"ltr" =
+class=3D"gmail_attr">---------- Forwarded message ---------<br>From: =
+<strong class=3D"gmail_sendername" dir=3D"auto">Chetan =
+Ankalgi/AWAV/Bengaluru</strong> <span dir=3D"auto">&lt;<a =
+href=3D"mailto:chetan.ankalgi@allwaveav.com">chetan.ankalgi@allwaveav.com=
+</a>&gt;</span><br>Date: Mon, Dec 23, 2024 at =
+5:29=E2=80=AFPM<br>Subject: Fwd: Minutes of meeting - WeWork =
+(Sakshi)-Outbrain.<br>To: Balasubramanian Selvam/AWAV/Bangalore &lt;<a =
+href=3D"mailto:bala.s@allwaveav.com">bala.s@allwaveav.com</a>&gt;<br></di=
+v><br><br><div dir=3D"ltr"><div>Hello =
+Sir</div><div><br></div><div>FYR=C2=A0</div><div><br></div><div><div =
+dir=3D"ltr" class=3D"gmail_signature" =
+data-smartmail=3D"gmail_signature"><div dir=3D"ltr"><div =
+style=3D"color:rgb(34,34,34)"><font face=3D"arial, sans-serif">Thanks =
+&amp; Regards,</font></div><div style=3D"color:rgb(34,34,34)"><table =
+border=3D"0" cellspacing=3D"0" cellpadding=3D"0" =
+style=3D"color:rgb(0,0,0);max-width:600px;width:600px"><tbody><tr><td =
+valign=3D"top" style=3D"padding:0px 0px =
+5px;line-height:27px;vertical-align:top"><font face=3D"arial, =
+sans-serif"><font color=3D"#500050"><b>CHETAN =
+ANKALGI=C2=A0</b></font>|=C2=A0<b><span =
+style=3D"color:rgb(34,34,34)"><font color=3D"#2f2fff">Junior Design =
+&amp; Estimation =
+Engineer</font></span></b></font></td></tr><tr></tr></tbody></table></div=
+><div style=3D"color:rgb(34,34,34)"><br></div><div =
+style=3D"color:rgb(34,34,34)"><table border=3D"0" cellspacing=3D"0" =
+cellpadding=3D"0" =
+style=3D"color:rgb(0,0,0);max-width:600px;width:600px"><tbody><tr><td><ta=
+ble border=3D"0" cellspacing=3D"0" cellpadding=3D"0" =
+style=3D"max-width:800px;width:600px"><tbody><tr><td valign=3D"middle" =
+width=3D"52%"><table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" =
+style=3D"width:312px"><tbody><tr><td style=3D"padding:3px 0px"><span =
+style=3D"display:block"><img =
+src=3D"https://media.allwaveav.com/call.png" alt=3D"mobile-icon" =
+width=3D"20" height=3D"20" border=3D"0" =
+style=3D"color:rgb(34,34,34);border:0px;width:16px;height:16px;float:left=
+"><font face=3D"arial, sans-serif"><span =
+style=3D"color:rgb(34,34,34)">=C2=A0=C2=A0(+91) =
+6361957818</span></font><font face=3D"arial, =
+sans-serif"><br></font></span></td></tr><tr><td style=3D"padding:3px =
+0px"><span style=3D"display:block"><img =
+src=3D"https://media.allwaveav.com/telephone.png" alt=3D"mobile-icon" =
+width=3D"20" height=3D"20" border=3D"0" =
+style=3D"border:0px;width:16px;height:16px;float:left"><font =
+face=3D"arial, sans-serif">=C2=A0=C2=A0(+91) 22-22664937 | 1800 2100 =
+198</font></span></td></tr><tr><td style=3D"padding:3px 0px"><span =
+style=3D"display:block"><img =
+src=3D"https://media.allwaveav.com/mail.png" alt=3D"phone-icon" =
+width=3D"20" height=3D"20" border=3D"0" =
+style=3D"border:0px;width:16px;height:16px;float:left"><font =
+face=3D"arial, sans-serif">=C2=A0 =C2=A0<a =
+href=3D"mailto:chetan.ankalgi@allwaveav.com" =
+style=3D"color:rgb(17,85,204)" =
+target=3D"_blank">chetan.ankalgi@allwaveav.com</a></font></span></td></tr=
+></tbody></table></td><td><img width=3D"527" height=3D"72" =
+src=3D"https://ci3.googleusercontent.com/mail-sig/AIorK4xNuojfwVLX9R61hEm=
+4vUaILAa9KH_qWRwdxTl4tvDC3u9Em_AccWlYNlkG_ZT4Az_YKNSYY9M" =
+style=3D"margin-right:0px"></td><td valign=3D"top"></td></tr><tr><td =
+colspan=3D"3" style=3D"padding:3px 0px"><span =
+style=3D"display:block"><img =
+src=3D"https://media.allwaveav.com/placeholder.png" alt=3D"email-icon" =
+width=3D"20" height=3D"20" border=3D"0" =
+style=3D"border:0px;width:16px;height:16px;float:left"><font =
+face=3D"arial, sans-serif">=C2=A0 =C2=A0Classic Arena, 4th Floor, Hosur =
+Rd, AECS Layout - A Block, Singasandra, Bengaluru, Karnataka - =
+560068=C2=A0</font></span><span style=3D"display:block"><font =
+face=3D"arial, sans-serif"><br></font></span><table border=3D"0" =
+cellspacing=3D"0" cellpadding=3D"0" =
+style=3D"max-width:800px;width:600px"><tbody><tr><td colspan=3D"3" =
+style=3D"padding:2px 5px 2px =
+10px;background-color:rgb(22,43,188);border-radius:5px"><table =
+border=3D"0" cellspacing=3D"0" cellpadding=3D"0" =
+style=3D"width:585px"><tbody><tr><td><span =
+style=3D"color:rgb(255,255,255)"><a href=3D"https://allwaveav.com/" =
+style=3D"color:rgb(255,255,255)" target=3D"_blank"><font face=3D"arial, =
+sans-serif" size=3D"2">www.allwaveav.com</font></a></span></td><td><font =
+face=3D"arial, sans-serif" size=3D"2">=C2=A0</font></td><td =
+style=3D"padding-top:5px;text-align:right"><font face=3D"arial, =
+sans-serif" size=3D"2"><a =
+href=3D"https://www.facebook.com/Allwave.AV.Systems/" =
+style=3D"color:rgb(17,85,204)" target=3D"_blank"><img =
+src=3D"https://media.allwaveav.com/facebook.png" alt=3D"Facebook" =
+width=3D"28" height=3D"28">=C2=A0</a>=C2=A0=C2=A0<a =
+href=3D"https://twitter.com/AllwaveAV" style=3D"color:rgb(17,85,204)" =
+target=3D"_blank"><img src=3D"https://media.allwaveav.com/twitter.png" =
+alt=3D"Twitter" width=3D"28" height=3D"28">=C2=A0</a>=C2=A0=C2=A0<a =
+href=3D"https://www.linkedin.com/company/13404167/" =
+style=3D"color:rgb(17,85,204)" target=3D"_blank"><img =
+src=3D"https://media.allwaveav.com/linkedin.png" alt=3D"Linkedin" =
+width=3D"28" height=3D"28">=C2=A0</a>=C2=A0=C2=A0<a =
+href=3D"https://www.instagram.com/allwaveav/" =
+style=3D"color:rgb(17,85,204)" target=3D"_blank"><img =
+src=3D"https://media.allwaveav.com/instagram.png" alt=3D"Instagram" =
+width=3D"28" =
+height=3D"28">=C2=A0</a></font></td></tr></tbody></table></td></tr></tbod=
+y></table><font face=3D"arial, sans-serif" size=3D"2"><br>MUMBAI =
+=C2=A0|=C2=A0 PUNE =C2=A0|=C2=A0 NCR =C2=A0|=C2=A0 BENGALURU =
+=C2=A0|=C2=A0 HYDERABAD =C2=A0|=C2=A0 CHENNAI =C2=A0|=C2=A0 =
+KOLKATA<br><br></font></td></tr></tbody></table></td></tr></tbody></table=
+></div></div></div></div><br><br><div class=3D"gmail_quote"><div =
+dir=3D"ltr" class=3D"gmail_attr">---------- Forwarded message =
+---------<br>From: <strong class=3D"gmail_sendername" =
+dir=3D"auto">Shraddha Ojha</strong> <span dir=3D"auto">&lt;<a =
+href=3D"mailto:shraddha.ojha@allwavegs.com" =
+target=3D"_blank">shraddha.ojha@allwavegs.com</a>&gt;</span><br>Date: =
+Fri, Dec 20, 2024 at 10:28=E2=80=AFAM<br>Subject: Fwd: Minutes of =
+meeting - WeWork (Sakshi)-Outbrain.<br>To:  &lt;<a =
+href=3D"mailto:chetan.ankalgi@allwaveav.com" =
+target=3D"_blank">chetan.ankalgi@allwaveav.com</a>&gt;<br></div><br><br><=
+div dir=3D"auto">Hi Chetan,=C2=A0<div dir=3D"auto">This is the previous =
+mom for out brain.</div></div><br><div class=3D"gmail_quote"><div =
+dir=3D"ltr" class=3D"gmail_attr">---------- Forwarded message =
+---------<br>From: <strong class=3D"gmail_sendername" =
+dir=3D"auto">Shraddha Ojha</strong> <span dir=3D"auto">&lt;<a =
+href=3D"mailto:shraddha.ojha@allwavegs.com" =
+target=3D"_blank">shraddha.ojha@allwavegs.com</a>&gt;</span><br>Date: =
+Tue, 12 Nov 2024, 7:00=E2=80=AFpm<br>Subject: Minutes of meeting - =
+WeWork (Sakshi)-Outbrain.<br>To: Ganga Ram/AWAV/ NCR &lt;<a =
+href=3D"mailto:ganga.ram@allwaveav.com" =
+target=3D"_blank">ganga.ram@allwaveav.com</a>&gt;, Pravesh Agrawal/AWAV =
+&lt;<a href=3D"mailto:pravesh.agrawal@allwaveav.com" =
+target=3D"_blank">pravesh.agrawal@allwaveav.com</a>&gt;, Naval =
+Manchakatla/AWAV/Design &lt;<a =
+href=3D"mailto:naval.manchakatla@allwaveav.com" =
+target=3D"_blank">naval.manchakatla@allwaveav.com</a>&gt;<br>Cc: Kuldip =
+Kamat &lt;<a href=3D"mailto:kuldip.kamat@allwaveav.com" =
+target=3D"_blank">kuldip.kamat@allwaveav.com</a>&gt;, Tanaji Dange =
+&lt;<a href=3D"mailto:tanaji.dange@allwaveav.com" =
+target=3D"_blank">tanaji.dange@allwaveav.com</a>&gt;,  &lt;<a =
+href=3D"mailto:krishnan@allwaveav.com" =
+target=3D"_blank">krishnan@allwaveav.com</a>&gt;<br></div><br><br><div =
+dir=3D"auto">Hi Pravesh,<div dir=3D"auto"><br><div =
+dir=3D"auto">Here&#39;s the Meeting Details:</div><div =
+dir=3D"auto"><br></div><div dir=3D"auto">Date: 12 Nov=C2=A0</div><div =
+dir=3D"auto">Time: 11: 30 am=C2=A0</div><div dir=3D"auto"><br></div><div =
+dir=3D"auto">Objective: Discuss Audio-Visual Requirements for =
+Townhall,Conference Rooms.</div><div dir=3D"auto"><br></div><div =
+dir=3D"auto">Room 1: Town Hall (40-Seater)</div><div =
+dir=3D"auto"><br></div><div dir=3D"auto">- Room Dimensions: Length - =
+11,500 mm, Width - 8,600 mm</div><div dir=3D"auto">=C2=A0</div><div =
+dir=3D"auto">Screen space:=C2=A0</div><div dir=3D"auto">=C2=A0- height: =
+3340mm</div><div dir=3D"auto">=C2=A0- Diagonal space for display is : =
+2100 mm</div><div dir=3D"auto"><br></div><div dir=3D"auto">- =
+Requirements:</div><div dir=3D"auto">=C2=A0 =C2=A0 1. Interactive =
+Display with Hi-Tech Features</div><div dir=3D"auto">=C2=A0 =C2=A0 2. =
+Big Screen with Camera</div><div dir=3D"auto">=C2=A0 =C2=A0 3. Signage =
+Platform</div><div dir=3D"auto">=C2=A0 =C2=A0 4. Speaker (Wireless/Wi-Fi =
+Connectivity)</div><div dir=3D"auto">=C2=A0 =C2=A0 5. Amazon =
+Stick</div><div dir=3D"auto">=C2=A0 =C2=A0 6. Ceiling-Mounted =
+Display</div><div dir=3D"auto">=C2=A0 =C2=A0 7. Marshall Speaker for =
+Music</div><div dir=3D"auto">=C2=A0 =C2=A0 8. Audio:</div><div =
+dir=3D"auto">=C2=A0 =C2=A0 =C2=A0 =C2=A0 - 4 Microphones (2 Handheld, 2 =
+Head Mics)</div><div dir=3D"auto">=C2=A0 =C2=A0 9. Visual:</div><div =
+dir=3D"auto">=C2=A0 =C2=A0 =C2=A0 =C2=A0 - Whiteboard Samsung =
+Flip</div><div dir=3D"auto">=C2=A0 =C2=A0 =C2=A0 =C2=A0 - Wheel Stand =
+for Movable Screen Mount</div><div dir=3D"auto">=C2=A0 =C2=A0 10. =
+Conferencing:</div><div dir=3D"auto">=C2=A0 =C2=A0 =C2=A0 =C2=A0 - =
+Speaker and cameras.</div><div dir=3D"auto">=C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+- Signage Software</div><div dir=3D"auto">=C2=A0 =C2=A0 =C2=A0 =C2=A0 - =
+Wireless Network Connectivity</div><div dir=3D"auto">=C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 - HDMI Connectivity Workstation to Display.</div><div =
+dir=3D"auto">=C2=A0 =C2=A0=C2=A0</div><div =
+dir=3D"auto">Optional:</div><div dir=3D"auto">=C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 - Fire Stick</div><div dir=3D"auto"><br></div><div =
+dir=3D"auto"><br></div><div dir=3D"auto">Room 2: Conference Room (5-6 =
+Seater)</div><div dir=3D"auto"><br></div><div dir=3D"auto">- =
+Dimensions:</div><div dir=3D"auto">=C2=A0 =C2=A0 - Length: 2,560 =
+mm</div><div dir=3D"auto">=C2=A0 =C2=A0 - Width: 2,900 mm</div><div =
+dir=3D"auto">=C2=A0 =C2=A0 - Height: 2,400 mm</div><div =
+dir=3D"auto"><br></div><div dir=3D"auto">- Table Dimensions:</div><div =
+dir=3D"auto">=C2=A0 =C2=A0 - Length: 2 meters</div><div =
+dir=3D"auto">=C2=A0 =C2=A0 - Width: 760 mm</div><div dir=3D"auto">=C2=A0 =
+=C2=A0 - Height: 720 mm</div><div dir=3D"auto">=C2=A0 =C2=A0 - Length: =
+1,930 mm</div><div dir=3D"auto"><br></div><div dir=3D"auto">- Wall to =
+Table Distance: 900 mm</div><div dir=3D"auto"><br></div><div =
+dir=3D"auto">- Requirements:</div><div dir=3D"auto">=C2=A0 =C2=A0 1. =
+Zoom Room Setup: BYOD (Wireless and Wired)</div><div dir=3D"auto">=C2=A0 =
+=C2=A0 2. Polycom Unified Communication Solution</div><div =
+dir=3D"auto">=C2=A0 =C2=A0 3. Room Scheduler (7-Inch)</div><div =
+dir=3D"auto">=C2=A0 =C2=A0 4. Wall Mounting TV with USB-C to HDMI =
+Adaptor</div><div dir=3D"auto">=C2=A0 =C2=A0 5. Zoom Setup: Native =
+Solution with Wireless Connectivity</div><div dir=3D"auto">=C2=A0 =C2=A0 =
+6. Google Meet, zoom Compatibility.</div><div =
+dir=3D"auto"><br></div><div dir=3D"auto"><br></div><div =
+dir=3D"auto">Room 3: Gaming Room</div><div dir=3D"auto"><br></div><div =
+dir=3D"auto">- Dimensions:</div><div dir=3D"auto">=C2=A0 =C2=A0 - =
+Length: 2,400 mm</div><div dir=3D"auto">=C2=A0 =C2=A0 - Width: 3,100 =
+mm</div><div dir=3D"auto">=C2=A0 =C2=A0 - Height: 2,260 mm</div><div =
+dir=3D"auto"><br></div><div dir=3D"auto">- Table Dimensions:</div><div =
+dir=3D"auto">=C2=A0 =C2=A0 - Distance from Wall: 1,020 mm</div><div =
+dir=3D"auto">=C2=A0 =C2=A0 - Height: 760 mm</div><div =
+dir=3D"auto"><br></div><div dir=3D"auto">- Requirements:</div><div =
+dir=3D"auto">=C2=A0 =C2=A0 1. PS5 Gaming System (Optional)</div><div =
+dir=3D"auto">=C2=A0 =C2=A0 =C2=A0 =C2=A0 -=C2=A0 With =
+Controller</div><div dir=3D"auto">=C2=A0 =C2=A0 =C2=A0 =C2=A0 - =
+Joystick</div><div dir=3D"auto">=C2=A0 =C2=A0 2. Zoom setup Native =
+Solution with wireless connectivity.</div><div dir=3D"auto">=C2=A0 =
+=C2=A0 3. Google Meet, zoom room compatibility should be =
+there.</div><div dir=3D"auto">=C2=A0 =C2=A0 4.BYOD .</div><div =
+dir=3D"auto"><br></div><div dir=3D"auto"><br></div><div =
+dir=3D"auto">Room 4 : workstation. (2 Townhall)- 20 seater room =
+.</div><div dir=3D"auto"><br></div><div dir=3D"auto">- =
+Dimensions:</div><div dir=3D"auto">=C2=A0 =C2=A0 - Height: 3,400 mm =
+(bottom distance: 1,800 mm)</div><div dir=3D"auto"><br></div><div =
+dir=3D"auto">- Requirements:</div><div dir=3D"auto"><br></div><div =
+dir=3D"auto">=C2=A0 =C2=A0 1. Display:</div><div dir=3D"auto">=C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 - Ceiling-Mounted Screen</div><div =
+dir=3D"auto">=C2=A0 =C2=A0 2. Signage:</div><div dir=3D"auto">=C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 - Signage Platform (Essential)</div><div =
+dir=3D"auto">=C2=A0 =C2=A0 3. Whiteboard:</div><div dir=3D"auto">=C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 - Samsung Flip Whiteboard</div><div =
+dir=3D"auto">=C2=A0 =C2=A0 =C2=A0 =C2=A0 - Digital Whiteboard</div><div =
+dir=3D"auto">=C2=A0 =C2=A0 4. Streaming:</div><div dir=3D"auto">=C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 - Fire Stick (Optional)</div><div =
+dir=3D"auto">=C2=A0 =C2=A0 5. Connectivity:</div><div =
+dir=3D"auto">=C2=A0 =C2=A0 =C2=A0 =C2=A0 - Wireless Network Connectivity =
+(for seamless content sharing)</div><div dir=3D"auto"><br></div><div =
+dir=3D"auto">-Client asked to prepare a quotation with the following =
+specifications:</div><div dir=3D"auto"><br></div><div dir=3D"auto">- =
+prepare Two quotation with comparison.</div><div dir=3D"auto">- =
+Room-wise breakdown (Room 1: Town Hall, Room 2: Conference Room, Room 3: =
+Gaming Room, Room 4 : workstation)</div><div dir=3D"auto">- one =
+quotation must includes Prices for optional products and one should =
+not.</div><div dir=3D"auto">- Total Amount should mention clearly in =
+both quotation as per client.</div><div dir=3D"auto"><br></div><div =
+dir=3D"auto">NOTE:=C2=A0</div><div dir=3D"auto"><br></div><div =
+dir=3D"auto">- we must refer existing delhi customers.</div><div =
+dir=3D"auto"><br></div><div dir=3D"auto">- Demo request for the client =
+to experience our solutions</div><div dir=3D"auto"><br></div><div =
+dir=3D"auto">Thanks.</div><div dir=3D"auto"><br></div><div =
+dir=3D"auto">Best regards,</div><div dir=3D"auto"><br></div><div =
+dir=3D"auto">Shraddha Ojha=C2=A0</div><div dir=3D"auto"><a =
+href=3D"mailto:shraddha.ojha@allwavegs.com" rel=3D"noreferrer" =
+target=3D"_blank">shraddha.ojha@allwavegs.com</a>=C2=A0</div><div =
+dir=3D"auto">6260284943.</div><div dir=3D"auto"><br></div><div =
+dir=3D"auto"><br></div><div dir=3D"auto"><br></div><div =
+dir=3D"auto"><br></div><div dir=3D"auto"><br></div><div =
+dir=3D"auto"><br></div></div></div>
+</div>
+</div></div>
+</div></div>
+
+------=_NextPart_000_0A64_01DC1917.59C1D650--
