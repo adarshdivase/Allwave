@@ -19,11 +19,11 @@ def load_data():
         closed_tickets_file = "Closed tickets(Last 10 days).xlsx - Jira Export Excel CSV (my defau.csv"
         open_tickets_file = "Open Tickets(last 10 days).xlsx - Jira Export Excel CSV (my defau.csv"
 
-        # --- FINAL FIX: Use the 'python' engine for more flexible parsing ---
-        # The 'python' engine is better at handling non-standard CSV files from Excel.
-        oem_df = pd.read_csv(oem_file, encoding='latin1', engine='python')
-        closed_tickets_df = pd.read_csv(closed_tickets_file, encoding='latin1', engine='python')
-        open_tickets_df = pd.read_csv(open_tickets_file, encoding='latin1', engine='python')
+        # --- FINAL FIX: Use the 'python' engine and add error handling ---
+        # This is the most robust way to read CSVs that might be malformed.
+        oem_df = pd.read_csv(oem_file, encoding='latin1', engine='python', on_bad_lines='skip')
+        closed_tickets_df = pd.read_csv(closed_tickets_file, encoding='latin1', engine='python', on_bad_lines='skip')
+        open_tickets_df = pd.read_csv(open_tickets_file, encoding='latin1', engine='python', on_bad_lines='skip')
         
         all_tickets_df = pd.concat([closed_tickets_df, open_tickets_df], ignore_index=True)
         all_tickets_df.rename(columns={'Summary': 'summary', 'Custom field (RCA - Root Cause Analysis)': 'rca'}, inplace=True)
@@ -32,7 +32,7 @@ def load_data():
         st.error(f"Fatal Error loading data: {e}. Please ensure all required CSV files are in the same folder as this script and that the filenames match exactly.")
         return None, None
     except Exception as e:
-        st.error(f"An error occurred while parsing the data files: {e}. Please check that the CSV files are not corrupted.")
+        st.error(f"An error occurred while parsing the data files: {e}. Please check that the CSV files are not corrupted and are saved in a standard format.")
         return None, None
 
 
