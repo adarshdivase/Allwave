@@ -12,17 +12,18 @@ st.title("🚀 All Wave AI-Powered Design & Estimation Engine")
 
 @st.cache_data
 def load_data():
-    """Loads and prepares all necessary data files with specific encoding."""
+    """Loads and prepares all necessary data files with robust parsing."""
     try:
         # Define the exact filenames to look for
         oem_file = "av_oem_list_2025.csv"
         closed_tickets_file = "Closed tickets(Last 10 days).xlsx - Jira Export Excel CSV (my defau.csv"
         open_tickets_file = "Open Tickets(last 10 days).xlsx - Jira Export Excel CSV (my defau.csv"
 
-        # --- FIX IS HERE: Added encoding='latin1' to handle the file format ---
-        oem_df = pd.read_csv(oem_file, encoding='latin1')
-        closed_tickets_df = pd.read_csv(closed_tickets_file, encoding='latin1')
-        open_tickets_df = pd.read_csv(open_tickets_file, encoding='latin1')
+        # --- FINAL FIX: Use the 'python' engine for more flexible parsing ---
+        # The 'python' engine is better at handling non-standard CSV files from Excel.
+        oem_df = pd.read_csv(oem_file, encoding='latin1', engine='python')
+        closed_tickets_df = pd.read_csv(closed_tickets_file, encoding='latin1', engine='python')
+        open_tickets_df = pd.read_csv(open_tickets_file, encoding='latin1', engine='python')
         
         all_tickets_df = pd.concat([closed_tickets_df, open_tickets_df], ignore_index=True)
         all_tickets_df.rename(columns={'Summary': 'summary', 'Custom field (RCA - Root Cause Analysis)': 'rca'}, inplace=True)
@@ -30,6 +31,10 @@ def load_data():
     except FileNotFoundError as e:
         st.error(f"Fatal Error loading data: {e}. Please ensure all required CSV files are in the same folder as this script and that the filenames match exactly.")
         return None, None
+    except Exception as e:
+        st.error(f"An error occurred while parsing the data files: {e}. Please check that the CSV files are not corrupted.")
+        return None, None
+
 
 oem_list_df, tickets_df = load_data()
 
