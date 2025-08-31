@@ -60,7 +60,7 @@ def parse_docx(file_stream):
 
 def create_room_visualization(room_width, room_length, capacity):
     """Generates a 2D top-down visualization of the conference room."""
-    fig, ax = plt.subplots(figsize=(6, 6 * (room_length / room_width)))
+    fig, ax = plt.subplots(figsize=(6, 6 * (room_length / room_width) if room_width > 0 else 6))
     ax.set_aspect('equal', adjustable='box')
 
     ax.add_patch(Rectangle((0, 0), room_width, room_length, fill=None, edgecolor='black', linewidth=2))
@@ -95,7 +95,7 @@ def create_room_visualization(room_width, room_length, capacity):
 def generate_proposal(capacity, farthest_viewer, use_case, has_direct_light, tier="Standard"):
     """The core engine that runs compliance checks and generates tiered BOQs."""
     min_height_m = farthest_viewer / 15 if use_case == "Analytical Decision Making" else farthest_viewer / 20
-    min_diagonal_inches = min_height_m * 39.37 * 1.89
+    min_diagonal_inches = min_height_m * 39.37 * 1.89 if min_height_m > 0 else 55
     sizes = [55, 65, 75, 85, 98]
     rec_size = min(sizes, key=lambda x:abs(x-min_diagonal_inches))
     discas_report = f"Recommended display is {rec_size}\" based on viewing distance."
@@ -129,7 +129,7 @@ if oem_list_df is not None:
         if extracted: st.session_state.update(extracted); st.sidebar.success(f"Analyzed: **{st.session_state.get('room_name', '')}**")
     st.sidebar.text_input("Room Name", key="room_name")
     st.sidebar.number_input("Seating Capacity", min_value=1, key="capacity")
-    st.sidebar.number_input("Farthest Viewer (meters)", key="farthest_viewer")
+    st.sidebar.number_input("Farthest Viewer (meters)", min_value=0.0, key="farthest_viewer")
     use_case = st.sidebar.selectbox("Primary Use Case", ["Analytical Decision Making", "Basic Decision Making"])
     has_light = st.sidebar.checkbox("Light source above display?")
     if st.sidebar.button("🚀 Generate AI Proposal"):
@@ -152,18 +152,23 @@ if oem_list_df is not None:
         st.header("3. Historical Support Ticket Search")
         query = st.text_input("Search past tickets (e.g., 'projector image', 'Crestron'):")
         if query:
-            # --- FIX IS HERE: Check if 'rca' column exists before searching ---
+            # --- FINAL FIX: Check if columns exist before searching them ---
             def search_row(r):
-                summary_match = query.lower() in str(r['summary']).lower()
+                summary_match = False
+                if 'summary' in r and pd.notna(r['summary']):
+                    summary_match = query.lower() in str(r['summary']).lower()
+                
                 rca_match = False
                 if 'rca' in r and pd.notna(r['rca']):
                     rca_match = query.lower() in str(r['rca']).lower()
+                
                 return summary_match or rca_match
 
             results = tickets_df[tickets_df.apply(search_row, axis=1)]
             if not results.empty:
-                # Display only columns that are guaranteed to exist
-                display_cols = ['Issue key', 'Status', 'summary']
+                display_cols = ['Issue key', 'Status']
+                if 'summary' in results.columns:
+                    display_cols.append('summary')
                 if 'rca' in results.columns:
                     display_cols.append('rca')
                 st.dataframe(results[display_cols].head())
