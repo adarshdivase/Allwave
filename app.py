@@ -141,7 +141,6 @@ if oem_list_df is not None:
     if 'proposal_generated' in st.session_state:
         st.header("2. AI-Generated Proposal")
         
-        # --- MORE STABLE TIER BUTTONS ---
         col1_tier, col2_tier, col3_tier = st.columns(3)
         if col1_tier.button("💵 Generate Budget BOQ"):
             st.session_state.tier = "Budget"
@@ -150,7 +149,6 @@ if oem_list_df is not None:
         if col3_tier.button("💎 Generate Premium BOQ"):
             st.session_state.tier = "Premium"
 
-        # Generate the proposal based on the currently selected tier
         compliance, boq = generate_proposal(st.session_state.capacity, st.session_state.farthest_viewer, use_case, has_light, st.session_state.get('tier', 'Standard'))
         
         col1_disp, col2_disp = st.columns(2)
@@ -164,7 +162,7 @@ if oem_list_df is not None:
             room_length = st.session_state.farthest_viewer
             room_width = room_length * 0.75
             fig = create_room_visualization(room_width, room_length, st.session_state.capacity)
-            st.pyplot(fig, clear_figure=True) # --- FIX IS HERE ---
+            st.pyplot(fig, clear_figure=True)
 
     else: st.info("Upload a document or fill in details on the left and click 'Generate'.")
 
@@ -172,17 +170,23 @@ if oem_list_df is not None:
         st.header("3. Historical Support Ticket Search")
         query = st.text_input("Search past tickets (e.g., 'projector image', 'Crestron'):")
         if query:
+            # --- FINAL FIX: Check if columns exist before searching them ---
             def search_row(r):
                 summary_match = False
                 if 'summary' in r and pd.notna(r['summary']):
                     summary_match = query.lower() in str(r['summary']).lower()
+                
                 rca_match = False
                 if 'rca' in r and pd.notna(r['rca']):
                     rca_match = query.lower() in str(r['rca']).lower()
+                
                 return summary_match or rca_match
+
             results = tickets_df[tickets_df.apply(search_row, axis=1)]
             if not results.empty:
                 display_cols = ['Issue key', 'Status']
-                if 'summary' in results.columns: display_cols.append('summary')
-                if 'rca' in results.columns: display_cols.append('rca')
+                if 'summary' in results.columns:
+                    display_cols.append('summary')
+                if 'rca' in results.columns:
+                    display_cols.append('rca')
                 st.dataframe(results[display_cols].head())
