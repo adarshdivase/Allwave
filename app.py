@@ -26,7 +26,6 @@ def load_data():
         open_tickets_df = pd.read_csv(open_tickets_file, encoding='latin1', engine='python', on_bad_lines='skip')
         
         all_tickets_df = pd.concat([closed_tickets_df, open_tickets_df], ignore_index=True)
-        # Rename columns that are known to exist
         all_tickets_df.rename(columns={'Summary': 'summary', 'Custom field (RCA - Root Cause Analysis)': 'rca'}, inplace=True)
         return oem_df, all_tickets_df
     except FileNotFoundError as e:
@@ -90,6 +89,7 @@ def create_room_visualization(room_width, room_length, capacity):
     ax.set_xticks([])
     ax.set_yticks([])
     plt.title(f"{capacity}-Person Room Layout")
+    
     return fig
 
 def generate_proposal(capacity, farthest_viewer, use_case, has_direct_light, tier="Standard"):
@@ -127,48 +127,62 @@ if oem_list_df is not None:
     if uploaded_file:
         extracted = parse_docx(io.BytesIO(uploaded_file.getvalue()))
         if extracted: st.session_state.update(extracted); st.sidebar.success(f"Analyzed: **{st.session_state.get('room_name', '')}**")
+    
     st.sidebar.text_input("Room Name", key="room_name")
     st.sidebar.number_input("Seating Capacity", min_value=1, key="capacity")
     st.sidebar.number_input("Farthest Viewer (meters)", min_value=0.0, key="farthest_viewer")
     use_case = st.sidebar.selectbox("Primary Use Case", ["Analytical Decision Making", "Basic Decision Making"])
     has_light = st.sidebar.checkbox("Light source above display?")
+
     if st.sidebar.button("🚀 Generate AI Proposal"):
-        st.session_state.compliance, st.session_state.boq = generate_proposal(st.session_state.capacity, st.session_state.farthest_viewer, use_case, has_light, "Standard")
         st.session_state.proposal_generated = True
+        st.session_state.tier = "Standard" # Default tier
+
     if 'proposal_generated' in st.session_state:
         st.header("2. AI-Generated Proposal")
-        col1, col2 = st.columns(2)
-        with col1:
+        
+        # --- MORE STABLE TIER BUTTONS ---
+        col1_tier, col2_tier, col3_tier = st.columns(3)
+        if col1_tier.button("💵 Generate Budget BOQ"):
+            st.session_state.tier = "Budget"
+        if col2_tier.button("⭐ Generate Standard BOQ"):
+            st.session_state.tier = "Standard"
+        if col3_tier.button("💎 Generate Premium BOQ"):
+            st.session_state.tier = "Premium"
+
+        # Generate the proposal based on the currently selected tier
+        compliance, boq = generate_proposal(st.session_state.capacity, st.session_state.farthest_viewer, use_case, has_light, st.session_state.get('tier', 'Standard'))
+        
+        col1_disp, col2_disp = st.columns(2)
+        with col1_disp:
             st.subheader("Bill of Quantities (BOQ)")
-            st.table(st.session_state.boq)
+            st.table(boq)
             st.subheader("AVIXA Compliance Report")
-            st.dataframe(st.session_state.compliance.style.apply(lambda row: ['color:red' if row.Status == '❌' else '' for v in row], axis=1))
-        with col2:
+            st.dataframe(compliance.style.apply(lambda row: ['color:red' if row.Status == '❌' else '' for v in row], axis=1))
+        with col2_disp:
             st.subheader("Room Layout Visualization")
-            room_length = st.session_state.farthest_viewer; room_width = room_length * 0.75
-            fig = create_room_visualization(room_width, room_length, st.session_state.capacity); st.pyplot(fig)
+            room_length = st.session_state.farthest_viewer
+            room_width = room_length * 0.75
+            fig = create_room_visualization(room_width, room_length, st.session_state.capacity)
+            st.pyplot(fig, clear_figure=True) # --- FIX IS HERE ---
+
     else: st.info("Upload a document or fill in details on the left and click 'Generate'.")
+
     if tickets_df is not None:
         st.header("3. Historical Support Ticket Search")
         query = st.text_input("Search past tickets (e.g., 'projector image', 'Crestron'):")
         if query:
-            # --- FINAL FIX: Check if columns exist before searching them ---
             def search_row(r):
                 summary_match = False
                 if 'summary' in r and pd.notna(r['summary']):
                     summary_match = query.lower() in str(r['summary']).lower()
-                
                 rca_match = False
                 if 'rca' in r and pd.notna(r['rca']):
                     rca_match = query.lower() in str(r['rca']).lower()
-                
                 return summary_match or rca_match
-
             results = tickets_df[tickets_df.apply(search_row, axis=1)]
             if not results.empty:
                 display_cols = ['Issue key', 'Status']
-                if 'summary' in results.columns:
-                    display_cols.append('summary')
-                if 'rca' in results.columns:
-                    display_cols.append('rca')
+                if 'summary' in results.columns: display_cols.append('summary')
+                if 'rca' in results.columns: display_cols.append('rca')
                 st.dataframe(results[display_cols].head())
