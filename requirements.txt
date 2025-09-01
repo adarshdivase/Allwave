@@ -8,3 +8,5 @@ langchain-community
 sentence-transformers
 faiss-cpu
 unstructured[all]
+unstructured[pptx]
+python-magic-bin
