@@ -1,13 +1,14 @@
 # pages/2_AI_Support_Chatbot.py
 import streamlit as st
 import os
-from langchain.document_loaders import DirectoryLoader, UnstructuredFileLoader
+from langchain.document_loaders import DirectoryLoader, UnstructuredFileLoader, TextLoader, CSVLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import SentenceTransformerEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 from langchain.llms import HuggingFaceHub # To simulate a real LLM
 import warnings
+import glob
 warnings.filterwarnings("ignore")
 
 # --- Backend Functions ---
@@ -18,17 +19,65 @@ def create_knowledge_base():
     This function runs only once and is cached.
     """
     try:
-        # Load all supported file types from the current directory
-        loader = DirectoryLoader('.', glob="**/*.*", loader_cls=UnstructuredFileLoader, use_multithreading=True, show_progress=True)
-        documents = loader.load()
+        documents = []
+        
+        # Define file type loaders with fallbacks
+        file_loaders = {
+            '*.txt': TextLoader,
+            '*.csv': CSVLoader,
+            '*.md': TextLoader,
+        }
+        
+        # Load files by type to avoid problematic formats
+        for pattern, loader_class in file_loaders.items():
+            files = glob.glob(pattern, recursive=True)
+            for file_path in files:
+                try:
+                    if loader_class == CSVLoader:
+                        loader = loader_class(file_path)
+                    else:
+                        loader = loader_class(file_path, encoding='utf-8')
+                    docs = loader.load()
+                    documents.extend(docs)
+                    st.write(f"✅ Loaded: {os.path.basename(file_path)}")
+                except Exception as e:
+                    st.warning(f"⚠️ Skipped {file_path}: {str(e)}")
+        
+        # Try to load other files with UnstructuredFileLoader (excluding problematic formats)
+        try:
+            excluded_patterns = ['*.pptx', '*.ppt', '*.xlsx', '*.xls']  # Skip problematic formats for now
+            loader = DirectoryLoader(
+                '.', 
+                glob="**/*.*", 
+                loader_cls=UnstructuredFileLoader,
+                use_multithreading=False,  # Disable multithreading to avoid issues
+                show_progress=False,
+                exclude=excluded_patterns
+            )
+            additional_docs = loader.load()
+            
+            # Filter out already loaded files
+            existing_sources = {doc.metadata.get('source', '') for doc in documents}
+            new_docs = [doc for doc in additional_docs if doc.metadata.get('source', '') not in existing_sources]
+            documents.extend(new_docs)
+            
+            for doc in new_docs:
+                st.write(f"✅ Loaded: {os.path.basename(doc.metadata.get('source', 'Unknown'))}")
+                
+        except Exception as e:
+            st.warning(f"Some advanced file types couldn't be loaded: {str(e)}")
 
         if not documents:
-            st.error("No documents found to load. Please add your data files to the project folder.")
+            st.error("No documents found to load. Please add supported file types (.txt, .csv, .md, .pdf, .docx) to the project folder.")
             return None
+
+        st.write(f"📚 Total documents loaded: {len(documents)}")
 
         # Split documents into smaller chunks
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
         docs = text_splitter.split_documents(documents)
+        
+        st.write(f"📄 Total chunks created: {len(docs)}")
 
         # Create embeddings with alternative model and CPU-only device specification
         embeddings = SentenceTransformerEmbeddings(
@@ -43,6 +92,10 @@ def create_knowledge_base():
     
     except Exception as e:
         st.error(f"Error creating knowledge base: {str(e)}")
+        st.write("**Troubleshooting:**")
+        st.write("1. Install missing dependencies: `pip install 'unstructured[pptx]' python-magic-bin`")
+        st.write("2. For system libraries: `sudo apt-get install libgl1-mesa-glx libglib2.0-0`")
+        st.write("3. Ensure you have supported document formats in your folder")
         return None
 
 def run_query(db, query):
