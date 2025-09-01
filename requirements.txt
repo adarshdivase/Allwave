@@ -3,3 +3,7 @@ pandas
 python-docx
 eml_parser
 matplotlib
+langchain
+sentence-transformers
+faiss-cpu
+ unstructured
