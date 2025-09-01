@@ -7,4 +7,4 @@ langchain
 langchain-community
 sentence-transformers
 faiss-cpu
-unstructured[all,md]
+unstructured[all,md,image]
