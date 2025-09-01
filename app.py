@@ -1,192 +1,22 @@
+# app.py
 import streamlit as st
-import pandas as pd
-import math
-import re
-import eml_parser
-import docx
-import io
-import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle, Circle, Wedge
-import numpy as np
 
-# --- 1. Load Data & Core Functions ---
-st.set_page_config(layout="wide")
-st.title("🚀 All Wave AI-Powered Design & Estimation Engine")
+st.set_page_config(
+    page_title="All Wave AI Platform",
+    layout="wide"
+)
 
-@st.cache_data
-def load_data():
-    """Loads and prepares all necessary data files with robust parsing."""
-    try:
-        oem_file = "av_oem_list_2025.csv"
-        closed_tickets_file = "Closed tickets(Last 10 days).xlsx - Jira Export Excel CSV (my defau.csv"
-        open_tickets_file = "Open Tickets(last 10 days).xlsx - Jira Export Excel CSV (my defau.csv"
+st.title("Welcome to the All Wave AI Design & Support Platform 🚀")
+st.sidebar.success("Select a tool above.")
 
-        oem_df = pd.read_csv(oem_file, encoding='latin1', engine='python', on_bad_lines='skip')
-        closed_tickets_df = pd.read_csv(closed_tickets_file, encoding='latin1', engine='python', on_bad_lines='skip')
-        open_tickets_df = pd.read_csv(open_tickets_file, encoding='latin1', engine='python', on_bad_lines='skip')
-        
-        all_tickets_df = pd.concat([closed_tickets_df, open_tickets_df], ignore_index=True)
-        all_tickets_df.rename(columns={'Summary': 'summary', 'Custom field (RCA - Root Cause Analysis)': 'rca'}, inplace=True)
-        return oem_df, all_tickets_df
-    except FileNotFoundError as e:
-        st.error(f"Fatal Error loading data: {e}. Please ensure all required CSV files are in the same folder as this script and that the filenames match exactly.")
-        return None, None
-    except Exception as e:
-        st.error(f"An error occurred while parsing the data files: {e}. Please check that the CSV files are not corrupted and are saved in a standard format.")
-        return None, None
-
-oem_list_df, tickets_df = load_data()
-
-def parse_docx(file_stream):
-    """AI-powered parser for .docx Need Analysis Documents."""
-    try:
-        doc = docx.Document(file_stream)
-        text = "\n".join([para.text for para in doc.paragraphs])
-        
-        length_ft = re.search(r'Length\s*-\s*(\d+(\.\d+)?)ft', text, re.IGNORECASE)
-        capacity_search = re.search(r'(\d+)\s*Pax', text, re.IGNORECASE)
-        
-        capacity = int(capacity_search.group(1)) if capacity_search else 12
-
-        return {
-            "room_name": doc.paragraphs[0].text.strip().replace(":", ""),
-            "farthest_viewer": float(length_ft.group(1)) * 0.3048 if length_ft else 6.0,
-            "capacity": capacity,
-        }
-    except Exception:
-        st.warning("Could not fully parse the DOCX. Please review the extracted details.")
-        return None
-
-def create_room_visualization(room_width, room_length, capacity):
-    """Generates a 2D top-down visualization of the conference room."""
-    fig, ax = plt.subplots(figsize=(6, 6 * (room_length / room_width) if room_width > 0 else 6))
-    ax.set_aspect('equal', adjustable='box')
-
-    ax.add_patch(Rectangle((0, 0), room_width, room_length, fill=None, edgecolor='black', linewidth=2))
-    display_x = room_width * 0.25
-    ax.add_patch(Rectangle((display_x, room_length - 0.05), room_width * 0.5, 0.05, facecolor='darkblue', edgecolor='black'))
-    camera_pos = (room_width / 2, room_length - 0.1)
-    ax.add_patch(Circle(camera_pos, radius=0.1, facecolor='black'))
-    fov_angle = 90
-    ax.add_patch(Wedge(camera_pos, r=room_length * 1.2, 
-                         theta1=270 - fov_angle / 2, 
-                         theta2=270 + fov_angle / 2, 
-                         facecolor='lightcyan', alpha=0.5))
-
-    num_seats_per_side = int(np.ceil(capacity / 2))
-    table_length = max(1, room_length * 0.6)
-    table_width = max(1, room_width * 0.4)
-    table_x = (room_width - table_width) / 2
-    table_y = (room_length - table_length) / 2.5
-
-    for i in range(num_seats_per_side):
-        y_pos = table_y + (i * table_length / (num_seats_per_side - 1 if num_seats_per_side > 1 else 1))
-        ax.add_patch(Circle((table_x - 0.3, y_pos), radius=0.25, facecolor='gray'))
-        ax.add_patch(Circle((table_x + table_width + 0.3, y_pos), radius=0.25, facecolor='gray'))
+st.markdown(
+    """
+    This is the central hub for our next-generation AV solutions platform.
     
-    ax.set_xlim(-1, room_width + 1)
-    ax.set_ylim(-1, room_length + 1)
-    ax.set_xticks([])
-    ax.set_yticks([])
-    plt.title(f"{capacity}-Person Room Layout")
-    
-    return fig
+    **👈 Select a tool from the sidebar** to get started.
 
-def generate_proposal(capacity, farthest_viewer, use_case, has_direct_light, tier="Standard"):
-    """The core engine that runs compliance checks and generates tiered BOQs."""
-    min_height_m = farthest_viewer / 15 if use_case == "Analytical Decision Making" else farthest_viewer / 20
-    min_diagonal_inches = min_height_m * 39.37 * 1.89 if min_height_m > 0 else 55
-    sizes = [55, 65, 75, 85, 98]
-    rec_size = min(sizes, key=lambda x:abs(x-min_diagonal_inches))
-    discas_report = f"Recommended display is {rec_size}\" based on viewing distance."
-    light_report, light_status = ("FAIL: High risk of screen glare.", "❌") if has_direct_light else ("PASS: No lighting conflicts.", "✅")
-    compliance_df = pd.DataFrame([
-        {"Standard": "Display Size (DISCAS)", "Result": discas_report, "Status": "✅"},
-        {"Standard": "Lighting & Glare", "Result": light_report, "Status": light_status}
-    ])
-    brand_tiers = {"Budget": ["Yealink", "BenQ", "Aver"],"Standard": ["Logitech", "Poly", "Samsung"],"Premium": ["Cisco", "Crestron", "Shure", "Biamp"]}
-    if capacity <= 6: template = ["UC & Collaboration Devices", "Displays & Projectors"]
-    elif capacity <= 14: template = ["UC & Collaboration Devices", "Displays & Projectors", "Audio: Microphones & Conferencing"]
-    else: template = ["PTZ & Pro Video Cameras", "Video Wall Technology", "Audio: DSP & Mixing", "Control Systems", "Acoustics & Sound Masking"]
-    boq_items = []
-    for category in template:
-        brands = oem_list_df[oem_list_df['Category'] == category]
-        selected_brand = brands[brands['OEM / Brand'].str.contains('|'.join(brand_tiers[tier]), case=False)]
-        brand = selected_brand['OEM / Brand'].iloc[0] if not selected_brand.empty else (brands['OEM / Brand'].iloc[0] if not brands.empty else "N/A")
-        desc = f"{rec_size}\" Display" if "Display" in category else f"{brand} Solution"
-        boq_items.append({"Category": category, "Brand Recommendation": brand, "Description": desc, "Tier": tier, "Qty": 1})
-    return compliance_df, pd.DataFrame(boq_items)
-
-# --- Streamlit User Interface ---
-if oem_list_df is not None:
-    if 'capacity' not in st.session_state or not isinstance(st.session_state.capacity, (int, float)): st.session_state.capacity = 10
-    if 'farthest_viewer' not in st.session_state or not isinstance(st.session_state.farthest_viewer, (int, float)): st.session_state.farthest_viewer = 6.0
-    st.sidebar.header("1. Start a New Project")
-    st.sidebar.info("Upload a Need Analysis Doc (.docx) to auto-fill.")
-    uploaded_file = st.sidebar.file_uploader("Upload Document", type=['docx'])
-    if uploaded_file:
-        extracted = parse_docx(io.BytesIO(uploaded_file.getvalue()))
-        if extracted: st.session_state.update(extracted); st.sidebar.success(f"Analyzed: **{st.session_state.get('room_name', '')}**")
-    
-    st.sidebar.text_input("Room Name", key="room_name")
-    st.sidebar.number_input("Seating Capacity", min_value=1, key="capacity")
-    st.sidebar.number_input("Farthest Viewer (meters)", min_value=0.0, key="farthest_viewer")
-    use_case = st.sidebar.selectbox("Primary Use Case", ["Analytical Decision Making", "Basic Decision Making"])
-    has_light = st.sidebar.checkbox("Light source above display?")
-
-    if st.sidebar.button("🚀 Generate AI Proposal"):
-        st.session_state.proposal_generated = True
-        st.session_state.tier = "Standard" # Default tier
-
-    if 'proposal_generated' in st.session_state:
-        st.header("2. AI-Generated Proposal")
-        
-        col1_tier, col2_tier, col3_tier = st.columns(3)
-        if col1_tier.button("💵 Generate Budget BOQ"):
-            st.session_state.tier = "Budget"
-        if col2_tier.button("⭐ Generate Standard BOQ"):
-            st.session_state.tier = "Standard"
-        if col3_tier.button("💎 Generate Premium BOQ"):
-            st.session_state.tier = "Premium"
-
-        compliance, boq = generate_proposal(st.session_state.capacity, st.session_state.farthest_viewer, use_case, has_light, st.session_state.get('tier', 'Standard'))
-        
-        col1_disp, col2_disp = st.columns(2)
-        with col1_disp:
-            st.subheader("Bill of Quantities (BOQ)")
-            st.table(boq)
-            st.subheader("AVIXA Compliance Report")
-            st.dataframe(compliance.style.apply(lambda row: ['color:red' if row.Status == '❌' else '' for v in row], axis=1))
-        with col2_disp:
-            st.subheader("Room Layout Visualization")
-            room_length = st.session_state.farthest_viewer
-            room_width = room_length * 0.75
-            fig = create_room_visualization(room_width, room_length, st.session_state.capacity)
-            st.pyplot(fig, clear_figure=True)
-
-    else: st.info("Upload a document or fill in details on the left and click 'Generate'.")
-
-    if tickets_df is not None:
-        st.header("3. Historical Support Ticket Search")
-        query = st.text_input("Search past tickets (e.g., 'projector image', 'Crestron'):")
-        if query:
-            # --- FINAL FIX: Check if columns exist before searching them ---
-            def search_row(r):
-                summary_match = False
-                if 'summary' in r and pd.notna(r['summary']):
-                    summary_match = query.lower() in str(r['summary']).lower()
-                
-                rca_match = False
-                if 'rca' in r and pd.notna(r['rca']):
-                    rca_match = query.lower() in str(r['rca']).lower()
-                
-                return summary_match or rca_match
-
-            results = tickets_df[tickets_df.apply(search_row, axis=1)]
-            if not results.empty:
-                display_cols = ['Issue key', 'Status']
-                if 'summary' in results.columns:
-                    display_cols.append('summary')
-                if 'rca' in results.columns:
-                    display_cols.append('rca')
-                st.dataframe(results[display_cols].head())
+    ### Tools Available:
+    - **Interactive Configurator:** A tool for customers to design their own meeting rooms and get instant visual feedback and equipment recommendations.
+    - **AI Support Chatbot:** An intelligent assistant trained on our entire history of support tickets, project documents, and meeting notes to help diagnose issues and answer questions.
+    """
+)
