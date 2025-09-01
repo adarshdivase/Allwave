@@ -6,4 +6,4 @@ matplotlib
 langchain
 sentence-transformers
 faiss-cpu
- unstructured
+unstructured[all]
