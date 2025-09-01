@@ -1,214 +1,291 @@
 # pages/2_AI_Support_Chatbot.py
 import streamlit as st
+import pandas as pd
 import os
 import glob
-from langchain.document_loaders import TextLoader, CSVLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings import SentenceTransformerEmbeddings
-from langchain.vectorstores import FAISS
+from sentence_transformers import SentenceTransformer
+import faiss
+import numpy as np
 import warnings
+import re
 warnings.filterwarnings("ignore")
 
-# --- Backend Functions ---
-@st.cache_resource
-def create_knowledge_base():
-    """
-    Loads documents, splits them, creates embeddings, and stores them in a FAISS vector store.
-    This simplified version only handles txt, csv, and md files to avoid dependency issues.
-    """
-    try:
-        documents = []
-        supported_files = []
-        
-        # Find all supported files
-        for ext in ['*.txt', '*.csv', '*.md']:
-            files = glob.glob(f"**/{ext}", recursive=True)
-            supported_files.extend(files)
-        
-        if not supported_files:
-            st.error("No supported files found. Please add .txt, .csv, or .md files to your project.")
-            st.write("Supported formats: Text files (.txt), CSV files (.csv), Markdown files (.md)")
-            return None
-        
-        # Load each file
-        for file_path in supported_files:
-            try:
-                if file_path.endswith('.csv'):
-                    loader = CSVLoader(file_path)
-                else:
-                    loader = TextLoader(file_path, encoding='utf-8')
-                
-                docs = loader.load()
-                documents.extend(docs)
-                st.success(f"✅ Loaded: {os.path.basename(file_path)}")
-                
-            except Exception as e:
-                st.warning(f"⚠️ Could not load {file_path}: {str(e)}")
-        
-        if not documents:
-            st.error("No documents could be loaded successfully.")
-            return None
-        
-        st.info(f"📚 Successfully loaded {len(documents)} documents")
-        
-        # Split documents into smaller chunks
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000, 
-            chunk_overlap=100,
-            separators=["\n\n", "\n", " ", ""]
-        )
-        docs = text_splitter.split_documents(documents)
-        
-        st.info(f"📄 Created {len(docs)} text chunks for search")
-        
-        # Create embeddings with CPU-only specification
-        embeddings = SentenceTransformerEmbeddings(
-            model_name="paraphrase-MiniLM-L6-v2",
-            model_kwargs={'device': 'cpu'}
-        )
-        
-        # Create FAISS vector store
-        db = FAISS.from_documents(docs, embeddings)
-        
-        # Save locally for faster subsequent loads
-        try:
-            db.save_local("faiss_index")
-        except:
-            pass  # Continue even if save fails
-        
-        return db
-        
-    except Exception as e:
-        st.error(f"❌ Error creating knowledge base: {str(e)}")
-        st.write("**Try these solutions:**")
-        st.write("1. Ensure you have .txt, .csv, or .md files in your repository")
-        st.write("2. Check that your requirements.txt has the correct dependencies")
-        st.write("3. Use 'Reboot app' from the menu if the issue persists")
-        return None
+# --- Helper Functions ---
+def clean_and_format_text(text):
+    """Clean and format text for better readability"""
+    # Remove extra whitespace and clean up
+    text = re.sub(r'\s+', ' ', text.strip())
+    return text
 
-@st.cache_resource
-def load_existing_db():
-    """Try to load existing FAISS database if available"""
-    try:
-        if os.path.exists("faiss_index"):
-            embeddings = SentenceTransformerEmbeddings(
-                model_name="paraphrase-MiniLM-L6-v2",
-                model_kwargs={'device': 'cpu'}
-            )
-            db = FAISS.load_local("faiss_index", embeddings)
-            return db
-    except:
-        pass
-    return None
+def generate_friendly_response(query, results):
+    """Generate a friendly, conversational response based on search results"""
+    if not results:
+        return """I'd be happy to help you, but I couldn't find specific information about that in your documents. 
 
-def run_query(db, query):
-    """
-    Searches the knowledge base for relevant documents for a given query.
-    """
-    if db is None:
-        return []
+Here are a few things you can try:
+- Rephrase your question with different keywords
+- Ask about specific topics I might have data on
+- Check if the relevant documents are uploaded
+
+What else would you like to know? 😊"""
+
+    # Determine query type and craft appropriate response
+    query_lower = query.lower()
     
-    try:
-        # Retrieve the most relevant document chunks
-        retriever = db.as_retriever(
-            search_type="similarity", 
-            search_kwargs={"k": 3}
-        )
-        retrieved_docs = retriever.get_relevant_documents(query)
-        return retrieved_docs
-    except Exception as e:
-        st.error(f"Error during search: {str(e)}")
-        return []
-
-# --- Streamlit App ---
-st.set_page_config(page_title="AI Support Chatbot", page_icon="🧠")
-
-st.title("AI Support Chatbot 🧠")
-st.write("Ask any question about your documents and projects.")
-
-# Set environment variables for better compatibility
-os.environ['TOKENIZERS_PARALLELISM'] = 'false'
-os.environ['OMP_NUM_THREADS'] = '1'
-
-# Try to load existing database first, then create new one if needed
-db = None
-
-with st.spinner("🔄 Initializing AI Assistant..."):
-    # First try to load existing database
-    db = load_existing_db()
-    
-    if db is None:
-        # Create new knowledge base
-        db = create_knowledge_base()
+    if any(word in query_lower for word in ['computer', 'laptop', 'pc', 'hardware']):
+        intro = "Based on your documents, here are some computer/hardware related options I found:"
+    elif any(word in query_lower for word in ['camera', 'video', 'recording']):
+        intro = "For cameras and video equipment, I found these options in your data:"
+    elif any(word in query_lower for word in ['audio', 'microphone', 'speaker', 'sound']):
+        intro = "Here are the audio equipment options from your documents:"
+    elif any(word in query_lower for word in ['issue', 'problem', 'error', 'bug', 'ticket']):
+        intro = "I found some relevant information about issues or tickets:"
+    elif any(word in query_lower for word in ['meeting', 'conference', 'call']):
+        intro = "Regarding meetings and conferencing, here's what I found:"
     else:
-        st.success("✅ AI Assistant loaded from cache")
+        intro = "Based on your query, here's the most relevant information I found:"
+    
+    response = f"{intro}\n\n"
+    
+    for i, result in enumerate(results, 1):
+        source_name = result['source']
+        content = result['content']
+        
+        # Format the response based on content type
+        if 'csv' in source_name.lower():
+            # Parse CSV-like content better
+            lines = content.split('\n')
+            formatted_content = ""
+            for line in lines[:3]:  # Show first 3 relevant lines
+                if line.strip() and not line.startswith('Unnamed'):
+                    formatted_content += f"• {line.strip()}\n"
+            
+            response += f"**From {source_name}:**\n{formatted_content}\n"
+        else:
+            # Regular text content
+            clean_content = clean_and_format_text(content)
+            if len(clean_content) > 200:
+                clean_content = clean_content[:200] + "..."
+            response += f"**From {source_name}:**\n{clean_content}\n\n"
+    
+    # Add helpful follow-up suggestion
+    response += "\n💡 **Need more details?** Feel free to ask more specific questions about any of these items!"
+    
+    return response
 
-if db is None:
-    st.error("❌ Could not initialize the AI Assistant")
-    st.write("Please check your files and requirements, then use 'Reboot app' from the menu.")
-    st.stop()
+# --- Main Functions ---
+@st.cache_resource
+def load_documents():
+    """Load and process documents from the repository"""
+    documents = []
+    file_paths = []
+    
+    # Find supported files
+    file_patterns = {
+        "**/*.txt": "text",
+        "**/*.md": "text", 
+        "**/*.csv": "csv"
+    }
+    
+    for pattern, file_type in file_patterns.items():
+        files = glob.glob(pattern, recursive=True)
+        
+        for file_path in files:
+            try:
+                if file_type == "csv":
+                    df = pd.read_csv(file_path)
+                    # Convert CSV to readable text format
+                    content = f"Data from {os.path.basename(file_path)}:\n"
+                    content += df.to_string(index=False)
+                else:
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        content = f.read()
+                
+                if content.strip():
+                    documents.append(content)
+                    file_paths.append(file_path)
+                    st.success(f"✅ Loaded: {os.path.basename(file_path)}")
+                    
+            except Exception as e:
+                st.warning(f"⚠️ Skipped {file_path}: {str(e)}")
+    
+    return documents, file_paths
 
-# Initialize chat history
+@st.cache_resource
+def create_search_index(_documents, _file_paths):
+    """Create FAISS search index"""
+    if not _documents:
+        return None, None, None, None
+    
+    # Create text chunks
+    chunks = []
+    chunk_sources = []
+    
+    for i, doc in enumerate(_documents):
+        # Smart chunking
+        if len(doc) <= 1000:
+            chunks.append(doc)
+            chunk_sources.append(_file_paths[i])
+        else:
+            # Split long documents
+            words = doc.split()
+            current_chunk = []
+            
+            for word in words:
+                current_chunk.append(word)
+                if len(' '.join(current_chunk)) > 800:
+                    chunks.append(' '.join(current_chunk))
+                    chunk_sources.append(_file_paths[i])
+                    current_chunk = []
+            
+            if current_chunk:
+                chunks.append(' '.join(current_chunk))
+                chunk_sources.append(_file_paths[i])
+    
+    st.info(f"📄 Created {len(chunks)} searchable chunks")
+    
+    # Create embeddings
+    model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+    embeddings = model.encode(chunks, show_progress_bar=False)
+    
+    # Create FAISS index
+    dimension = embeddings.shape[1]
+    index = faiss.IndexFlatIP(dimension)
+    
+    # Normalize for cosine similarity
+    faiss.normalize_L2(embeddings)
+    index.add(embeddings.astype('float32'))
+    
+    return index, chunks, chunk_sources, model
+
+def search_knowledge_base(index, chunks, chunk_sources, model, query, k=3):
+    """Search the knowledge base and return formatted results"""
+    if index is None:
+        return []
+    
+    try:
+        # Encode query
+        query_embedding = model.encode([query])
+        faiss.normalize_L2(query_embedding)
+        
+        # Search
+        scores, indices = index.search(query_embedding.astype('float32'), k)
+        
+        results = []
+        for i, idx in enumerate(indices[0]):
+            if idx < len(chunks) and scores[0][i] > 0.1:  # Minimum relevance threshold
+                results.append({
+                    'content': chunks[idx],
+                    'source': chunk_sources[idx],
+                    'score': float(scores[0][i])
+                })
+        
+        return results
+        
+    except Exception as e:
+        st.error(f"Search error: {str(e)}")
+        return []
+
+# --- Streamlit Interface ---
+st.set_page_config(page_title="AI Support Assistant", page_icon="🤖", layout="wide")
+
+st.title("🤖 AI Support Assistant")
+st.markdown("*Your friendly helper for finding information in your documents and JIRA tickets*")
+
+# Initialize the system
+with st.spinner("🔄 Setting up your AI assistant..."):
+    documents, file_paths = load_documents()
+    
+    if not documents:
+        st.error("❌ No documents found to work with!")
+        st.markdown("""
+        **Please add some files to your repository:**
+        - Text files (.txt)
+        - Markdown files (.md) 
+        - CSV files with your JIRA ticket data (.csv)
+        """)
+        st.stop()
+
+with st.spinner("🧠 Building search capabilities..."):
+    index, chunks, chunk_sources, model = create_search_index(documents, file_paths)
+    
+    if index is None:
+        st.error("❌ Couldn't create search index")
+        st.stop()
+
+st.success("✅ Your AI assistant is ready to help!")
+
+# Initialize chat
 if "messages" not in st.session_state:
     st.session_state.messages = []
-    # Add welcome message
-    st.session_state.messages.append({
-        "role": "assistant", 
-        "content": "Hello! I'm your AI Support Assistant. I can help you find information from your uploaded documents. What would you like to know?"
-    })
+    welcome_msg = """Hello! 👋 I'm your AI Support Assistant. 
 
-# Display chat messages
+I can help you find information from your documents and JIRA tickets. Here are some things you can ask me:
+
+• **Equipment questions**: "What cameras do we have?" or "Show me audio equipment"
+• **Issue tracking**: "What were the network issues?" or "Show me recent tickets"
+• **Project info**: "Tell me about the Mumbai project" or "What are the open issues?"
+
+What would you like to know?"""
+    
+    st.session_state.messages.append({"role": "assistant", "content": welcome_msg})
+
+# Display chat history
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
 # Chat input
-if prompt := st.chat_input("Ask me anything about your documents..."):
+if prompt := st.chat_input("Ask me anything about your projects, issues, or equipment..."):
     # Add user message
     st.session_state.messages.append({"role": "user", "content": prompt})
     
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    # Generate response
+    # Generate assistant response
     with st.chat_message("assistant"):
-        with st.spinner("🔍 Searching through your documents..."):
-            response_docs = run_query(db, prompt)
+        with st.spinner("🔍 Let me search through your documents..."):
+            # Search for relevant information
+            search_results = search_knowledge_base(index, chunks, chunk_sources, model, prompt)
             
-            if not response_docs:
-                response = "I couldn't find any relevant information in your documents for that query. Try rephrasing your question or check if the relevant documents are uploaded."
-            else:
-                response = "Here's what I found in your documents:\n\n"
-                
-                for i, doc in enumerate(response_docs, 1):
-                    source_file = os.path.basename(doc.metadata.get('source', 'Unknown'))
-                    content = doc.page_content.strip()
-                    
-                    # Limit content length for better readability
-                    if len(content) > 400:
-                        content = content[:400] + "..."
-                    
-                    response += f"**📄 Source {i}: {source_file}**\n"
-                    response += f"{content}\n\n"
-                    response += "---\n\n"
-                
-                response += "*💡 Tip: You can ask follow-up questions to get more specific information.*"
+            # Generate friendly response
+            response = generate_friendly_response(prompt, search_results)
             
             st.markdown(response)
     
-    # Add assistant response to chat history
+    # Save response to chat history
     st.session_state.messages.append({"role": "assistant", "content": response})
 
-# Sidebar with app info
+# Sidebar with useful info
 with st.sidebar:
-    st.header("📋 App Info")
-    st.write("This chatbot searches through your uploaded documents to answer questions.")
+    st.header("📊 Assistant Status")
     
-    st.header("📁 Supported Files")
-    st.write("- Text files (.txt)")
-    st.write("- CSV files (.csv)")  
-    st.write("- Markdown files (.md)")
+    if 'documents' in locals():
+        st.metric("📄 Documents", len(documents))
+    if 'chunks' in locals():
+        st.metric("🔍 Search Chunks", len(chunks))
     
-    if st.button("🔄 Refresh Knowledge Base"):
+    st.header("💡 Tips")
+    st.markdown("""
+    **Ask me about:**
+    - Equipment and inventory
+    - JIRA tickets and issues  
+    - Project status and updates
+    - Technical problems
+    - Meeting notes and decisions
+    
+    **Example queries:**
+    - "What audio issues were reported?"
+    - "Show me camera options"
+    - "Any network problems recently?"
+    """)
+    
+    if st.button("🔄 Refresh Data"):
         st.cache_resource.clear()
         st.rerun()
+        
+    st.header("📁 Loaded Files")
+    if 'file_paths' in locals():
+        for fp in file_paths:
+            st.write(f"📄 {os.path.basename(fp)}")
