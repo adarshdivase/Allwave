@@ -370,6 +370,8 @@ class AdvancedAVRecommender:
 
 # --- Premium 3D Visualization ---
 def create_photorealistic_3d_room(specs, recommendations):
+    # --- Replacement for create_photorealistic_3d_room ---
+def create_photorealistic_3d_room(specs, recommendations):
     """Create photorealistic 3D room with actual furniture models"""
     fig = go.Figure()
     
@@ -381,9 +383,10 @@ def create_photorealistic_3d_room(specs, recommendations):
     floor_z = np.zeros_like(floor_x)
     floor_pattern = np.sin(floor_x*2) * np.sin(floor_y*2) * 0.01  # Wood grain effect
     
+    # FIX: Replaced 'Browns' with a valid Plotly colorscale 'ylorbr'.
     fig.add_trace(go.Surface(
         x=floor_x, y=floor_y, z=floor_z + floor_pattern,
-        colorscale='Browns', showscale=False, name='Wood Floor',
+        colorscale='ylorbr', showscale=False, name='Wood Floor',
         lighting=dict(ambient=0.6, diffuse=0.8, specular=0.2, roughness=0.8)
     ))
     
@@ -595,44 +598,83 @@ def create_photorealistic_3d_room(specs, recommendations):
     
     return fig
 
-def add_premium_chair(fig, x, y, rotation=0):
-    """Add a realistic office chair to the figure"""
-    # Chair seat
-    seat_h = 0.45
-    fig.add_trace(go.Scatter3d(
-        x=[x], y=[y], z=[seat_h],
-        mode='markers',
-        marker=dict(size=12, color='rgb(70, 70, 70)', symbol='square'),
-        showlegend=False
-    ))
+# --- Replacement for create_cost_breakdown_chart ---
+def create_cost_breakdown_chart(cost_data, roi_analysis):
+    """Create comprehensive cost breakdown visualization"""
+    fig = make_subplots(
+        rows=2, cols=2,
+        subplot_titles=('Cost Breakdown', 'ROI Projection', 'Monthly Cash Flow', 'Payback Analysis'),
+        specs=[[{"type": "pie"}, {"secondary_y": False}],
+               [{"secondary_y": False}, {"secondary_y": False}]]
+    )
     
-    # Chair back
-    back_h = 0.9
-    back_offset_x = -0.15 * np.sin(np.radians(rotation))
-    back_offset_y = 0.15 * np.cos(np.radians(rotation))
-    fig.add_trace(go.Scatter3d(
-        x=[x + back_offset_x, x + back_offset_x],
-        y=[y + back_offset_y, y + back_offset_y],
-        z=[seat_h, back_h],
-        mode='lines',
-        line=dict(color='rgb(70, 70, 70)', width=12),
-        showlegend=False
-    ))
+    # Cost breakdown pie chart
+    categories = list(cost_data.keys())[:-1]  # Exclude 'total'
+    values = [cost_data[cat] for cat in categories]
+    colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7']
     
-    # Chair base (5-star wheel base)
-    base_radius = 0.2
-    for angle in range(0, 360, 72):
-        rad = np.radians(angle + rotation)
-        base_x = x + base_radius * np.cos(rad)
-        base_y = y + base_radius * np.sin(rad)
-        fig.add_trace(go.Scatter3d(
-            x=[x, base_x],
-            y=[y, base_y],
-            z=[0.1, 0.1],
-            mode='lines',
-            line=dict(color='rgb(150, 150, 150)', width=3),
-            showlegend=False
-        ))
+    fig.add_trace(
+        go.Pie(labels=categories, values=values, 
+               marker_colors=colors, hole=0.4),
+        row=1, col=1
+    )
+    
+    # ROI projection over 5 years
+    years = list(range(1, 6))
+    annual_savings = roi_analysis['annual_savings']
+    cumulative_savings = [annual_savings * year for year in years]
+    initial_investment = cost_data['total']
+    
+    fig.add_trace(
+        go.Scatter(x=years, y=cumulative_savings, name="Cumulative Savings",
+                   line=dict(color='green', width=3)),
+        row=1, col=2
+    )
+    fig.add_trace(
+        go.Scatter(x=years, y=[initial_investment]*len(years), name="Investment",
+                   line=dict(color='red', width=2, dash='dash')),
+        row=1, col=2
+    )
+    
+    # Monthly cash flow
+    months = list(range(1, 37))  # 3 years
+    monthly_savings = [annual_savings / 12] * 36 if annual_savings > 0 else [0] * 36
+    net_cumulative = np.cumsum(monthly_savings) - initial_investment
+
+    fig.add_trace(
+        go.Scatter(x=months, y=net_cumulative, name="Cumulative Net Flow",
+               line=dict(color='purple')),
+        row=2, col=1
+    )
+
+    # FIX: Replaced problematic fig.add_hline with the more stable fig.add_shape.
+    fig.add_shape(
+        type="line",
+        x0=months[0], y0=0,
+        x1=months[-1], y1=0,
+        line=dict(color="grey", width=2, dash="dash"),
+        row=2, col=1
+    )
+    
+    # Payback analysis
+    payback_scenarios = ['Conservative', 'Realistic', 'Optimistic']
+    payback_months = [roi_analysis['payback_months'] * 1.2, roi_analysis['payback_months'], roi_analysis['payback_months'] * 0.8]
+    colors_payback = ['#FF6B6B', '#4ECDC4', '#45B7D1']
+    
+    fig.add_trace(
+        go.Bar(x=payback_scenarios, y=payback_months, 
+               marker_color=colors_ payback, name="Payback Period"),
+        row=2, col=2
+    )
+    
+    fig.update_xaxes(title_text="Years", row=1, col=2)
+    fig.update_xaxes(title_text="Months", row=2, col=1)
+    fig.update_yaxes(title_text="Value ($)", row=1, col=2)
+    fig.update_yaxes(title_text="Net Value ($)", row=2, col=1)
+    fig.update_yaxes(title_text="Months", row=2, col=2)
+    
+    fig.update_layout(height=800, showlegend=True, title_text="Comprehensive Financial Analysis")
+    return fig
 
 # --- Cost Calculator with ROI ---
 class CostCalculator:
