@@ -6,3 +6,5 @@ langchain-community
 sentence-transformers
 faiss-cpu
 tiktoken
+numpy
+plotly
