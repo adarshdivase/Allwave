@@ -9,5 +9,4 @@ tiktoken
 numpy
 plotly
 jason 
-base64
 random
