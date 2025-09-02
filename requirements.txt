@@ -8,3 +8,5 @@ faiss-cpu
 tiktoken
 numpy
 plotly
+jason 
+base64
