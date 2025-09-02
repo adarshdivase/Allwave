@@ -171,7 +171,7 @@ class AdvancedAVRecommender:
     def __init__(self):
         self.db = ProductDatabase()
         self.compatibility_matrix = self._build_compatibility_matrix()
-        
+    
     def _build_compatibility_matrix(self):
         """Build product compatibility scoring"""
         return {
@@ -291,6 +291,7 @@ class AdvancedAVRecommender:
                 'primary': 'Crestron Flex UC',
                 'type': 'Tabletop touchpanel',
                 'price': 3999,
+                'rating': 4.6, # Added for consistency
                 'features': ['One-touch join', 'Room scheduling', 'Preset scenes']
             }
         else:
@@ -298,6 +299,7 @@ class AdvancedAVRecommender:
                 'primary': 'Crestron NVX System',
                 'type': 'Enterprise control platform',
                 'price': 15999,
+                'rating': 4.9, # Added for consistency
                 'features': ['Full automation', 'Network AV', 'API integration', 'Analytics']
             }
     
@@ -422,15 +424,15 @@ def create_photorealistic_3d_room(specs, recommendations):
             x = table_x - table_w/2 + corner_radius - corner_radius*np.cos(t)
             y = table_y - table_l/2 + corner_radius - corner_radius*np.sin(t)
         elif t < np.pi:
-            x = table_x + table_w/2 - corner_radius + corner_radius*np.cos(t)
-            y = table_y - table_l/2 + corner_radius - corner_radius*np.sin(t)
+            x = table_x + table_w/2 - corner_radius + corner_radius*np.cos(np.pi - t)
+            y = table_y - table_l/2 + corner_radius - corner_radius*np.sin(np.pi - t)
         elif t < 3*np.pi/2:
-            x = table_x + table_w/2 - corner_radius + corner_radius*np.cos(t)
-            y = table_y + table_l/2 - corner_radius + corner_radius*np.sin(t)
+            x = table_x + table_w/2 - corner_radius + corner_radius*np.cos(t - np.pi)
+            y = table_y + table_l/2 - corner_radius + corner_radius*np.sin(t - np.pi)
         else:
-            x = table_x - table_w/2 + corner_radius - corner_radius*np.cos(t)
-            y = table_y + table_l/2 - corner_radius + corner_radius*np.sin(t)
-        
+            x = table_x - table_w/2 + corner_radius - corner_radius*np.cos(2*np.pi - t)
+            y = table_y + table_l/2 - corner_radius + corner_radius*np.sin(2*np.pi - t)
+
         table_points_x.append(x)
         table_points_y.append(y)
     
@@ -440,7 +442,9 @@ def create_photorealistic_3d_room(specs, recommendations):
         y=table_points_y + [table_points_y[0]],
         z=[table_h] * (len(table_points_x) + 1),
         mode='lines',
-        line=dict(color='rgb(139, 69, 19)', width=20),
+        fill='toself',
+        fillcolor='rgba(139, 69, 19, 0.8)',
+        line=dict(color='rgb(139, 69, 19)', width=2),
         name='Conference Table',
         showlegend=False
     ))
@@ -537,21 +541,18 @@ def create_photorealistic_3d_room(specs, recommendations):
         
         for mic_x, mic_y, mic_z in mic_positions:
             # Microphone array (hexagonal shape)
-            hex_points = []
+            hex_points_x = []
+            hex_points_y = []
             for angle in np.linspace(0, 2*np.pi, 7):
-                hex_x = mic_x + 0.2 * np.cos(angle)
-                hex_y = mic_y + 0.2 * np.sin(angle)
-                hex_points.append([hex_x, hex_y, mic_z])
+                hex_points_x.append(mic_x + 0.2 * np.cos(angle))
+                hex_points_y.append(mic_y + 0.2 * np.sin(angle))
             
-            for i in range(6):
-                fig.add_trace(go.Scatter3d(
-                    x=[hex_points[i][0], hex_points[i+1][0]],
-                    y=[hex_points[i][1], hex_points[i+1][1]],
-                    z=[hex_points[i][2], hex_points[i+1][2]],
-                    mode='lines',
-                    line=dict(color='white', width=3),
-                    showlegend=False
-                ))
+            fig.add_trace(go.Scatter3d(
+                x=hex_points_x, y=hex_points_y, z=[mic_z] * 7,
+                mode='lines',
+                line=dict(color='white', width=3),
+                showlegend=False
+            ))
     
     # Add speakers
     speaker_positions = [
@@ -607,13 +608,14 @@ def add_premium_chair(fig, x, y, rotation=0):
     
     # Chair back
     back_h = 0.9
-    back_offset = 0.15 * np.cos(np.radians(rotation))
+    back_offset_x = -0.15 * np.sin(np.radians(rotation))
+    back_offset_y = 0.15 * np.cos(np.radians(rotation))
     fig.add_trace(go.Scatter3d(
-        x=[x, x],
-        y=[y + back_offset, y + back_offset],
+        x=[x + back_offset_x, x + back_offset_x],
+        y=[y + back_offset_y, y + back_offset_y],
         z=[seat_h, back_h],
         mode='lines',
-        line=dict(color='rgb(70, 70, 70)', width=8),
+        line=dict(color='rgb(70, 70, 70)', width=12),
         showlegend=False
     ))
     
@@ -664,7 +666,7 @@ class CostCalculator:
       # Infrastructure upgrades
         infrastructure = self._calculate_infrastructure(specs)
         
-        # Training and support
+      # Training and support
         training = 2000 if specs['capacity'] > 12 else 1000
         support_year1 = equipment_cost * 0.1
         
@@ -714,12 +716,12 @@ class CostCalculator:
         travel_savings = annual_travel_budget * travel_reduction
         
         total_annual_savings = annual_savings + travel_savings
-        payback_period = total_investment / total_annual_savings
+        payback_period = total_investment / total_annual_savings if total_annual_savings > 0 else float('inf')
         
         return {
             'annual_savings': total_annual_savings,
             'payback_months': payback_period * 12,
-            'roi_3_years': ((total_annual_savings * 3 - total_investment) / total_investment) * 100
+            'roi_3_years': ((total_annual_savings * 3 - total_investment) / total_investment) * 100 if total_investment > 0 else float('inf')
         }
 
 # --- Environmental Analysis ---
@@ -736,14 +738,15 @@ def analyze_room_environment(specs):
 def analyze_lighting_conditions(specs):
     """Analyze lighting conditions and recommendations"""
     room_area = specs['length'] * specs['width']
-    window_area = specs.get('windows', 0)
+    window_area_percent = specs.get('windows', 0) / 100
+    window_area = room_area * window_area_percent
     
     # Calculate ambient light levels
     if window_area > room_area * 0.2:
         lighting_challenge = "High"
         recommendations = [
             "Install motorized blinds with light sensors",
-            "Use high-brightness display (>500 nits)",
+            "Use high-brightness display (>700 nits)",
             "Consider bias lighting behind display"
         ]
     elif window_area > room_area * 0.1:
@@ -766,8 +769,8 @@ def analyze_acoustic_properties(specs):
     """Analyze room acoustics"""
     room_volume = specs['length'] * specs['width'] * specs['ceiling_height']
     surface_area = 2 * (specs['length'] * specs['width'] + 
-                       specs['length'] * specs['ceiling_height'] + 
-                       specs['width'] * specs['ceiling_height'])
+                        specs['length'] * specs['ceiling_height'] + 
+                        specs['width'] * specs['ceiling_height'])
     
     # Estimate RT60 based on room characteristics
     estimated_rt60 = room_volume / (surface_area * 0.15)  # Simplified calculation
@@ -807,7 +810,7 @@ def analyze_thermal_considerations(specs):
     
     return {
         'estimated_heat_load': f"{total_load} Watts",
-        'cooling_requirement': f"{total_load / 293:.1f} BTU/hr additional",
+        'cooling_requirement': f"{total_load * 3.41:.1f} BTU/hr additional",
         'ventilation_note': "Ensure adequate airflow for equipment cooling"
     }
 
@@ -838,7 +841,7 @@ def create_acoustic_analysis_chart(analysis):
         rows=2, cols=2,
         subplot_titles=('RT60 Analysis', 'Frequency Response', 'Coverage Pattern', 'Noise Floor'),
         specs=[[{"secondary_y": False}, {"secondary_y": False}],
-               [{"secondary_y": False}, {"secondary_y": False}]]
+               [{"type": "polar"}, {"secondary_y": False}]]
     )
     
     # RT60 across frequencies
@@ -848,12 +851,12 @@ def create_acoustic_analysis_chart(analysis):
     
     fig.add_trace(
         go.Scatter(x=frequencies, y=rt60_values, name="Current RT60", 
-                  line=dict(color='red', width=3)),
+                   line=dict(color='red', width=3)),
         row=1, col=1
     )
     fig.add_trace(
         go.Scatter(x=frequencies, y=target_rt60, name="Target RT60", 
-                  line=dict(color='green', width=2, dash='dash')),
+                   line=dict(color='green', width=2, dash='dash')),
         row=1, col=1
     )
     
@@ -863,7 +866,7 @@ def create_acoustic_analysis_chart(analysis):
     
     fig.add_trace(
         go.Scatter(x=freq_range, y=response, name="Room Response",
-                  line=dict(color='blue')),
+                   line=dict(color='blue')),
         row=1, col=2
     )
     
@@ -873,7 +876,7 @@ def create_acoustic_analysis_chart(analysis):
     
     fig.add_trace(
         go.Scatterpolar(r=coverage, theta=angles, mode='lines',
-                       name="Microphone Pattern"),
+                          name="Microphone Pattern", fill='toself'),
         row=2, col=1
     )
     
@@ -883,7 +886,7 @@ def create_acoustic_analysis_chart(analysis):
     
     fig.add_trace(
         go.Scatter(x=time_points, y=noise_floor, name="Ambient Noise",
-                  line=dict(color='orange')),
+                   line=dict(color='orange')),
         row=2, col=2
     )
     
@@ -896,11 +899,11 @@ def create_acoustic_analysis_chart(analysis):
     fig.update_yaxes(title_text="Noise Level (dBA)", row=2, col=2)
     
     fig.update_layout(height=600, showlegend=True,
-                     title_text="Comprehensive Acoustic Analysis")
+                          title_text="Comprehensive Acoustic Analysis")
     
     return fig
 
-def create_cost_breakdown_chart(cost_data):
+def create_cost_breakdown_chart(cost_data, roi_analysis):
     """Create comprehensive cost breakdown visualization"""
     fig = make_subplots(
         rows=2, cols=2,
@@ -922,41 +925,37 @@ def create_cost_breakdown_chart(cost_data):
     
     # ROI projection over 5 years
     years = list(range(1, 6))
-    cumulative_savings = [50000, 120000, 190000, 260000, 330000]  # Example
+    annual_savings = roi_analysis['annual_savings']
+    cumulative_savings = [annual_savings * year for year in years]
     initial_investment = cost_data['total']
     net_roi = [savings - initial_investment for savings in cumulative_savings]
     
     fig.add_trace(
         go.Scatter(x=years, y=cumulative_savings, name="Cumulative Savings",
-                  line=dict(color='green', width=3)),
+                   line=dict(color='green', width=3)),
         row=1, col=2
     )
     fig.add_trace(
-        go.Scatter(x=years, y=net_roi, name="Net ROI",
-                  line=dict(color='blue', width=3)),
+        go.Scatter(x=years, y=[initial_investment]*len(years), name="Investment",
+                   line=dict(color='red', width=2, dash='dash')),
         row=1, col=2
     )
     
     # Monthly cash flow
     months = list(range(1, 37))  # 3 years
-    monthly_savings = [4000] * 36  # Example monthly savings
-    monthly_costs = [-cost_data['total']/36] + [0] * 35  # Amortized cost
-    net_monthly = [s + c for s, c in zip(monthly_savings, monthly_costs)]
-    
+    monthly_savings = [annual_savings / 12] * 36
+    net_cumulative = np.cumsum(monthly_savings) - initial_investment
+
     fig.add_trace(
-        go.Bar(x=months, y=monthly_savings, name="Monthly Savings",
-               marker_color='lightgreen'),
+        go.Scatter(x=months, y=net_cumulative, name="Cumulative Net Flow",
+               line=dict(color='purple')),
         row=2, col=1
     )
-    fig.add_trace(
-        go.Bar(x=months, y=monthly_costs, name="Monthly Costs",
-               marker_color='lightcoral'),
-        row=2, col=1
-    )
-    
+    fig.add_hline(y=0, line_dash="dash", line_color="grey", row=2, col=1)
+
     # Payback analysis
     payback_scenarios = ['Conservative', 'Realistic', 'Optimistic']
-    payback_months = [36, 24, 18]
+    payback_months = [roi_analysis['payback_months'] * 1.2, roi_analysis['payback_months'], roi_analysis['payback_months'] * 0.8]
     colors_payback = ['#FF6B6B', '#4ECDC4', '#45B7D1']
     
     fig.add_trace(
@@ -965,7 +964,13 @@ def create_cost_breakdown_chart(cost_data):
         row=2, col=2
     )
     
-    fig.update_layout(height=800, showlegend=True)
+    fig.update_xaxes(title_text="Years", row=1, col=2)
+    fig.update_xaxes(title_text="Months", row=2, col=1)
+    fig.update_yaxes(title_text="Value ($)", row=1, col=2)
+    fig.update_yaxes(title_text="Net Value ($)", row=2, col=1)
+    fig.update_yaxes(title_text="Months", row=2, col=2)
+    
+    fig.update_layout(height=800, showlegend=True, title_text="Comprehensive Financial Analysis")
     return fig
 
 # --- Main Application Interface ---
@@ -1064,18 +1069,23 @@ def main():
                     if category in recommendations:
                         rec = recommendations[category]
                         
+                        # FIX: Use .get() to safely access keys that might not exist.
+                        # This prevents the KeyError for 'specs' in the control system.
+                        specs_text = rec.get('specs', 'N/A')
+                        rating = rec.get('rating', 0) # Also make rating safe
+                        
                         st.markdown(f"""
                         <div class="recommendation-card">
                             <h3>{category.title()} Recommendation</h3>
                             <h4>🏆 {rec['primary']}</h4>
                             <p><strong>Price:</strong> ${rec['price']:,}</p>
-                            <p><strong>Specs:</strong> {rec['specs']}</p>
-                            <p><strong>Rating:</strong> {'⭐' * int(rec['rating'])} ({rec['rating']}/5.0)</p>
-                            {f"<p><strong>Features:</strong> {rec.get('features', 'N/A')}</p>" if 'features' in rec else ""}
+                            <p><strong>Specs:</strong> {specs_text}</p>
+                            <p><strong>Rating:</strong> {'⭐' * int(rating)} ({rating}/5.0)</p>
+                            {f"<p><strong>Features:</strong> {', '.join(rec.get('features', []))}</p>" if 'features' in rec else ""}
                         </div>
                         """, unsafe_allow_html=True)
                         
-                        # Show reviews
+                        # Show reviews if they exist
                         if 'reviews' in rec:
                             st.markdown("**Customer Reviews:**")
                             for review in rec['reviews'][:2]:  # Show top 2 reviews
@@ -1090,12 +1100,17 @@ def main():
                 # Confidence score
                 confidence = recommendations['confidence_score']
                 st.metric("AI Confidence Score", f"{confidence}%", 
-                         delta="High Confidence" if confidence > 90 else "Good Match")
+                          delta="High Confidence" if confidence > 90 else "Good Match")
                 
-                # Quick stats
-                total_cost = sum([rec.get('price', 0) for rec in recommendations.values() 
-                                if isinstance(rec, dict) and 'price' in rec])
-                
+                # FIX: Correctly calculate total equipment cost including accessories
+                total_cost = 0
+                for key, value in recommendations.items():
+                    if isinstance(value, dict) and 'price' in value:
+                        total_cost += value['price']
+                    elif key == 'accessories' and isinstance(value, list):
+                        for item in value:
+                            total_cost += item.get('price', 0)
+
                 st.markdown(f"""
                 <div class="metric-card">
                     <h4>Quick Stats</h4>
@@ -1104,17 +1119,18 @@ def main():
                     <p><strong>Technology Grade:</strong> Enterprise</p>
                 </div>
                 """, unsafe_allow_html=True)
-        
+    
         # Tab 2: 3D Visualization
         with tabs[1]:
             st.markdown("### 🏗️ Photorealistic 3D Room Preview")
             
-            try:
-                fig_3d = create_photorealistic_3d_room(room_specs, recommendations)
-                st.plotly_chart(fig_3d, use_container_width=True)
-            except Exception as e:
-                st.error(f"3D visualization temporarily unavailable: {str(e)}")
-                st.info("💡 3D room visualization will show your configured space with all recommended equipment positioned optimally.")
+            with st.spinner("Rendering 3D model..."):
+                try:
+                    fig_3d = create_photorealistic_3d_room(room_specs, recommendations)
+                    st.plotly_chart(fig_3d, use_container_width=True)
+                except Exception as e:
+                    st.error(f"3D visualization temporarily unavailable: {str(e)}")
+                    st.info("💡 3D room visualization will show your configured space with all recommended equipment positioned optimally.")
             
             # Room metrics
             col1, col2, col3, col4 = st.columns(4)
@@ -1128,7 +1144,7 @@ def main():
             with col4:
                 optimal_viewing = room_specs['length'] * 0.9
                 st.metric("Viewing Distance", f"{optimal_viewing:.1f} m")
-        
+    
         # Tab 3: Cost Analysis
         with tabs[2]:
             st.markdown("### 💰 Comprehensive Cost Analysis")
@@ -1142,14 +1158,14 @@ def main():
             with col1:
                 st.metric("Equipment", f"${cost_breakdown['equipment']:,}")
             with col2:
-                st.metric("Installation", f"${cost_breakdown['installation']:,}")
+                st.metric("Services", f"${cost_breakdown['installation'] + cost_breakdown['training']:,}")
             with col3:
                 st.metric("Total Investment", f"${cost_breakdown['total']:,}")
             with col4:
                 st.metric("Payback Period", f"{roi_analysis['payback_months']:.1f} months")
             
             # Cost visualization
-            fig_cost = create_cost_breakdown_chart(cost_breakdown)
+            fig_cost = create_cost_breakdown_chart(cost_breakdown, roi_analysis)
             st.plotly_chart(fig_cost, use_container_width=True)
             
             # ROI details
@@ -1157,10 +1173,12 @@ def main():
             col1, col2 = st.columns(2)
             
             with col1:
+                meeting_savings = roi_analysis['annual_savings'] * 0.6 if roi_analysis['annual_savings'] > 0 else 0
+                travel_savings = roi_analysis['annual_savings'] * 0.4 if roi_analysis['annual_savings'] > 0 else 0
                 st.markdown(f"""
                 **Annual Savings Breakdown:**
-                - Meeting Efficiency Gains: ${roi_analysis['annual_savings'] * 0.6:,.0f}
-                - Travel Reduction: ${roi_analysis['annual_savings'] * 0.4:,.0f}
+                - Meeting Efficiency Gains: ${meeting_savings:,.0f}
+                - Travel Reduction: ${travel_savings:,.0f}
                 - **Total Annual Savings: ${roi_analysis['annual_savings']:,.0f}**
                 """)
             
@@ -1169,9 +1187,9 @@ def main():
                 **ROI Metrics:**
                 - Payback Period: {roi_analysis['payback_months']:.1f} months
                 - 3-Year ROI: {roi_analysis['roi_3_years']:.0f}%
-                - Break-even Point: Month {roi_analysis['payback_months']:.0f}
+                - Break-even Point: Month {int(roi_analysis['payback_months'])}
                 """)
-        
+    
         # Tab 4: Environmental Analysis
         with tabs[3]:
             st.markdown("### 🔊 Environmental & Performance Analysis")
@@ -1209,7 +1227,7 @@ def main():
                 st.markdown("**Infrastructure:**")
                 for req in env_analysis['network']['network_requirements']:
                     st.write(f"• {req}")
-        
+    
         # Tab 5: Project Summary
         with tabs[4]:
             st.markdown("### 📋 Executive Project Summary")
@@ -1241,6 +1259,8 @@ def main():
                 """)
             
             with col2:
+                cost_breakdown = CostCalculator().calculate_total_cost(recommendations, room_specs)
+                roi_analysis = CostCalculator().calculate_roi(cost_breakdown, room_specs)
                 st.markdown(f"""
                 #### 📊 Project Metrics
                 - **Confidence Score:** {recommendations['confidence_score']}%
