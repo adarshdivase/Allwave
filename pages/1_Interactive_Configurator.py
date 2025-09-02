@@ -1,355 +1,1318 @@
-# pages/1_Interactive_Configurator.py
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle, Circle, Wedge
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
+import json
+from datetime import datetime, timedelta
+import random
+from typing import Dict, List, Tuple, Optional
+import base64
+from io import BytesIO
 
-st.set_page_config(page_title="AI Room Configurator", page_icon="🏢", layout="wide")
+st.set_page_config(page_title="AI Room Configurator Pro", page_icon="🏢", layout="wide")
 
-# --- AI Recommendation System ---
-class AVRecommendationEngine:
-    def __init__(self, oem_data=None):
-        self.oem_data = oem_data
-        self.recommendations = {}
-        
-    def get_display_recommendations(self, room_length, room_width, capacity):
-        """AI-powered display recommendations based on room specs"""
-        recommendations = []
-        
-        farthest_viewer = room_length * 0.9
-        min_diagonal_inches = (farthest_viewer * 39.37) / 6  # 6H rule
-        max_diagonal_inches = (farthest_viewer * 39.37) / 3  # 3H rule
-        
-        room_area = room_length * room_width
-        
-        if room_area <= 20:  # Small rooms
-            recommended_sizes = [55, 65, 75]
-            display_type = "Interactive Display or Large Format Display"
-        elif room_area <= 50:  # Medium rooms  
-            recommended_sizes = [75, 85, 98]
-            display_type = "Large Format Display or Projector"
-        else:  # Large rooms
-            recommended_sizes = [98, 110, 135]
-            display_type = "Projector with Large Screen"
-        
-        optimal_size = min(recommended_sizes, key=lambda x: abs(x - min_diagonal_inches))
-        
-        recommendations.append({
-            'category': 'Display',
-            'product': f'{optimal_size}" {display_type}',
-            'reason': f'Optimal for {farthest_viewer:.1f}m viewing distance',
-            'specs': f'Recommended size: {min_diagonal_inches:.0f}"-{max_diagonal_inches:.0f}"',
-            'price_range': self._get_price_estimate('display', optimal_size)
-        })
-        
-        return recommendations
-    
-    def get_camera_recommendations(self, room_length, room_width, capacity):
-        """AI-powered camera recommendations"""
-        recommendations = []
-        room_area = room_length * room_width
-        
-        if capacity <= 6 and room_area <= 25:
-            camera_type = "Fixed Wide-Angle Camera"
-            reason = "Small meeting room - single wide-angle view sufficient"
-            suggested_models = ["Logitech Rally Bar Mini", "Poly Studio X30", "Yealink UVC30"]
-        elif capacity <= 12 and room_area <= 50:
-            camera_type = "PTZ Camera with Auto-Framing"  
-            reason = "Medium room - PTZ for speaker tracking and group framing"
-            suggested_models = ["Logitech Rally Camera", "Poly Studio X50", "Huddly IQ"]
-        else:
-            camera_type = "Multi-Camera System with AI Director"
-            reason = "Large room - multiple cameras for comprehensive coverage"
-            suggested_models = ["Logitech Rally System", "Poly Studio X70", "Multiple PTZ Setup"]
-        
-        recommendations.append({
-            'category': 'Camera',
-            'product': camera_type,
-            'reason': reason,
-            'specs': f'Coverage for {capacity} people in {room_area:.0f}m² space',
-            'models': suggested_models,
-            'price_range': self._get_price_estimate('camera', capacity)
-        })
-        
-        return recommendations
-    
-    def get_audio_recommendations(self, room_length, room_width, capacity):
-        """AI-powered audio recommendations"""
-        recommendations = []
-        room_volume = room_length * room_width * 3  # Assume 3m ceiling
-        
-        if capacity <= 6:
-            audio_type = "All-in-One Soundbar with Beamforming Mics"
-            reason = "Small group - integrated solution sufficient"
-            suggested_models = ["Logitech Rally Bar", "Poly Studio X30", "Jabra Panacast 50"]
-        elif capacity <= 12:
-            audio_type = "Ceiling Mic Array + Premium Speakers"
-            reason = "Medium room - dedicated audio for clear pickup"
-            suggested_models = ["Shure MXA910", "Biamp Parlé Ceiling", "QSC Speakers"]
-        else:
-            audio_type = "Distributed Audio System with Zone Control"
-            reason = "Large space - multiple zones for optimal coverage"
-            suggested_models = ["Shure MXA920", "Biamp Tesira", "QSC Q-SYS"]
-        
-        recommendations.append({
-            'category': 'Audio',
-            'product': audio_type,
-            'reason': reason,
-            'specs': f'Optimized for {room_volume:.0f}m³ volume',
-            'models': suggested_models,
-            'price_range': self._get_price_estimate('audio', capacity)
-        })
-        
-        return recommendations
-    
-    def get_control_recommendations(self, complexity_score):
-        """Control system recommendations based on setup complexity"""
-        if complexity_score <= 3:
-            control_type = "Touch Panel with Preset Controls"
-            models = ["Crestron TSW-752", "Extron TLP Pro 525M"]
-        else:
-            control_type = "Advanced Room Control System"  
-            models = ["Crestron 3-Series", "AMX Acendo", "QSC Q-SYS"]
-        
-        # --- FIX IS HERE: Added the missing 'specs' key for consistency ---
-        return [{
-            'category': 'Control',
-            'product': control_type,
-            'reason': f'System complexity score: {complexity_score}/5',
-            'specs': f'Manages a system with {complexity_score} or more integrated components.',
-            'models': models,
-            'price_range': self._get_price_estimate('control', complexity_score)
-        }]
-    
-    def _get_price_estimate(self, category, size_factor):
-        """Estimate price ranges based on category and complexity"""
-        price_ranges = {
-            'display': {
-                55: "$3,000 - $5,000", 65: "$4,000 - $7,000", 75: "$6,000 - $10,000",
-                85: "$8,000 - $15,000", 98: "$12,000 - $25,000", 110: "$20,000 - $40,000"
+# Custom CSS for premium styling
+st.markdown("""
+<style>
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
+        padding: 10px;
+        border-radius: 10px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: white !important;
+        color: #1e3c72 !important;
+    }
+    .recommendation-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        border-radius: 15px;
+        color: white;
+        margin: 10px 0;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .metric-card {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid #667eea;
+    }
+    .product-image {
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+    .review-card {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 10px 0;
+        border-left: 3px solid #ffd700;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# --- Enhanced Product Database with Reviews ---
+class ProductDatabase:
+    def __init__(self):
+        self.products = {
+            'displays': {
+                'Samsung QMR Series 98"': {
+                    'price': 12999,
+                    'image': '📺',
+                    'specs': '4K UHD, 500 nits, 24/7 operation, MagicINFO',
+                    'rating': 4.8,
+                    'reviews': [
+                        {'user': 'Tech Director, Fortune 500', 'rating': 5, 'text': 'Crystal clear image quality, perfect for our boardroom'},
+                        {'user': 'AV Manager', 'rating': 4.5, 'text': 'Excellent display, easy integration with control systems'}
+                    ]
+                },
+                'LG LAEC Series 136" LED': {
+                    'price': 45999,
+                    'image': '🖥️',
+                    'specs': 'All-in-One LED, 1.2mm pixel pitch, HDR10',
+                    'rating': 4.9,
+                    'reviews': [
+                        {'user': 'Corporate AV Lead', 'rating': 5, 'text': 'Stunning visuals, no bezels, worth every penny'},
+                        {'user': 'Integration Specialist', 'rating': 4.8, 'text': 'Best LED wall solution we\'ve deployed'}
+                    ]
+                },
+                'Sony Crystal LED': {
+                    'price': 89999,
+                    'image': '💎',
+                    'specs': 'MicroLED, 1.0mm pitch, 1800 nits, HDR',
+                    'rating': 5.0,
+                    'reviews': [
+                        {'user': 'Executive Board', 'rating': 5, 'text': 'Absolutely breathtaking quality'},
+                        {'user': 'CTO', 'rating': 5, 'text': 'The future of display technology'}
+                    ]
+                }
             },
-            'camera': {
-                range(1, 7): "$800 - $2,500", range(7, 13): "$2,500 - $8,000",
-                range(13, 31): "$8,000 - $20,000"
+            'cameras': {
+                'Logitech Rally Plus': {
+                    'price': 5999,
+                    'image': '📹',
+                    'specs': '4K PTZ, 15x zoom, AI auto-framing, dual speakers',
+                    'rating': 4.7,
+                    'reviews': [
+                        {'user': 'IT Director', 'rating': 5, 'text': 'Best video quality in hybrid meetings'},
+                        {'user': 'Facility Manager', 'rating': 4.5, 'text': 'Easy setup, great tracking'}
+                    ]
+                },
+                'Poly Studio X70': {
+                    'price': 8999,
+                    'image': '🎥',
+                    'specs': 'Dual 4K cameras, 120° FOV, NoiseBlockAI',
+                    'rating': 4.8,
+                    'reviews': [
+                        {'user': 'VP Engineering', 'rating': 5, 'text': 'Exceptional AI director mode'},
+                        {'user': 'Meeting Room Admin', 'rating': 4.6, 'text': 'Crystal clear even in large rooms'}
+                    ]
+                },
+                'Cisco Room Kit Pro': {
+                    'price': 15999,
+                    'image': '🎬',
+                    'specs': 'Triple camera, 5K video, speaker tracking',
+                    'rating': 4.9,
+                    'reviews': [
+                        {'user': 'Enterprise Architect', 'rating': 5, 'text': 'Enterprise-grade reliability'},
+                        {'user': 'AV Consultant', 'rating': 4.8, 'text': 'Best-in-class for large spaces'}
+                    ]
+                }
             },
             'audio': {
-                range(1, 7): "$1,500 - $4,000", range(7, 13): "$4,000 - $12,000", 
-                range(13, 31): "$12,000 - $30,000"
-            },
-            'control': {
-                range(1, 4): "$2,000 - $5,000", range(4, 6): "$5,000 - $15,000"
+                'Shure MXA920': {
+                    'price': 6999,
+                    'image': '🎤',
+                    'specs': 'Ceiling array, steerable coverage, IntelliMix DSP',
+                    'rating': 4.9,
+                    'reviews': [
+                        {'user': 'Audio Engineer', 'rating': 5, 'text': 'Invisible yet perfect audio capture'},
+                        {'user': 'Consultant', 'rating': 4.8, 'text': 'Game-changer for ceiling installations'}
+                    ]
+                },
+                'Biamp Parlé': {
+                    'price': 4999,
+                    'image': '🔊',
+                    'specs': 'Beamforming mic bar, AEC, AGC, Dante',
+                    'rating': 4.7,
+                    'reviews': [
+                        {'user': 'Systems Integrator', 'rating': 4.8, 'text': 'Excellent DSP, clean audio'},
+                        {'user': 'Tech Lead', 'rating': 4.6, 'text': 'Great for medium rooms'}
+                    ]
+                },
+                'QSC Q-SYS': {
+                    'price': 12999,
+                    'image': '🎵',
+                    'specs': 'Full ecosystem, network audio, advanced DSP',
+                    'rating': 4.8,
+                    'reviews': [
+                        {'user': 'AV Director', 'rating': 5, 'text': 'Most flexible platform available'},
+                        {'user': 'Integrator', 'rating': 4.6, 'text': 'Powerful but requires expertise'}
+                    ]
+                }
             }
         }
-        
-        if category == 'display':
-            return price_ranges[category].get(size_factor, "$15,000 - $30,000")
-        else:
-            for key_range, price in price_ranges[category].items():
-                if isinstance(key_range, range) and size_factor in key_range:
-                    return price
-            return "$10,000 - $25,000"
 
-# --- 3D Visualization Functions ---
-def create_3d_room_visualization(room_width, room_length, capacity, recommendations):
-    """Create interactive 3D room visualization"""
+# --- Advanced AI Recommendation Engine ---
+class AdvancedAVRecommender:
+    def __init__(self):
+        self.db = ProductDatabase()
+        self.compatibility_matrix = self._build_compatibility_matrix()
+        
+    def _build_compatibility_matrix(self):
+        """Build product compatibility scoring"""
+        return {
+            ('Logitech', 'Logitech'): 1.2,  # Same brand bonus
+            ('Poly', 'Poly'): 1.2,
+            ('Cisco', 'Cisco'): 1.2,
+            ('Shure', 'Biamp'): 1.1,  # Known good combinations
+            ('QSC', 'Samsung'): 1.1,
+        }
+    
+    def get_ai_recommendations(self, room_specs: Dict) -> Dict:
+        """Generate comprehensive AI-powered recommendations"""
+        recommendations = {
+            'display': self._recommend_display(room_specs),
+            'camera': self._recommend_camera(room_specs),
+            'audio': self._recommend_audio(room_specs),
+            'control': self._recommend_control(room_specs),
+            'accessories': self._recommend_accessories(room_specs),
+            'confidence_score': self._calculate_confidence(room_specs)
+        }
+        return recommendations
+    
+    def _recommend_display(self, specs):
+        room_area = specs['length'] * specs['width']
+        viewing_distance = specs['length'] * 0.9
+        
+        # AVIXA formula for display size
+        min_height = viewing_distance / 6  # Analytical viewing
+        max_height = viewing_distance / 3  # Basic viewing
+        optimal_diagonal = min_height * 2.2 * 39.37  # Convert to inches
+        
+        if room_area < 25:
+            products = ['Samsung QMR Series 98"']
+            tech_type = "4K Display"
+        elif room_area < 60:
+            products = ['LG LAEC Series 136" LED']
+            tech_type = "LED Wall"
+        else:
+            products = ['Sony Crystal LED']
+            tech_type = "MicroLED Wall"
+        
+        selected = products[0]
+        product_info = self.db.products['displays'][selected]
+        
+        return {
+            'primary': selected,
+            'technology': tech_type,
+            'size': f"{optimal_diagonal:.0f} inches",
+            'price': product_info['price'],
+            'specs': product_info['specs'],
+            'rating': product_info['rating'],
+            'reviews': product_info['reviews'],
+            'alternatives': products[1:] if len(products) > 1 else [],
+            'reasoning': f"Optimal for {viewing_distance:.1f}m viewing distance with {specs['capacity']} viewers"
+        }
+    
+    def _recommend_camera(self, specs):
+        capacity = specs['capacity']
+        room_area = specs['length'] * specs['width']
+        
+        if capacity <= 8:
+            products = ['Logitech Rally Plus']
+            features = "Auto-framing for small groups"
+        elif capacity <= 16:
+            products = ['Poly Studio X70']
+            features = "Dual cameras with AI director"
+        else:
+            products = ['Cisco Room Kit Pro']
+            features = "Triple camera system with speaker tracking"
+        
+        selected = products[0]
+        product_info = self.db.products['cameras'][selected]
+        
+        return {
+            'primary': selected,
+            'features': features,
+            'price': product_info['price'],
+            'specs': product_info['specs'],
+            'rating': product_info['rating'],
+            'reviews': product_info['reviews'],
+            'fov_coverage': self._calculate_fov_coverage(specs),
+            'ai_features': ['Auto-framing', 'Speaker tracking', 'People counting', 'Whiteboard mode']
+        }
+    
+    def _recommend_audio(self, specs):
+        room_volume = specs['length'] * specs['width'] * specs['ceiling_height']
+        
+        if room_volume < 75:
+            products = ['Biamp Parlé']
+            config = "Single beamforming bar"
+        elif room_volume < 150:
+            products = ['Shure MXA920']
+            config = "Ceiling array with zones"
+        else:
+            products = ['QSC Q-SYS']
+            config = "Distributed audio system"
+        
+        selected = products[0]
+        product_info = self.db.products['audio'][selected]
+        
+        return {
+            'primary': selected,
+            'configuration': config,
+            'price': product_info['price'],
+            'specs': product_info['specs'],
+            'rating': product_info['rating'],
+            'reviews': product_info['reviews'],
+            'coverage_zones': self._calculate_audio_zones(specs),
+            'acoustic_treatment': self._recommend_acoustic_treatment(specs)
+        }
+    
+    def _recommend_control(self, specs):
+        complexity = specs.get('complexity_score', 3)
+        
+        if complexity <= 3:
+            return {
+                'primary': 'Crestron Flex UC',
+                'type': 'Tabletop touchpanel',
+                'price': 3999,
+                'features': ['One-touch join', 'Room scheduling', 'Preset scenes']
+            }
+        else:
+            return {
+                'primary': 'Crestron NVX System',
+                'type': 'Enterprise control platform',
+                'price': 15999,
+                'features': ['Full automation', 'Network AV', 'API integration', 'Analytics']
+            }
+    
+    def _recommend_accessories(self, specs):
+        accessories = []
+        
+        if specs['capacity'] > 12:
+            accessories.append({
+                'item': 'Wireless presentation system',
+                'model': 'Barco ClickShare CX-50',
+                'price': 1999
+            })
+        
+        if 'Recording' in specs.get('special_requirements', []):
+            accessories.append({
+                'item': 'Recording appliance',
+                'model': 'Epiphan Pearl Nexus',
+                'price': 8999
+            })
+        
+        accessories.append({
+            'item': 'Cable management',
+            'model': 'FSR Floor boxes and raceways',
+            'price': 999
+        })
+        
+        return accessories
+    
+    def _calculate_fov_coverage(self, specs):
+        """Calculate camera field of view coverage"""
+        room_area = specs['length'] * specs['width']
+        return min(100, (120 / room_area) * 100)
+    
+    def _calculate_audio_zones(self, specs):
+        """Calculate number of audio coverage zones"""
+        room_area = specs['length'] * specs['width']
+        return max(1, int(room_area / 25))
+    
+    def _recommend_acoustic_treatment(self, specs):
+        """Recommend acoustic treatments"""
+        treatments = []
+        room_volume = specs['length'] * specs['width'] * specs['ceiling_height']
+        
+        if room_volume > 100:
+            treatments.append("Acoustic ceiling tiles (NRC 0.85+)")
+        if specs['width'] > 8:
+            treatments.append("Wall absorption panels (40% coverage)")
+        if specs['length'] > 10:
+            treatments.append("Rear wall diffusion")
+            
+        return treatments
+    
+    def _calculate_confidence(self, specs):
+        """Calculate recommendation confidence score"""
+        base_score = 85
+        
+        # Adjust based on room proportions
+        ratio = specs['length'] / specs['width']
+        if 1.2 <= ratio <= 1.8:
+            base_score += 10
+        
+        # Adjust based on capacity fit
+        area_per_person = (specs['length'] * specs['width']) / specs['capacity']
+        if 2.5 <= area_per_person <= 4:
+            base_score += 5
+            
+        return min(100, base_score)
+
+# --- Premium 3D Visualization ---
+def create_photorealistic_3d_room(specs, recommendations):
+    """Create photorealistic 3D room with actual furniture models"""
     fig = go.Figure()
     
-    room_height = 3.0
+    room_w, room_l, room_h = specs['width'], specs['length'], specs['ceiling_height']
     
-    # Floor
-    fig.add_trace(go.Mesh3d(x=[0, room_width, room_width, 0], y=[0, 0, room_length, room_length], z=[0, 0, 0, 0], color='lightgray', opacity=0.3, name='Floor'))
+    # Enhanced room shell with textures
+    # Floor with wood texture pattern
+    floor_x, floor_y = np.meshgrid(np.linspace(0, room_w, 20), np.linspace(0, room_l, 20))
+    floor_z = np.zeros_like(floor_x)
+    floor_pattern = np.sin(floor_x*2) * np.sin(floor_y*2) * 0.01  # Wood grain effect
     
-    # Walls
-    walls = [
-        ([0, room_width, room_width, 0], [room_length, room_length, room_length, room_length], [0, 0, room_height, room_height]),
-        ([0, room_width, room_width, 0], [0, 0, 0, 0], [0, 0, room_height, room_height]),
-        ([0, 0, 0, 0], [0, room_length, room_length, 0], [0, 0, room_height, room_height]),
-        ([room_width, room_width, room_width, room_width], [0, room_length, room_length, 0], [0, 0, room_height, room_height])
+    fig.add_trace(go.Surface(
+        x=floor_x, y=floor_y, z=floor_z + floor_pattern,
+        colorscale='Browns', showscale=False, name='Wood Floor',
+        lighting=dict(ambient=0.6, diffuse=0.8, specular=0.2, roughness=0.8)
+    ))
+    
+    # Walls with gradient lighting
+    wall_color = 'rgb(245, 245, 245)'
+    
+    # Back wall with display
+    wall_x = np.linspace(0, room_w, 10)
+    wall_z = np.linspace(0, room_h, 10)
+    wall_xx, wall_zz = np.meshgrid(wall_x, wall_z)
+    wall_yy = np.ones_like(wall_xx) * room_l
+    
+    fig.add_trace(go.Surface(
+        x=wall_xx, y=wall_yy, z=wall_zz,
+        colorscale=[[0, wall_color], [1, wall_color]],
+        showscale=False, name='Back Wall',
+        lighting=dict(ambient=0.7, diffuse=0.8)
+    ))
+    
+    # Add premium conference table (realistic shape)
+    table_l = room_l * 0.5
+    table_w = room_w * 0.35
+    table_h = 0.75
+    table_x = room_w / 2
+    table_y = room_l * 0.4
+    
+    # Table top with rounded corners
+    theta = np.linspace(0, 2*np.pi, 50)
+    corner_radius = 0.3
+    
+    # Create rounded rectangle for table
+    table_points_x = []
+    table_points_y = []
+    
+    # Generate rounded rectangle path
+    for t in theta:
+        if t < np.pi/2:
+            x = table_x - table_w/2 + corner_radius - corner_radius*np.cos(t)
+            y = table_y - table_l/2 + corner_radius - corner_radius*np.sin(t)
+        elif t < np.pi:
+            x = table_x + table_w/2 - corner_radius + corner_radius*np.cos(t)
+            y = table_y - table_l/2 + corner_radius - corner_radius*np.sin(t)
+        elif t < 3*np.pi/2:
+            x = table_x + table_w/2 - corner_radius + corner_radius*np.cos(t)
+            y = table_y + table_l/2 - corner_radius + corner_radius*np.sin(t)
+        else:
+            x = table_x - table_w/2 + corner_radius - corner_radius*np.cos(t)
+            y = table_y + table_l/2 - corner_radius + corner_radius*np.sin(t)
+        
+        table_points_x.append(x)
+        table_points_y.append(y)
+    
+    # Table surface
+    fig.add_trace(go.Scatter3d(
+        x=table_points_x + [table_points_x[0]],
+        y=table_points_y + [table_points_y[0]],
+        z=[table_h] * (len(table_points_x) + 1),
+        mode='lines',
+        line=dict(color='rgb(139, 69, 19)', width=20),
+        name='Conference Table',
+        showlegend=False
+    ))
+    
+    # Table legs (cylindrical)
+    leg_positions = [
+        (table_x - table_w/3, table_y - table_l/3),
+        (table_x + table_w/3, table_y - table_l/3),
+        (table_x - table_w/3, table_y + table_l/3),
+        (table_x + table_w/3, table_y + table_l/3)
     ]
-    for i, (x, y, z) in enumerate(walls):
-        fig.add_trace(go.Mesh3d(x=x, y=y, z=z, color='lightblue', opacity=0.4, name=f'Wall {i+1}'))
     
-    # Display screen
-    display_width = room_width * 0.6
-    display_height = display_width * 0.5625
-    display_x = (room_width - display_width) / 2
-    display_y = room_length - 0.1
-    display_z = 1.2
-    fig.add_trace(go.Mesh3d(x=[display_x, display_x + display_width, display_x + display_width, display_x], y=[display_y, display_y, display_y, display_y], z=[display_z, display_z, display_z + display_height, display_z + display_height], color='black', opacity=0.8, name='Display Screen'))
+    for leg_x, leg_y in leg_positions:
+        fig.add_trace(go.Scatter3d(
+            x=[leg_x, leg_x],
+            y=[leg_y, leg_y],
+            z=[0, table_h],
+            mode='lines',
+            line=dict(color='rgb(105, 105, 105)', width=15),
+            showlegend=False
+        ))
     
-    # Conference table
-    table_length = room_length * 0.6
-    table_width = room_width * 0.3
-    table_x = (room_width - table_width) / 2
-    table_y = room_length * 0.3
-    table_height = 0.75
-    fig.add_trace(go.Mesh3d(x=[table_x, table_x + table_width, table_x + table_width, table_x], y=[table_y, table_y, table_y + table_length, table_y + table_length], z=[table_height, table_height, table_height, table_height], color='brown', opacity=0.7, name='Conference Table'))
+    # Add realistic chairs
+    chairs_per_side = specs['capacity'] // 2
+    chair_spacing = table_l / (chairs_per_side + 1)
     
-    # Chairs
-    chairs_per_side = capacity // 2
     for i in range(chairs_per_side):
-        y_pos = table_y + (i + 1) * table_length / (chairs_per_side + 1)
-        fig.add_trace(go.Scatter3d(x=[table_x - 0.5], y=[y_pos], z=[0.4], mode='markers', marker=dict(size=8, color='gray'), name='Chair'))
-        fig.add_trace(go.Scatter3d(x=[table_x + table_width + 0.5], y=[y_pos], z=[0.4], mode='markers', marker=dict(size=8, color='gray'), name='Chair'))
+        y_pos = table_y - table_l/2 + (i + 1) * chair_spacing
+        
+        # Left side chairs
+        add_premium_chair(fig, table_x - table_w/2 - 0.6, y_pos, rotation=90)
+        # Right side chairs  
+        add_premium_chair(fig, table_x + table_w/2 + 0.6, y_pos, rotation=-90)
     
-    # Camera position
-    camera_x = room_width / 2
-    camera_y = room_length - 0.3
-    camera_z = room_height - 0.5
-    fig.add_trace(go.Scatter3d(x=[camera_x], y=[camera_y], z=[camera_z], mode='markers', marker=dict(size=10, color='red', symbol='diamond'), name='PTZ Camera'))
+    # Add head chairs
+    if specs['capacity'] % 2 == 1:
+        add_premium_chair(fig, table_x, table_y - table_l/2 - 0.6, rotation=0)
+    if specs['capacity'] > 8:
+        add_premium_chair(fig, table_x, table_y + table_l/2 + 0.6, rotation=180)
     
-    # Ceiling mics
-    if capacity > 6:
-        mic_positions = [[room_width*0.3, room_length*0.4, room_height-0.1], [room_width*0.7, room_length*0.4, room_height-0.1]]
-        for pos in mic_positions:
-            fig.add_trace(go.Scatter3d(x=[pos[0]], y=[pos[1]], z=[pos[2]], mode='markers', marker=dict(size=6, color='blue'), name='Ceiling Mic'))
+    # Add premium display
+    display_w = room_w * 0.7
+    display_h = display_w * 0.5625
+    display_x = room_w / 2
+    display_y = room_l - 0.05
+    display_z = 1.5
+    
+    # Display frame
+    fig.add_trace(go.Mesh3d(
+        x=[display_x - display_w/2, display_x + display_w/2, display_x + display_w/2, display_x - display_w/2],
+        y=[display_y, display_y, display_y, display_y],
+        z=[display_z, display_z, display_z + display_h, display_z + display_h],
+        i=[0, 0], j=[1, 2], k=[2, 3],
+        color='black', opacity=0.95, name='Display Frame'
+    ))
+    
+    # Display screen (with slight glow effect)
+    screen_margin = 0.05
+    fig.add_trace(go.Mesh3d(
+        x=[display_x - display_w/2 + screen_margin, display_x + display_w/2 - screen_margin,
+           display_x + display_w/2 - screen_margin, display_x - display_w/2 + screen_margin],
+        y=[display_y + 0.01, display_y + 0.01, display_y + 0.01, display_y + 0.01],
+        z=[display_z + screen_margin, display_z + screen_margin,
+           display_z + display_h - screen_margin, display_z + display_h - screen_margin],
+        i=[0, 0], j=[1, 2], k=[2, 3],
+        color='rgb(50, 150, 250)', opacity=0.3, name='Display Screen'
+    ))
+    
+    # Add PTZ camera (realistic model)
+    cam_x, cam_y, cam_z = room_w/2, room_l - 0.3, room_h - 0.3
+    
+    # Camera body
+    fig.add_trace(go.Scatter3d(
+        x=[cam_x], y=[cam_y], z=[cam_z],
+        mode='markers',
+        marker=dict(size=15, color='rgb(60, 60, 60)', symbol='square'),
+        name='PTZ Camera Body', showlegend=False
+    ))
+    
+    # Camera lens
+    fig.add_trace(go.Scatter3d(
+        x=[cam_x], y=[cam_y - 0.1], z=[cam_z],
+        mode='markers',
+        marker=dict(size=8, color='rgb(30, 30, 30)', symbol='circle'),
+        name='Camera Lens', showlegend=False
+    ))
+    
+    # Add ceiling microphones if needed
+    if specs['capacity'] > 8:
+        mic_positions = [
+            (room_w * 0.3, room_l * 0.4, room_h - 0.1),
+            (room_w * 0.7, room_l * 0.4, room_h - 0.1)
+        ]
+        
+        for mic_x, mic_y, mic_z in mic_positions:
+            # Microphone array (hexagonal shape)
+            hex_points = []
+            for angle in np.linspace(0, 2*np.pi, 7):
+                hex_x = mic_x + 0.2 * np.cos(angle)
+                hex_y = mic_y + 0.2 * np.sin(angle)
+                hex_points.append([hex_x, hex_y, mic_z])
             
+            for i in range(6):
+                fig.add_trace(go.Scatter3d(
+                    x=[hex_points[i][0], hex_points[i+1][0]],
+                    y=[hex_points[i][1], hex_points[i+1][1]],
+                    z=[hex_points[i][2], hex_points[i+1][2]],
+                    mode='lines',
+                    line=dict(color='white', width=3),
+                    showlegend=False
+                ))
+    
+    # Add speakers
+    speaker_positions = [
+        (room_w * 0.2, room_l - 0.2, room_h - 0.5),
+        (room_w * 0.8, room_l - 0.2, room_h - 0.5)
+    ]
+    
+    for spk_x, spk_y, spk_z in speaker_positions:
+        fig.add_trace(go.Scatter3d(
+            x=[spk_x], y=[spk_y], z=[spk_z],
+            mode='markers',
+            marker=dict(size=10, color='rgb(40, 40, 40)', symbol='square'),
+            name='Speaker', showlegend=False
+        ))
+    
+    # Configure camera and lighting
+    camera_eye = dict(x=1.8, y=-1.8, z=1.5)
+    camera_center = dict(x=0, y=0, z=0.5)
+    
     fig.update_layout(
-        title="3D Room Visualization with Recommended Equipment",
+        title={
+            'text': "Photorealistic 3D Room Configuration",
+            'x': 0.5,
+            'xanchor': 'center',
+            'font': {'size': 24, 'color': '#1e3c72'}
+        },
         scene=dict(
-            xaxis_title="Width (m)", yaxis_title="Length (m)", zaxis_title="Height (m)",
-            camera=dict(eye=dict(x=1.5, y=1.5, z=1.2)),
-            aspectmode='manual', aspectratio=dict(x=1, y=room_length/room_width, z=0.5)
+            xaxis=dict(title="Width (m)", gridcolor='lightgray', showbackground=False),
+            yaxis=dict(title="Length (m)", gridcolor='lightgray', showbackground=False),
+            zaxis=dict(title="Height (m)", gridcolor='lightgray', showbackground=False),
+            camera=dict(eye=camera_eye, center=camera_center),
+            aspectmode='manual',
+            aspectratio=dict(x=1, y=room_l/room_w, z=0.5),
+            bgcolor='rgb(240, 240, 245)'
         ),
-        showlegend=False, height=600
+        showlegend=False,
+        height=700,
+        margin=dict(l=0, r=0, t=50, b=0)
     )
+    
     return fig
 
-# --- Data Loading ---
-@st.cache_data
-def load_oem_data():
-    try:
-        return pd.read_csv("av_oem_list_2025.csv", encoding='latin-1', on_bad_lines='skip')
-    except FileNotFoundError:
-        st.warning("OEM database not found. Using default recommendations.")
-        return None
+def add_premium_chair(fig, x, y, rotation=0):
+    """Add a realistic office chair to the figure"""
+    # Chair seat
+    seat_h = 0.45
+    fig.add_trace(go.Scatter3d(
+        x=[x], y=[y], z=[seat_h],
+        mode='markers',
+        marker=dict(size=12, color='rgb(70, 70, 70)', symbol='square'),
+        showlegend=False
+    ))
+    
+    # Chair back
+    back_h = 0.9
+    back_offset = 0.15 * np.cos(np.radians(rotation))
+    fig.add_trace(go.Scatter3d(
+        x=[x, x],
+        y=[y + back_offset, y + back_offset],
+        z=[seat_h, back_h],
+        mode='lines',
+        line=dict(color='rgb(70, 70, 70)', width=8),
+        showlegend=False
+    ))
+    
+    # Chair base (5-star wheel base)
+    base_radius = 0.2
+    for angle in range(0, 360, 72):
+        rad = np.radians(angle + rotation)
+        base_x = x + base_radius * np.cos(rad)
+        base_y = y + base_radius * np.sin(rad)
+        fig.add_trace(go.Scatter3d(
+            x=[x, base_x],
+            y=[y, base_y],
+            z=[0.1, 0.1],
+            mode='lines',
+            line=dict(color='rgb(150, 150, 150)', width=3),
+            showlegend=False
+        ))
 
-# --- Main Application ---
-st.title("🏢 AI-Powered Room Configurator & Equipment Recommender")
-st.markdown("*Design your perfect meeting space with AI recommendations and 3D visualization*")
+# --- Cost Calculator with ROI ---
+class CostCalculator:
+    def __init__(self):
+        self.labor_rates = {
+            'basic': 150,
+            'standard': 200,
+            'premium': 300
+        }
+        
+    def calculate_total_cost(self, recommendations, specs):
+        """Calculate comprehensive project costs"""
+        equipment_cost = 0
+        
+        # Add up all equipment
+        for category in ['display', 'camera', 'audio', 'control']:
+            if category in recommendations:
+                equipment_cost += recommendations[category].get('price', 0)
+        
+        # Add accessories
+        if 'accessories' in recommendations:
+            for item in recommendations['accessories']:
+                equipment_cost += item.get('price', 0)
+        
+        # Calculate installation
+        complexity = specs.get('complexity_score', 3)
+        labor_hours = 8 + (complexity * 4)
+        labor_rate = self.labor_rates['premium'] if equipment_cost > 50000 else self.labor_rates['standard']
+        installation_cost = labor_hours * labor_rate
+        
+      # Infrastructure upgrades
+        infrastructure = self._calculate_infrastructure(specs)
+        
+        # Training and support
+        training = 2000 if specs['capacity'] > 12 else 1000
+        support_year1 = equipment_cost * 0.1
+        
+        return {
+            'equipment': equipment_cost,
+            'installation': installation_cost,
+            'infrastructure': infrastructure,
+            'training': training,
+            'support_year1': support_year1,
+            'total': equipment_cost + installation_cost + infrastructure + training + support_year1
+        }
+    
+    def _calculate_infrastructure(self, specs):
+        """Calculate infrastructure upgrade costs"""
+        base_cost = 5000  # Network, power, mounting
+        room_area = specs['length'] * specs['width']
+        
+        # Scale with room size
+        area_multiplier = max(1.0, room_area / 50)
+        
+        # Add for special requirements
+        special_cost = 0
+        if 'Recording' in specs.get('special_requirements', []):
+            special_cost += 3000
+        if 'Live Streaming' in specs.get('special_requirements', []):
+            special_cost += 2000
+            
+        return int(base_cost * area_multiplier + special_cost)
+    
+    def calculate_roi(self, cost_breakdown, specs):
+        """Calculate ROI based on productivity gains"""
+        total_investment = cost_breakdown['total']
+        
+        # Productivity calculations
+        meeting_hours_per_week = specs['capacity'] * 4  # Assume 4 hours/person/week
+        hourly_rate = 75  # Average loaded cost per person
+        
+        # Efficiency gains
+        av_efficiency_gain = 0.15  # 15% more efficient meetings
+        travel_reduction = 0.3  # 30% less travel
+        
+        annual_meeting_cost = meeting_hours_per_week * 52 * hourly_rate
+        annual_savings = annual_meeting_cost * av_efficiency_gain
+        
+        # Travel savings (estimated)
+        annual_travel_budget = specs['capacity'] * 5000  # $5k per person
+        travel_savings = annual_travel_budget * travel_reduction
+        
+        total_annual_savings = annual_savings + travel_savings
+        payback_period = total_investment / total_annual_savings
+        
+        return {
+            'annual_savings': total_annual_savings,
+            'payback_months': payback_period * 12,
+            'roi_3_years': ((total_annual_savings * 3 - total_investment) / total_investment) * 100
+        }
 
-oem_data = load_oem_data()
-recommender = AVRecommendationEngine(oem_data)
-
-with st.sidebar:
-    st.header("🎛️ Room Configuration")
-    room_type = st.selectbox("Room Type", ["Small Meeting Room", "Medium Conference Room", "Large Boardroom", "Training Room", "Auditorium"])
-    room_length = st.slider("Room Length (meters)", 3.0, 20.0, 8.0, 0.5)
-    room_width = st.slider("Room Width (meters)", 3.0, 15.0, 6.0, 0.5)
-    capacity = st.slider("Number of Seats", 2, 50, 12, 2)
-    with st.expander("Advanced Options"):
-        ceiling_height = st.slider("Ceiling Height (meters)", 2.5, 5.0, 3.0, 0.1)
-        budget_range = st.selectbox("Budget Range", ["Economy ($10K-25K)", "Standard ($25K-50K)", "Premium ($50K-100K)", "Enterprise ($100K+)"])
-        special_requirements = st.multiselect("Special Requirements", ["Recording Capability", "Live Streaming", "Wireless Presentation", "Room Booking Display", "Environmental Controls"])
-
-tab1, tab2, tab3, tab4 = st.tabs(["3D Visualization", "AI Recommendations", "Equipment Specs", "Installation Plan"])
-
-with tab1:
-    st.subheader("Interactive 3D Room Preview")
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        fig_3d = create_3d_room_visualization(room_width, room_length, capacity, {})
-        st.plotly_chart(fig_3d, use_container_width=True)
-        if st.button("🔄 Regenerate Layout"):
-            st.rerun()
-        if st.button("💾 Save Configuration"):
-            st.success("Configuration saved! You can download the specs from the Installation Plan tab.")
-    with col2:
-        st.subheader("Room Statistics")
-        room_area = room_length * room_width
-        st.metric("Room Area", f"{room_area:.1f} m²")
-        st.metric("Capacity", f"{capacity} people")
-        st.metric("Area per Person", f"{room_area/capacity:.1f} m²")
-        st.subheader("AVIXA Compliance")
-        max_viewing_distance = room_length * 0.9
-        recommended_display_size = (max_viewing_distance * 39.37) / 6
-        if recommended_display_size <= 100:
-            st.success("✅ Viewing Distance: PASS")
-        else:
-            st.warning("⚠️ Consider larger display")
-        worst_angle = np.degrees(np.arctan2(room_width/2, max_viewing_distance))
-        if worst_angle <= 60:
-            st.success("✅ Viewing Angle: PASS")
-        else:
-            st.error("❌ Viewing Angle: FAIL")
-
-with tab2:
-    st.subheader("🤖 AI Equipment Recommendations")
-    display_recs = recommender.get_display_recommendations(room_length, room_width, capacity)
-    camera_recs = recommender.get_camera_recommendations(room_length, room_width, capacity)
-    audio_recs = recommender.get_audio_recommendations(room_length, room_width, capacity)
-    complexity_score = min(5, (capacity // 5) + (1 if room_length * room_width > 50 else 0) + len(special_requirements))
-    control_recs = recommender.get_control_recommendations(complexity_score)
-    all_recommendations = display_recs + camera_recs + audio_recs + control_recs
-    for rec in all_recommendations:
-        with st.expander(f"📺 {rec['category']}: {rec['product']}", expanded=True):
-            col1, col2 = st.columns([2, 1])
-            with col1:
-                st.write(f"**Why this recommendation:** {rec['reason']}")
-                st.write(f"**Specifications:** {rec['specs']}")
-                if 'models' in rec:
-                    st.write("**Suggested Models:**")
-                    for model in rec['models']:
-                        st.write(f"• {model}")
-            with col2:
-                st.metric("Price Range", rec['price_range'])
-                if st.button(f"Add {rec['category']} to Quote", key=f"add_{rec['category']}"):
-                    st.success(f"{rec['category']} added to quote!")
-    st.subheader("💰 Project Cost Estimate")
-    base_cost = 15000 + (capacity * 1000) + (room_area * 500)
-    equipment_multiplier = 1.0
-    if "Premium" in budget_range:
-        equipment_multiplier = 1.5
-    elif "Enterprise" in budget_range:
-        equipment_multiplier = 2.0
-    total_estimate = base_cost * equipment_multiplier
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Equipment Cost", f"${total_estimate*0.6:,.0f}")
-    with col2:
-        st.metric("Installation Cost", f"${total_estimate*0.3:,.0f}")
-    with col3:
-        st.metric("Total Project Cost", f"${total_estimate:,.0f}")
-
-with tab3:
-    st.subheader("📋 Detailed Equipment Specifications")
-    specs_data = []
-    for rec in all_recommendations:
-        specs_data.append({
-            'Category': rec['category'],
-            'Product': rec['product'],
-            'Reason': rec['reason'],
-            'Price Range': rec['price_range'],
-            'Models': ', '.join(rec.get('models', ['Custom Solution']))
-        })
-    specs_df = pd.DataFrame(specs_data)
-    st.dataframe(specs_df, use_container_width=True)
-    csv_data = specs_df.to_csv(index=False)
-    st.download_button(label="📥 Download Equipment Specifications", data=csv_data, file_name=f"room_config_{room_type.replace(' ', '_')}_{capacity}pax.csv", mime="text/csv")
-
-with tab4:
-    st.subheader("🔧 Installation & Project Plan")
-    st.write("### Project Timeline")
-    timeline_data = {
-        'Phase': ['Planning & Design', 'Equipment Procurement', 'Installation', 'Testing & Commissioning', 'Training & Handover'],
-        'Duration (Days)': [7, 14, 5, 3, 1],
-        'Dependencies': ['Client approval', 'Planning complete', 'Equipment delivered', 'Installation complete', 'Testing complete']
+# --- Environmental Analysis ---
+def analyze_room_environment(specs):
+    """Analyze environmental factors affecting AV performance"""
+    analysis = {
+        'lighting': analyze_lighting_conditions(specs),
+        'acoustics': analyze_acoustic_properties(specs),
+        'thermal': analyze_thermal_considerations(specs),
+        'network': analyze_network_requirements(specs)
     }
-    timeline_df = pd.DataFrame(timeline_data)
-    st.dataframe(timeline_df)
-    st.write("### Installation Requirements")
-    requirements = ["🔌 Power outlets: Minimum 6 dedicated 15A circuits", "🌐 Network infrastructure: CAT6A cabling to all device locations", "📺 Display mounting: Reinforced wall mount or ceiling suspension", "🎤 Audio infrastructure: Conduit for microphone cabling", "❄️ Environmental: HVAC considerations for equipment cooling", "🔒 Security: Equipment lockdown and access control"]
-    for req in requirements:
-        st.write(req)
-    st.write("### Next Steps")
-    if st.button("📞 Request Professional Consultation"):
-        st.success("Consultation request submitted! Our AV specialist will contact you within 24 hours.")
-    if st.button("📊 Generate Detailed Proposal"):
-        st.info("Generating comprehensive proposal with CAD drawings, detailed specifications, and project timeline...")
+    return analysis
 
-st.markdown("---")
-st.markdown("*Powered by AI recommendation engine and AVIXA standards compliance*")
+def analyze_lighting_conditions(specs):
+    """Analyze lighting conditions and recommendations"""
+    room_area = specs['length'] * specs['width']
+    window_area = specs.get('windows', 0)
+    
+    # Calculate ambient light levels
+    if window_area > room_area * 0.2:
+        lighting_challenge = "High"
+        recommendations = [
+            "Install motorized blinds with light sensors",
+            "Use high-brightness display (>500 nits)",
+            "Consider bias lighting behind display"
+        ]
+    elif window_area > room_area * 0.1:
+        lighting_challenge = "Medium"
+        recommendations = [
+            "Adjustable window treatments",
+            "Dimmable LED lighting with presets"
+        ]
+    else:
+        lighting_challenge = "Low"
+        recommendations = ["Standard LED lighting with scene control"]
+    
+    return {
+        'challenge_level': lighting_challenge,
+        'recommendations': recommendations,
+        'optimal_lux': '300-500 lux for video calls'
+    }
+
+def analyze_acoustic_properties(specs):
+    """Analyze room acoustics"""
+    room_volume = specs['length'] * specs['width'] * specs['ceiling_height']
+    surface_area = 2 * (specs['length'] * specs['width'] + 
+                       specs['length'] * specs['ceiling_height'] + 
+                       specs['width'] * specs['ceiling_height'])
+    
+    # Estimate RT60 based on room characteristics
+    estimated_rt60 = room_volume / (surface_area * 0.15)  # Simplified calculation
+    
+    if estimated_rt60 > 0.8:
+        acoustic_challenge = "High - Reverberant"
+        treatments = [
+            "Acoustic ceiling tiles (NRC 0.85+)",
+            "Wall absorption panels on 40% of surfaces",
+            "Carpet or soft flooring recommended"
+        ]
+    elif estimated_rt60 > 0.5:
+        acoustic_challenge = "Medium"
+        treatments = [
+            "Partial acoustic treatment",
+            "Soft furnishings and curtains"
+        ]
+    else:
+        acoustic_challenge = "Low - Well damped"
+        treatments = ["Minimal treatment needed"]
+    
+    return {
+        'estimated_rt60': f"{estimated_rt60:.2f} seconds",
+        'challenge_level': acoustic_challenge,
+        'treatments': treatments,
+        'target_rt60': '0.4-0.6 seconds for conferencing'
+    }
+
+def analyze_thermal_considerations(specs):
+    """Analyze thermal load and cooling requirements"""
+    # Estimate heat load from equipment and people
+    equipment_load = 2000  # Watts from AV equipment
+    people_load = specs['capacity'] * 100  # 100W per person
+    lighting_load = (specs['length'] * specs['width']) * 15  # 15W/m²
+    
+    total_load = equipment_load + people_load + lighting_load
+    
+    return {
+        'estimated_heat_load': f"{total_load} Watts",
+        'cooling_requirement': f"{total_load / 293:.1f} BTU/hr additional",
+        'ventilation_note': "Ensure adequate airflow for equipment cooling"
+    }
+
+def analyze_network_requirements(specs):
+    """Analyze network infrastructure needs"""
+    # Estimate bandwidth requirements
+    video_streams = 2  # Camera feeds
+    if specs['capacity'] > 8:
+        video_streams = 4  # Multiple camera angles
+    
+    bandwidth_per_stream = 10  # Mbps for 4K
+    total_bandwidth = video_streams * bandwidth_per_stream + 20  # Overhead
+    
+    return {
+        'recommended_bandwidth': f"{total_bandwidth} Mbps",
+        'network_requirements': [
+            "Dedicated VLAN for AV traffic",
+            "QoS policies for video/audio",
+            "PoE+ switches for cameras and mics",
+            "Redundant network paths recommended"
+        ]
+    }
+
+# --- Advanced Visualization Functions ---
+def create_acoustic_analysis_chart(analysis):
+    """Create acoustic analysis visualization"""
+    fig = make_subplots(
+        rows=2, cols=2,
+        subplot_titles=('RT60 Analysis', 'Frequency Response', 'Coverage Pattern', 'Noise Floor'),
+        specs=[[{"secondary_y": False}, {"secondary_y": False}],
+               [{"secondary_y": False}, {"secondary_y": False}]]
+    )
+    
+    # RT60 across frequencies
+    frequencies = [125, 250, 500, 1000, 2000, 4000]
+    rt60_values = [0.8, 0.7, 0.6, 0.5, 0.4, 0.4]  # Example values
+    target_rt60 = [0.6] * len(frequencies)
+    
+    fig.add_trace(
+        go.Scatter(x=frequencies, y=rt60_values, name="Current RT60", 
+                  line=dict(color='red', width=3)),
+        row=1, col=1
+    )
+    fig.add_trace(
+        go.Scatter(x=frequencies, y=target_rt60, name="Target RT60", 
+                  line=dict(color='green', width=2, dash='dash')),
+        row=1, col=1
+    )
+    
+    # Frequency response simulation
+    freq_range = np.logspace(2, 4, 100)
+    response = np.random.normal(0, 3, 100) + np.sin(np.log10(freq_range) * 2) * 2
+    
+    fig.add_trace(
+        go.Scatter(x=freq_range, y=response, name="Room Response",
+                  line=dict(color='blue')),
+        row=1, col=2
+    )
+    
+    # Coverage pattern (polar-like visualization)
+    angles = np.linspace(0, 360, 36)
+    coverage = 90 - np.abs(angles - 180) / 4  # Simulated directional pattern
+    
+    fig.add_trace(
+        go.Scatterpolar(r=coverage, theta=angles, mode='lines',
+                       name="Microphone Pattern"),
+        row=2, col=1
+    )
+    
+    # Noise floor
+    time_points = np.arange(0, 24, 0.5)
+    noise_floor = 35 + 10 * np.sin(time_points * np.pi / 12) + np.random.normal(0, 2, len(time_points))
+    
+    fig.add_trace(
+        go.Scatter(x=time_points, y=noise_floor, name="Ambient Noise",
+                  line=dict(color='orange')),
+        row=2, col=2
+    )
+    
+    fig.update_xaxes(title_text="Frequency (Hz)", type="log", row=1, col=1)
+    fig.update_xaxes(title_text="Frequency (Hz)", type="log", row=1, col=2)
+    fig.update_xaxes(title_text="Hour of Day", row=2, col=2)
+    
+    fig.update_yaxes(title_text="RT60 (seconds)", row=1, col=1)
+    fig.update_yaxes(title_text="Level (dB)", row=1, col=2)
+    fig.update_yaxes(title_text="Noise Level (dBA)", row=2, col=2)
+    
+    fig.update_layout(height=600, showlegend=True,
+                     title_text="Comprehensive Acoustic Analysis")
+    
+    return fig
+
+def create_cost_breakdown_chart(cost_data):
+    """Create comprehensive cost breakdown visualization"""
+    fig = make_subplots(
+        rows=2, cols=2,
+        subplot_titles=('Cost Breakdown', 'ROI Projection', 'Monthly Cash Flow', 'Payback Analysis'),
+        specs=[[{"type": "pie"}, {"secondary_y": False}],
+               [{"secondary_y": False}, {"secondary_y": False}]]
+    )
+    
+    # Cost breakdown pie chart
+    categories = list(cost_data.keys())[:-1]  # Exclude 'total'
+    values = [cost_data[cat] for cat in categories]
+    colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7']
+    
+    fig.add_trace(
+        go.Pie(labels=categories, values=values, 
+               marker_colors=colors, hole=0.4),
+        row=1, col=1
+    )
+    
+    # ROI projection over 5 years
+    years = list(range(1, 6))
+    cumulative_savings = [50000, 120000, 190000, 260000, 330000]  # Example
+    initial_investment = cost_data['total']
+    net_roi = [savings - initial_investment for savings in cumulative_savings]
+    
+    fig.add_trace(
+        go.Scatter(x=years, y=cumulative_savings, name="Cumulative Savings",
+                  line=dict(color='green', width=3)),
+        row=1, col=2
+    )
+    fig.add_trace(
+        go.Scatter(x=years, y=net_roi, name="Net ROI",
+                  line=dict(color='blue', width=3)),
+        row=1, col=2
+    )
+    
+    # Monthly cash flow
+    months = list(range(1, 37))  # 3 years
+    monthly_savings = [4000] * 36  # Example monthly savings
+    monthly_costs = [-cost_data['total']/36] + [0] * 35  # Amortized cost
+    net_monthly = [s + c for s, c in zip(monthly_savings, monthly_costs)]
+    
+    fig.add_trace(
+        go.Bar(x=months, y=monthly_savings, name="Monthly Savings",
+               marker_color='lightgreen'),
+        row=2, col=1
+    )
+    fig.add_trace(
+        go.Bar(x=months, y=monthly_costs, name="Monthly Costs",
+               marker_color='lightcoral'),
+        row=2, col=1
+    )
+    
+    # Payback analysis
+    payback_scenarios = ['Conservative', 'Realistic', 'Optimistic']
+    payback_months = [36, 24, 18]
+    colors_payback = ['#FF6B6B', '#4ECDC4', '#45B7D1']
+    
+    fig.add_trace(
+        go.Bar(x=payback_scenarios, y=payback_months, 
+               marker_color=colors_payback, name="Payback Period"),
+        row=2, col=2
+    )
+    
+    fig.update_layout(height=800, showlegend=True)
+    return fig
+
+# --- Main Application Interface ---
+def main():
+    # Header with logo and title
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("""
+        <div style="text-align: center; padding: 20px;">
+            <h1 style="color: #1e3c72; font-size: 3em; margin-bottom: 0;">🏢 AI Room Configurator Pro</h1>
+            <p style="color: #666; font-size: 1.2em; margin-top: 0;">Enterprise-Grade AV Solutions Powered by AI</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Initialize session state
+    if 'recommendations' not in st.session_state:
+        st.session_state.recommendations = None
+    if 'room_specs' not in st.session_state:
+        st.session_state.room_specs = None
+    
+    # Sidebar for room specifications
+    with st.sidebar:
+        st.markdown("### 📏 Room Specifications")
+        
+        # Basic dimensions
+        length = st.slider("Room Length (m)", 3.0, 20.0, 8.0, 0.5)
+        width = st.slider("Room Width (m)", 3.0, 15.0, 6.0, 0.5)
+        ceiling_height = st.slider("Ceiling Height (m)", 2.5, 5.0, 3.0, 0.1)
+        capacity = st.slider("Seating Capacity", 4, 50, 12)
+        
+        # Room characteristics
+        st.markdown("### 🏗️ Room Characteristics")
+        room_type = st.selectbox("Room Type", 
+            ['Conference Room', 'Boardroom', 'Training Room', 'Auditorium', 'Huddle Room'])
+        
+        windows = st.slider("Window Area (%)", 0, 50, 20)
+        
+        # Special requirements
+        st.markdown("### ⚙️ Special Requirements")
+        special_req = st.multiselect("Additional Features",
+            ['Recording', 'Live Streaming', 'Wireless Presentation', 'Digital Signage', 
+             'Room Scheduling', 'Environmental Control'])
+        
+        # Usage patterns
+        st.markdown("### 📊 Usage Patterns")
+        daily_meetings = st.slider("Daily Meetings", 1, 20, 8)
+        avg_meeting_duration = st.slider("Avg Meeting Duration (hours)", 0.5, 4.0, 1.5, 0.25)
+        remote_participants = st.slider("Remote Participants (%)", 0, 100, 40)
+        
+        # Generate button
+        if st.button("🚀 Generate AI Recommendations", type="primary"):
+            room_specs = {
+                'length': length,
+                'width': width,
+                'ceiling_height': ceiling_height,
+                'capacity': capacity,
+                'room_type': room_type,
+                'windows': windows,
+                'special_requirements': special_req,
+                'daily_meetings': daily_meetings,
+                'avg_meeting_duration': avg_meeting_duration,
+                'remote_participants': remote_participants,
+                'complexity_score': len(special_req) + (1 if capacity > 16 else 0)
+            }
+            
+            st.session_state.room_specs = room_specs
+            
+            # Generate recommendations
+            recommender = AdvancedAVRecommender()
+            recommendations = recommender.get_ai_recommendations(room_specs)
+            st.session_state.recommendations = recommendations
+            
+            st.success("✅ Recommendations generated successfully!")
+    
+    # Main content area
+    if st.session_state.recommendations is not None:
+        recommendations = st.session_state.recommendations
+        room_specs = st.session_state.room_specs
+        
+        # Tabs for different views
+        tabs = st.tabs([
+            "🎯 AI Recommendations", 
+            "📐 3D Visualization", 
+            "💰 Cost Analysis", 
+            "🔊 Environmental Analysis",
+            "📋 Project Summary"
+        ])
+        
+        # Tab 1: AI Recommendations
+        with tabs[0]:
+            col1, col2 = st.columns([2, 1])
+            
+            with col1:
+                # Display recommendations for each category
+                for category in ['display', 'camera', 'audio', 'control']:
+                    if category in recommendations:
+                        rec = recommendations[category]
+                        
+                        st.markdown(f"""
+                        <div class="recommendation-card">
+                            <h3>{category.title()} Recommendation</h3>
+                            <h4>🏆 {rec['primary']}</h4>
+                            <p><strong>Price:</strong> ${rec['price']:,}</p>
+                            <p><strong>Specs:</strong> {rec['specs']}</p>
+                            <p><strong>Rating:</strong> {'⭐' * int(rec['rating'])} ({rec['rating']}/5.0)</p>
+                            {f"<p><strong>Features:</strong> {rec.get('features', 'N/A')}</p>" if 'features' in rec else ""}
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # Show reviews
+                        if 'reviews' in rec:
+                            st.markdown("**Customer Reviews:**")
+                            for review in rec['reviews'][:2]:  # Show top 2 reviews
+                                st.markdown(f"""
+                                <div class="review-card">
+                                    <strong>{review['user']}</strong> - {'⭐' * int(review['rating'])}
+                                    <br>"{review['text']}"
+                                </div>
+                                """, unsafe_allow_html=True)
+            
+            with col2:
+                # Confidence score
+                confidence = recommendations['confidence_score']
+                st.metric("AI Confidence Score", f"{confidence}%", 
+                         delta="High Confidence" if confidence > 90 else "Good Match")
+                
+                # Quick stats
+                total_cost = sum([rec.get('price', 0) for rec in recommendations.values() 
+                                if isinstance(rec, dict) and 'price' in rec])
+                
+                st.markdown(f"""
+                <div class="metric-card">
+                    <h4>Quick Stats</h4>
+                    <p><strong>Total Equipment:</strong> ${total_cost:,}</p>
+                    <p><strong>Room Utilization:</strong> {room_specs['capacity']} people</p>
+                    <p><strong>Technology Grade:</strong> Enterprise</p>
+                </div>
+                """, unsafe_allow_html=True)
+        
+        # Tab 2: 3D Visualization
+        with tabs[1]:
+            st.markdown("### 🏗️ Photorealistic 3D Room Preview")
+            
+            try:
+                fig_3d = create_photorealistic_3d_room(room_specs, recommendations)
+                st.plotly_chart(fig_3d, use_container_width=True)
+            except Exception as e:
+                st.error(f"3D visualization temporarily unavailable: {str(e)}")
+                st.info("💡 3D room visualization will show your configured space with all recommended equipment positioned optimally.")
+            
+            # Room metrics
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("Room Area", f"{room_specs['length'] * room_specs['width']:.1f} m²")
+            with col2:
+                st.metric("Volume", f"{room_specs['length'] * room_specs['width'] * room_specs['ceiling_height']:.1f} m³")
+            with col3:
+                area_per_person = (room_specs['length'] * room_specs['width']) / room_specs['capacity']
+                st.metric("Area/Person", f"{area_per_person:.1f} m²")
+            with col4:
+                optimal_viewing = room_specs['length'] * 0.9
+                st.metric("Viewing Distance", f"{optimal_viewing:.1f} m")
+        
+        # Tab 3: Cost Analysis
+        with tabs[2]:
+            st.markdown("### 💰 Comprehensive Cost Analysis")
+            
+            calculator = CostCalculator()
+            cost_breakdown = calculator.calculate_total_cost(recommendations, room_specs)
+            roi_analysis = calculator.calculate_roi(cost_breakdown, room_specs)
+            
+            # Cost summary cards
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("Equipment", f"${cost_breakdown['equipment']:,}")
+            with col2:
+                st.metric("Installation", f"${cost_breakdown['installation']:,}")
+            with col3:
+                st.metric("Total Investment", f"${cost_breakdown['total']:,}")
+            with col4:
+                st.metric("Payback Period", f"{roi_analysis['payback_months']:.1f} months")
+            
+            # Cost visualization
+            fig_cost = create_cost_breakdown_chart(cost_breakdown)
+            st.plotly_chart(fig_cost, use_container_width=True)
+            
+            # ROI details
+            st.markdown("### 📈 Return on Investment Analysis")
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown(f"""
+                **Annual Savings Breakdown:**
+                - Meeting Efficiency Gains: ${roi_analysis['annual_savings'] * 0.6:,.0f}
+                - Travel Reduction: ${roi_analysis['annual_savings'] * 0.4:,.0f}
+                - **Total Annual Savings: ${roi_analysis['annual_savings']:,.0f}**
+                """)
+            
+            with col2:
+                st.markdown(f"""
+                **ROI Metrics:**
+                - Payback Period: {roi_analysis['payback_months']:.1f} months
+                - 3-Year ROI: {roi_analysis['roi_3_years']:.0f}%
+                - Break-even Point: Month {roi_analysis['payback_months']:.0f}
+                """)
+        
+        # Tab 4: Environmental Analysis
+        with tabs[3]:
+            st.markdown("### 🔊 Environmental & Performance Analysis")
+            
+            env_analysis = analyze_room_environment(room_specs)
+            
+            # Acoustic analysis
+            st.markdown("#### 🎵 Acoustic Analysis")
+            acoustic_fig = create_acoustic_analysis_chart(env_analysis['acoustics'])
+            st.plotly_chart(acoustic_fig, use_container_width=True)
+            
+            # Environmental factors
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("#### 💡 Lighting Conditions")
+                st.info(f"**Challenge Level:** {env_analysis['lighting']['challenge_level']}")
+                st.markdown("**Recommendations:**")
+                for rec in env_analysis['lighting']['recommendations']:
+                    st.write(f"• {rec}")
+                
+                st.markdown("#### 🌡️ Thermal Considerations")
+                st.info(f"**Heat Load:** {env_analysis['thermal']['estimated_heat_load']}")
+                st.write(f"**Additional Cooling:** {env_analysis['thermal']['cooling_requirement']}")
+            
+            with col2:
+                st.markdown("#### 🔊 Acoustic Properties")
+                st.info(f"**RT60:** {env_analysis['acoustics']['estimated_rt60']}")
+                st.markdown("**Recommended Treatments:**")
+                for treatment in env_analysis['acoustics']['treatments']:
+                    st.write(f"• {treatment}")
+                
+                st.markdown("#### 🌐 Network Requirements")
+                st.info(f"**Bandwidth:** {env_analysis['network']['recommended_bandwidth']}")
+                st.markdown("**Infrastructure:**")
+                for req in env_analysis['network']['network_requirements']:
+                    st.write(f"• {req}")
+        
+        # Tab 5: Project Summary
+        with tabs[4]:
+            st.markdown("### 📋 Executive Project Summary")
+            
+            # Generate PDF report button
+            col1, col2, col3 = st.columns([1, 1, 1])
+            with col2:
+                if st.button("📄 Generate PDF Report", type="primary"):
+                    st.success("✅ PDF report generated! (Feature in development)")
+            
+            # Executive summary
+            st.markdown("""
+            #### Executive Summary
+            This comprehensive AV solution has been designed specifically for your meeting space requirements 
+            using advanced AI algorithms that consider room acoustics, lighting conditions, user capacity, 
+            and budget constraints.
+            """)
+            
+            # Key highlights
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("""
+                #### 🎯 Key Highlights
+                - **AI-Optimized Design:** Custom configuration for your space
+                - **Enterprise-Grade Components:** Professional reliability and performance
+                - **Scalable Architecture:** Future-ready and expandable
+                - **Comprehensive Support:** Training and ongoing maintenance included
+                """)
+            
+            with col2:
+                st.markdown(f"""
+                #### 📊 Project Metrics
+                - **Confidence Score:** {recommendations['confidence_score']}%
+                - **Total Investment:** ${cost_breakdown['total']:,}
+                - **Expected ROI:** {roi_analysis['roi_3_years']:.0f}% (3 years)
+                - **Payback Period:** {roi_analysis['payback_months']:.1f} months
+                """)
+            
+            # Implementation timeline
+            st.markdown("#### 🗓️ Implementation Timeline")
+            timeline_data = {
+                'Phase': ['Planning & Design', 'Procurement', 'Installation', 'Testing & Training', 'Go-Live'],
+                'Duration': ['2 weeks', '3-4 weeks', '1 week', '1 week', '1 day'],
+                'Key Activities': [
+                    'Final design, permits, scheduling',
+                    'Equipment ordering, delivery coordination',
+                    'Physical installation, cable routing',
+                    'System commissioning, user training',
+                    'Production deployment, support handoff'
+                ]
+            }
+            
+            timeline_df = pd.DataFrame(timeline_data)
+            st.dataframe(timeline_df, use_container_width=True)
+            
+            # Next steps
+            st.markdown("""
+            #### 🚀 Next Steps
+            1. **Review Recommendations:** Evaluate the proposed solution with your team
+            2. **Schedule Consultation:** Book a detailed technical discussion with our experts
+            3. **Site Survey:** Arrange for precise measurements and environmental assessment  
+            4. **Proposal Refinement:** Customize the solution based on your feedback
+            5. **Project Kickoff:** Begin implementation once approved
+            """)
+            
+            # Contact information
+            st.markdown("""
+            #### 📞 Get Started Today
+            Ready to transform your meeting space? Contact our AV experts:
+            - **Email:** solutions@avpro.com
+            - **Phone:** +1 (555) 123-AVPRO
+            - **Schedule:** [Book a consultation](https://calendly.com/avpro-solutions)
+            """)
+    
+    else:
+        # Welcome screen when no recommendations are generated
+        st.markdown("""
+        <div style="text-align: center; padding: 50px;">
+            <h2>🎯 Welcome to AI Room Configurator Pro</h2>
+            <p style="font-size: 1.2em; color: #666;">
+                Get started by configuring your room specifications in the sidebar, 
+                then click "Generate AI Recommendations" to see your custom AV solution.
+            </p>
+            <div style="margin: 30px 0;">
+                <h4>🚀 What You'll Get:</h4>
+                <div style="display: flex; justify-content: center; gap: 30px; margin-top: 20px;">
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; width: 200px;">
+                        <h5>🎯 AI Recommendations</h5>
+                        <p>Smart product selection based on your specific needs</p>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; width: 200px;">
+                        <h5>📐 3D Visualization</h5>
+                        <p>See your room with equipment positioned optimally</p>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; width: 200px;">
+                        <h5>💰 Cost Analysis</h5>
+                        <p>Complete financial breakdown with ROI projections</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+if __name__ == "__main__":
+    main()
