@@ -275,7 +275,7 @@ class AdvancedAVRecommender:
                 'primary': 'Crestron Flex UC',
                 'type': 'Tabletop touchpanel',
                 'price': 3999,
-                'rating': 4.6,  # Added for consistency
+                'rating': 4.6,
                 'features': ['One-touch join', 'Room scheduling', 'Preset scenes']
             }
         else:
@@ -283,7 +283,7 @@ class AdvancedAVRecommender:
                 'primary': 'Crestron NVX System',
                 'type': 'Enterprise control platform',
                 'price': 15999,
-                'rating': 4.9,  # Added for consistency
+                'rating': 4.9,
                 'features': ['Full automation', 'Network AV', 'API integration', 'Analytics']
             }
 
@@ -386,7 +386,6 @@ def create_photorealistic_3d_room(specs, recommendations):
     floor_z = np.zeros_like(floor_x)
     floor_pattern = np.sin(floor_x * 2) * np.sin(floor_y * 2) * 0.01  # Wood grain effect
 
-    # FIX: Replaced 'Browns' with a valid Plotly colorscale 'ylorbr'.
     fig.add_trace(go.Surface(
         x=floor_x, y=floor_y, z=floor_z + floor_pattern,
         colorscale='ylorbr', showscale=False, name='Wood Floor',
@@ -442,17 +441,18 @@ def create_photorealistic_3d_room(specs, recommendations):
         table_points_x.append(x)
         table_points_y.append(y)
 
-    # Table surface
-    fig.add_trace(go.Scatter3d(
-        x=table_points_x + [table_points_x[0]],
-        y=table_points_y + [table_points_y[0]],
-        z=[table_h] * (len(table_points_x) + 1),
-        mode='lines',
-        fill='toself',
-        fillcolor='rgba(139, 69, 19, 0.8)',
-        line=dict(color='rgb(139, 69, 19)', width=2),
-        name='Conference Table',
-        showlegend=False
+    # Table surface using go.Mesh3d to create a solid shape
+    fig.add_trace(go.Mesh3d(
+        x=table_points_x,
+        y=table_points_y,
+        z=[table_h] * len(table_points_x),
+        # Use i, j, k to define the triangles that form the tabletop surface
+        i=list(range(len(table_points_x) - 2)),
+        j=list(range(1, len(table_points_x) - 1)),
+        k=list(range(2, len(table_points_x))),
+        color='rgb(139, 69, 19)',
+        opacity=0.8,
+        name='Conference Table'
     ))
 
     # Table legs (cylindrical)
@@ -479,7 +479,6 @@ def create_photorealistic_3d_room(specs, recommendations):
 
     for i in range(chairs_per_side):
         y_pos = table_y - table_l / 2 + (i + 1) * chair_spacing
-
         # Left side chairs
         add_premium_chair(fig, table_x - table_w / 2 - 0.6, y_pos, rotation=90)
         # Right side chairs
@@ -926,7 +925,6 @@ def create_cost_breakdown_chart(cost_data, roi_analysis):
         row=2, col=1
     )
 
-    # FIX: Replaced problematic fig.add_hline with the more stable fig.add_shape.
     fig.add_shape(
         type="line",
         x0=months[0], y0=0,
@@ -1053,10 +1051,8 @@ def main():
                     if category in recommendations:
                         rec = recommendations[category]
 
-                        # FIX: Use .get() to safely access keys that might not exist.
-                        # This prevents the KeyError for 'specs' in the control system.
                         specs_text = rec.get('specs', 'N/A')
-                        rating = rec.get('rating', 0)  # Also make rating safe
+                        rating = rec.get('rating', 0)
 
                         st.markdown(f"""
                         <div class="recommendation-card">
@@ -1072,7 +1068,7 @@ def main():
                         # Show reviews if they exist
                         if 'reviews' in rec:
                             st.markdown("**Customer Reviews:**")
-                            for review in rec['reviews'][:2]:  # Show top 2 reviews
+                            for review in rec['reviews'][:2]:
                                 st.markdown(f"""
                                 <div class="review-card">
                                     <strong>{review['user']}</strong> - {'⭐' * int(review['rating'])}
@@ -1086,7 +1082,6 @@ def main():
                 st.metric("AI Confidence Score", f"{confidence}%",
                           delta="High Confidence" if confidence > 90 else "Good Match")
 
-                # FIX: Correctly calculate total equipment cost including accessories
                 total_cost = 0
                 for key, value in recommendations.items():
                     if isinstance(value, dict) and 'price' in value:
