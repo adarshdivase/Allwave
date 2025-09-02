@@ -43,13 +43,22 @@ st.markdown("""
         margin: 10px 0;
         box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
+    /* --- CSS FIX APPLIED HERE --- */
     .metric-card {
         background: white;
         padding: 15px;
         border-radius: 10px;
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         border-left: 4px solid #667eea;
+        color: black !important; /* Set default text color to black */
     }
+    .metric-card h4 {
+        color: black !important; /* Ensure heading is also black */
+    }
+    .metric-card p {
+        color: black !important; /* Ensure paragraph text is black */
+    }
+    /* --- End of CSS FIX --- */
     .product-image {
         border-radius: 10px;
         box-shadow: 0 5px 20px rgba(0,0,0,0.15);
@@ -683,7 +692,7 @@ class CostCalculator:
         travel_savings = annual_travel_budget * travel_reduction
 
         total_annual_savings = annual_savings + travel_savings
-        payback_period = total_investment / total_annual_savings if total_annual_savings > 0 else float('inf')
+        payback_period = total_annual_savings / total_investment if total_investment > 0 else float('inf')
 
         return {
             'annual_savings': total_annual_savings,
@@ -1067,7 +1076,7 @@ def main():
 
                         # Show reviews if they exist
                         if 'reviews' in rec:
-                            st.markdown("**Customer Reviews:**")
+                            st.markdown("<strong>Customer Reviews:</strong>", unsafe_allow_html=True)
                             for review in rec['reviews'][:2]:
                                 st.markdown(f"""
                                 <div class="review-card">
