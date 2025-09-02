@@ -1,0 +1,10 @@
+Issue Type,Issue key,Issue id,Summary,Created,Status,Components,Resolution,Custom field (City),Custom field (Warranty Type),Custom field (Organizations),Custom field (RCA - Root Cause Analysis)
+Task,ALW-9,10008,"Audio issues in BCG Mumbai MPR room",2025-08-25 11:32 AM,Closed,Audio,Done,Mumbai,Standard,"BCG",Device Faulty
+Task,ALW-8,10007,"Crestron touch panel not responding at TCS Hyderabad",2025-08-24 4:15 PM,Closed,Control Systems,Done,Hyderabad,Premium,"TCS",Configuration Error
+Task,ALW-7,10006,"No image on projector in WeWork Bangalore conference room",2025-08-23 10:01 AM,Closed,Displays & Projectors,Done,Bangalore,Standard,"WeWork",Cable/Connector Faulty
+Task,ALW-6,10005,"Camera not detected on VC system at DXC Chennai",2025-08-22 2:30 PM,Closed,UC & Collaboration Devices,Done,Chennai,Premium,"DXC",Software/Driver Issue
+Task,ALW-5,10004,"Poor audio quality from ceiling mics in NSL Pune",2025-08-21 9:45 AM,Closed,Audio: Microphones & Conferencing,Done,Pune,Standard,"NSL",User Error/Training Issue
+Task,ALW-4,10003,"Video wall showing distorted colors at Smart Works Gurgaon",2025-08-20 5:00 PM,Closed,Video Wall Technology,Done,Gurgaon,Premium,"Smart Works",Device Faulty
+Task,ALW-3,10002,"Unable to share content wirelessly at Jiva Systems",2025-08-19 12:10 PM,Closed,Accessories,Done,Hyderabad,Standard,"Jiva Systems",Network/Firewall Issue
+Task,ALW-2,10001,"Logitech Tap controller frozen at Bayer office",2025-08-18 3:20 PM,Closed,Control Systems,Done,Mumbai,Premium,"Bayer",Software/Driver Issue
+Task,ALW-1,10000,"Echo reported from far-end participants at Collins Aerospace",2025-08-17 10:55 AM,Closed,Audio,Done,Bangalore,Standard,"Collins Aerospace",Acoustic/Room Issue
