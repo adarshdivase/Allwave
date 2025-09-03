@@ -439,7 +439,12 @@ def load_and_process_documents():
                 if file_type == "csv":
                     df = pd.read_csv(file_path, encoding='latin-1')
                     content = f"CSV Data from {metadata['file_name']}:\n"
-                    content += df.head(10).to_string(index=False)
+                    # Include more rows and better formatting for CSV data
+                    if len(df) > 0:
+                        # Get column names and sample data
+                        content += f"Columns: {', '.join(df.columns.tolist())}\n"
+                        content += "Sample Data:\n"
+                        content += df.head(15).to_string(index=False, max_colwidth=50)
                     metadata['rows'] = len(df)
                     metadata['columns'] = list(df.columns)
                 elif file_type == "json":
