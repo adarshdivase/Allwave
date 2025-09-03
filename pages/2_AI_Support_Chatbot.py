@@ -468,10 +468,6 @@ def generate_enhanced_response(query: str, search_results: List[Dict], maintenan
     for source_name, source_results in results_by_source.items():
         if len(source_results) == 1:
             result = source_results[0]
-            # Assuming format_search_result exists, but it's missing in the provided code.
-            # Creating a placeholder for it to avoid an error.
-            def format_search_result(content, metadata, query_info):
-                 return f"📄 **{os.path.basename(metadata.get('path', 'Unknown'))}**\n{content[:300]}...\n\n"
             response += format_search_result(result['content'], result['metadata'], query_info)
         else:
             response += f"📁 **Multiple matches in {source_name}:**\n\n"
@@ -649,48 +645,353 @@ def load_documents_enhanced():
     
     return documents, file_paths, file_metadata
 
-# Note: The function 'create_enhanced_search_index' was incomplete in the provided code.
-# I am providing a plausible completion for it to make the script functional.
 @st.cache_resource
 def create_enhanced_search_index(_documents, _file_paths, _metadata):
-    """Create enhanced search index using SentenceTransformers and FAISS"""
-    st.info("🧠 **Creating search index... This might take a moment.**")
-
-    model = SentenceTransformer('all-MiniLM-L6-v2')
+    """Create enhanced search index with better chunking and metadata"""
+    st.info("🧠 **Building semantic search index...**")
     
+    # Load sentence transformer model
+    try:
+        model = SentenceTransformer('all-MiniLM-L6-v2')
+        st.success("✅ **Loaded embedding model:** all-MiniLM-L6-v2")
+    except Exception as e:
+        st.error(f"❌ **Failed to load embedding model:** {str(e)}")
+        return None, [], []
+    
+    # Process documents into chunks
     all_chunks = []
     chunk_metadata = []
-
-    for i, doc in enumerate(_documents):
-        chunks = smart_chunking(doc, chunk_size=config.chunk_size)
-        all_chunks.extend(chunks)
-        for chunk in chunks:
-            chunk_metadata.append({
-                'source': _file_paths[i],
-                'metadata': _metadata[i]
-            })
-
+    
+    progress_bar = st.progress(0)
+    
+    for idx, (doc, file_path, metadata) in enumerate(zip(_documents, _file_paths, _metadata)):
+        try:
+            # Smart chunking
+            chunks = smart_chunking(doc, config.chunk_size)
+            
+            for chunk_idx, chunk in enumerate(chunks):
+                all_chunks.append(chunk)
+                chunk_metadata.append({
+                    'source': file_path,
+                    'chunk_id': chunk_idx,
+                    'total_chunks': len(chunks),
+                    'file_metadata': metadata
+                })
+            
+            progress_bar.progress((idx + 1) / len(_documents))
+            
+        except Exception as e:
+            st.warning(f"⚠️ **Error processing** {metadata['name']}: {str(e)}")
+    
     if not all_chunks:
-        st.warning("No text chunks were generated. The search index will be empty.")
+        st.error("❌ **No text chunks created!**")
         return None, [], []
-
-    st.info(f"📊 **Generated {len(all_chunks)} text chunks for indexing.**")
-
-    embeddings = model.encode(all_chunks, show_progress_bar=True)
     
-    dimension = embeddings.shape[1]
-    index = faiss.IndexFlatL2(dimension)
-    index.add(np.array(embeddings, dtype=np.float32))
+    st.info(f"📝 **Created {len(all_chunks)} text chunks**")
     
-    st.success(f"✅ **Search index created successfully!**")
+    # Create embeddings
+    try:
+        st.info("🔄 **Generating embeddings...**")
+        embeddings = model.encode(all_chunks, show_progress_bar=False)
+        st.success(f"✅ **Generated {len(embeddings)} embeddings**")
+    except Exception as e:
+        st.error(f"❌ **Embedding generation failed:** {str(e)}")
+        return None, [], []
+    
+    # Create FAISS index
+    try:
+        dimension = embeddings.shape[1]
+        index = faiss.IndexFlatIP(dimension)  # Inner product similarity
+        
+        # Normalize embeddings for cosine similarity
+        faiss.normalize_L2(embeddings)
+        index.add(embeddings.astype('float32'))
+        
+        st.success(f"🎯 **Created FAISS index with {index.ntotal} vectors**")
+        
+    except Exception as e:
+        st.error(f"❌ **FAISS index creation failed:** {str(e)}")
+        return None, [], []
     
     return index, all_chunks, chunk_metadata
 
-# Main application logic would typically follow here, e.g.:
-# if __name__ == "__main__":
-#     st.title("AI Support Chatbot Enhanced")
-#     docs, paths, meta = load_documents_enhanced()
-#     if docs:
-#         index, chunks, chunk_meta = create_enhanced_search_index(docs, paths, meta)
-#         maintenance_pipeline = MaintenancePipeline()
-#         # ... rest of the Streamlit UI and interaction logic
+def search_documents(query: str, index, chunks: List[str], chunk_metadata: List[Dict], k: int = 6) -> List[Dict]:
+    """Enhanced document search with better result formatting"""
+    if not index or not chunks:
+        return []
+    
+    try:
+        # Load model and create query embedding
+        model = SentenceTransformer('all-MiniLM-L6-v2')
+        query_embedding = model.encode([query])
+        faiss.normalize_L2(query_embedding)
+        
+        # Search
+        similarities, indices = index.search(query_embedding.astype('float32'), k)
+        
+        results = []
+        for sim, idx in zip(similarities[0], indices[0]):
+            if idx < len(chunks) and sim > config.similarity_threshold:
+                results.append({
+                    'content': chunks[idx],
+                    'similarity': float(sim),
+                    'source': chunk_metadata[idx]['source'],
+                    'metadata': chunk_metadata[idx]
+                })
+        
+        return results
+        
+    except Exception as e:
+        st.error(f"Search error: {str(e)}")
+        return []
+
+def format_search_result(content: str, metadata: Dict, query_info: Dict) -> str:
+    """Format individual search result with enhanced presentation"""
+    source_name = os.path.basename(metadata['source'])
+    
+    # Truncate content if too long
+    display_content = content
+    if len(content) > 800:
+        display_content = content[:800] + "..."
+    
+    # Add category-specific formatting
+    category = query_info.get('category', 'general')
+    category_emojis = {
+        'camera': '📷',
+        'audio': '🎵',
+        'computer': '💻',
+        'display': '🖥️',
+        'network': '🌐'
+    }
+    
+    emoji = category_emojis.get(category, '📄')
+    
+    result = f"{emoji} **{source_name}**\n\n"
+    result += f"{display_content}\n\n"
+    
+    return result
+
+# --- Streamlit Application ---
+def main():
+    """Main Streamlit application"""
+    st.set_page_config(
+        page_title="AI Support Chatbot Enhanced",
+        page_icon="🤖",
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
+    
+    # Custom CSS
+    st.markdown("""
+    <style>
+    .main-header {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem 1rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        text-align: center;
+        color: white;
+    }
+    .chat-message {
+        padding: 1rem;
+        margin: 0.5rem 0;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+        background-color: #f8f9fa;
+    }
+    .maintenance-alert {
+        background: linear-gradient(90deg, #ff6b6b 0%, #ee5a24 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+    .status-good {
+        background: linear-gradient(90deg, #2ed573 0%, #1e90ff 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Header
+    st.markdown("""
+    <div class="main-header">
+        <h1>🤖 AI Support Chatbot Enhanced</h1>
+        <p>Intelligent Equipment Support & Predictive Maintenance System</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Initialize maintenance pipeline
+    if 'maintenance_pipeline' not in st.session_state:
+        with st.spinner("🔧 Initializing maintenance system..."):
+            st.session_state.maintenance_pipeline = MaintenancePipeline()
+    
+    # Load documents and create search index
+    if 'search_ready' not in st.session_state:
+        with st.spinner("📚 Loading documents and building search index..."):
+            documents, file_paths, metadata = load_documents_enhanced()
+            
+            if documents:
+                index, chunks, chunk_metadata = create_enhanced_search_index(documents, file_paths, metadata)
+                
+                if index is not None:
+                    st.session_state.search_index = index
+                    st.session_state.chunks = chunks
+                    st.session_state.chunk_metadata = chunk_metadata
+                    st.session_state.search_ready = True
+                else:
+                    st.error("❌ **Failed to create search index**")
+                    st.session_state.search_ready = False
+            else:
+                st.warning("⚠️ **No documents loaded - running in maintenance-only mode**")
+                st.session_state.search_ready = False
+    
+    # Sidebar with system status
+    with st.sidebar:
+        st.header("🔧 System Status")
+        
+        # Maintenance system status
+        maintenance_pipeline = st.session_state.maintenance_pipeline
+        high_risk_equipment = maintenance_pipeline.get_equipment_by_risk('HIGH')
+        upcoming_maintenance = maintenance_pipeline.get_maintenance_schedule(7)
+        
+        if high_risk_equipment:
+            st.markdown(f"""
+            <div class="maintenance-alert">
+                <h4>🚨 High Risk Alert</h4>
+                <p>{len(high_risk_equipment)} equipment items need immediate attention</p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class="status-good">
+                <h4>✅ All Systems Normal</h4>
+                <p>No critical maintenance issues</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.metric("📅 Maintenance Due (7 days)", len(upcoming_maintenance))
+        st.metric("⚠️ High Risk Equipment", len(high_risk_equipment))
+        st.metric("📊 Total Equipment", len(maintenance_pipeline.maintenance_data))
+        
+        # Document search status
+        st.header("📚 Document Search")
+        if st.session_state.get('search_ready', False):
+            st.success("✅ Search system ready")
+            st.metric("📄 Documents Indexed", len(st.session_state.get('chunks', [])))
+        else:
+            st.warning("⚠️ Search system not ready")
+        
+        # Quick actions
+        st.header("⚡ Quick Actions")
+        if st.button("🚨 Show High Risk Equipment"):
+            st.session_state.quick_query = "Show me all high risk equipment"
+        
+        if st.button("📅 Show Maintenance Schedule"):
+            st.session_state.quick_query = "What's the maintenance schedule?"
+        
+        if st.button("💰 Show Cost Analysis"):
+            st.session_state.quick_query = "Show maintenance cost analysis"
+    
+    # Main chat interface
+    st.header("💬 Chat Interface")
+    
+    # Initialize chat history
+    if 'chat_history' not in st.session_state:
+        st.session_state.chat_history = []
+    
+    # Handle quick actions
+    if 'quick_query' in st.session_state and st.session_state.quick_query:
+        query = st.session_state.quick_query
+        st.session_state.quick_query = None
+    else:
+        query = st.chat_input("Ask me about equipment, maintenance, or search documents...")
+    
+    if query:
+        # Add user message to chat
+        st.session_state.chat_history.append({"role": "user", "content": query})
+        
+        # Process query
+        with st.spinner("🤔 Processing your query..."):
+            query_info = detect_query_intent(query)
+            
+            # Search documents if search system is ready
+            search_results = []
+            if st.session_state.get('search_ready', False):
+                search_results = search_documents(
+                    query,
+                    st.session_state.search_index,
+                    st.session_state.chunks,
+                    st.session_state.chunk_metadata,
+                    k=config.top_k_retrieval
+                )
+            
+            # Generate response
+            response = generate_enhanced_response(
+                query, 
+                search_results, 
+                st.session_state.maintenance_pipeline
+            )
+            
+            # Add assistant response to chat
+            st.session_state.chat_history.append({"role": "assistant", "content": response})
+    
+    # Display chat history
+    for message in st.session_state.chat_history:
+        if message["role"] == "user":
+            with st.chat_message("user"):
+                st.write(message["content"])
+        else:
+            with st.chat_message("assistant"):
+                st.markdown(message["content"])
+    
+    # Equipment explorer section
+    with st.expander("🔍 Equipment Explorer", expanded=False):
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.subheader("📊 Equipment by Type")
+            equipment_types = ['HVAC', 'IT_EQUIPMENT', 'ELECTRICAL', 'FIRE_SAFETY', 'AV_EQUIPMENT']
+            
+            for eq_type in equipment_types:
+                equipment_list = maintenance_pipeline.get_equipment_by_type(eq_type)
+                with st.expander(f"{eq_type.replace('_', ' ').title()} ({len(equipment_list)} items)"):
+                    for eq in equipment_list[:5]:  # Show first 5
+                        risk_color = {'HIGH': '🔴', 'MEDIUM': '🟡', 'LOW': '🟢'}.get(eq['risk_level'], '⚪')
+                        st.write(f"{risk_color} **{eq['id']}** - Risk: {eq['failure_probability']:.1%}")
+                        st.write(f"📍 {eq['location']} | Next maintenance: {eq['next_maintenance']}")
+        
+        with col2:
+            st.subheader("⚠️ Risk Assessment")
+            
+            # Risk distribution
+            risk_data = {
+                'HIGH': len(maintenance_pipeline.get_equipment_by_risk('HIGH')),
+                'MEDIUM': len(maintenance_pipeline.get_equipment_by_risk('MEDIUM')),
+                'LOW': len(maintenance_pipeline.get_equipment_by_risk('LOW'))
+            }
+            
+            for risk_level, count in risk_data.items():
+                color = {'HIGH': '🔴', 'MEDIUM': '🟡', 'LOW': '🟢'}[risk_level]
+                st.metric(f"{color} {risk_level} Risk", count)
+            
+            # Upcoming maintenance
+            st.subheader("📅 This Week's Maintenance")
+            upcoming = maintenance_pipeline.get_maintenance_schedule(7)
+            if upcoming:
+                for item in upcoming[:3]:
+                    st.write(f"📋 **{item['id']}** - {item['date']}")
+                    st.write(f"💰 Est. cost: ${item['maintenance_cost']:,}")
+            else:
+                st.write("✅ No maintenance scheduled this week")
+    
+    # Clear chat button
+    if st.button("🗑️ Clear Chat History"):
+        st.session_state.chat_history = []
+        st.experimental_rerun()
+
+if __name__ == "__main__":
+    main()
