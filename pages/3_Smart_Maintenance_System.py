@@ -1051,19 +1051,32 @@ def handle_predictive_dashboard(maintenance_engine):
 
             calendar_df = pd.DataFrame(calendar_data)
 
-            # Color code by priority
-            def highlight_priority(row):
-                if row['Priority'] == 'HIGH':
-                    return ['background-color: #ffebee'] * len(row)
-                elif row['Priority'] == 'MEDIUM':
-                    return ['background-color: #fff8e1'] * len(row)
-                else:
-                    return ['background-color: #e8f5e8'] * len(row)
+            # --- MODIFICATION FOR DARK THEME TABLE ---
+            # Create a Styler object from the DataFrame
+            styler = calendar_df.style
 
+            # Set the default text color for all cells to white for dark theme readability
+            styler.set_properties(**{'color': 'white'})
+
+            # Define the function to highlight rows based on priority
+            def highlight_priority(row):
+                # For highlighted rows, set a light background and black text for contrast
+                if row['Priority'] == 'HIGH':
+                    return ['background-color: #ffebee; color: black;'] * len(row)
+                elif row['Priority'] == 'MEDIUM':
+                    return ['background-color: #fff8e1; color: black;'] * len(row)
+                else:
+                    return ['background-color: #e8f5e8; color: black;'] * len(row)
+            
+            # Apply the highlighting function
+            styler.apply(highlight_priority, axis=1)
+
+            # Display the fully styled DataFrame
             st.dataframe(
-                calendar_df.style.apply(highlight_priority, axis=1),
+                styler,
                 use_container_width=True
             )
+            # --- END OF MODIFICATION ---
 
             # Maintenance metrics
             col1, col2, col3 = st.columns(3)
