@@ -959,13 +959,14 @@ def handle_predictive_dashboard(maintenance_engine):
         
         # Alert details
         for alert in alerts:
+            # Modified severity_colors to use black text
             severity_colors = {
-                'HIGH': ('#ffebee', '#f44336'),
-                'MEDIUM': ('#fff8e1', '#ff9800'),
-                'LOW': ('#e8f5e8', '#4caf50')
+                'HIGH': ('#ffebee', '#f44336', 'black'),
+                'MEDIUM': ('#fff8e1', '#ff9800', 'black'),
+                'LOW': ('#e8f5e8', '#4caf50', 'black')
             }
             
-            bg_color, border_color = severity_colors[alert['severity']]
+            bg_color, border_color, text_color = severity_colors[alert['severity']]
             
             st.markdown(f"""
             <div style="
@@ -974,10 +975,11 @@ def handle_predictive_dashboard(maintenance_engine):
                 padding: 1rem; 
                 border-radius: 5px; 
                 margin-bottom: 1rem;
+                color: {text_color}; /* Set text color to black */
             ">
                 <div style="display: flex; justify-content: space-between; align-items: start;">
                     <div>
-                        <h4 style="margin: 0; color: {border_color};">{alert['alert_type']}</h4>
+                        <h4 style="margin: 0; color: {text_color};">{alert['alert_type']}</h4>
                         <p style="margin: 5px 0;"><strong>Equipment:</strong> {alert['equipment_id']} ({alert['location']})</p>
                         <p style="margin: 5px 0;">{alert['message']}</p>
                         <p style="margin: 5px 0; font-size: 12px; color: #666;">
