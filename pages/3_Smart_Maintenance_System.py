@@ -2,13 +2,9 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import cv2
 import os
 import glob
 from PIL import Image, ImageDraw, ImageFont
-import pytesseract
-from sentence_transformers import SentenceTransformer
-import faiss
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
@@ -24,6 +20,28 @@ from dataclasses import dataclass
 from sklearn.ensemble import RandomForestRegressor, IsolationForest
 from sklearn.preprocessing import StandardScaler
 import joblib
+
+# Optional imports with fallbacks
+try:
+    import cv2
+    CV2_AVAILABLE = True
+except ImportError:
+    CV2_AVAILABLE = False
+    st.warning("⚠️ OpenCV not available. Image processing features will be limited.")
+
+try:
+    import pytesseract
+    TESSERACT_AVAILABLE = True
+except ImportError:
+    TESSERACT_AVAILABLE = False
+    st.warning("⚠️ Tesseract OCR not available. Text extraction from images will be simulated.")
+
+try:
+    from sentence_transformers import SentenceTransformer
+    import faiss
+    SENTENCE_TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    SENTENCE_TRANSFORMERS_AVAILABLE = False
 
 warnings.filterwarnings("ignore")
 
@@ -65,8 +83,13 @@ class RoomSchemaAnalyzer:
         }
 
     def extract_text_from_image(self, image_path: str) -> List[str]:
-        """Extract text from floor plan images using OCR"""
+        """Extract text from floor plan images using OCR or simulation"""
         try:
+            if not CV2_AVAILABLE or not TESSERACT_AVAILABLE:
+                # Simulate OCR results for demo
+                st.info("🔄 Simulating OCR text extraction (OCR libraries not available)")
+                return self._simulate_ocr_results(image_path)
+            
             # Load and preprocess image
             img = cv2.imread(image_path)
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -87,7 +110,21 @@ class RoomSchemaAnalyzer:
             
         except Exception as e:
             st.warning(f"OCR extraction failed for {image_path}: {str(e)}")
-            return []
+            return self._simulate_ocr_results(image_path)
+
+    def _simulate_ocr_results(self, image_path: str) -> List[str]:
+        """Simulate OCR results for demo purposes"""
+        # Generate realistic building schema text
+        simulated_tokens = [
+            'HVAC', 'AHU', 'AC', 'ELECTRICAL', 'PANEL', 'SWITCH', 
+            'FIRE', 'ALARM', 'EXIT', 'SERVER', 'RACK', 'NETWORK',
+            'DESK', 'CHAIR', 'CAMERA', 'SENSOR', 'PROJECTOR', 'SCREEN',
+            'WC', 'KITCHEN', 'WATER', 'STORAGE', 'CABINET'
+        ]
+        
+        # Randomly select tokens to simulate different schemas
+        num_tokens = random.randint(10, 25)
+        return random.sample(simulated_tokens, min(num_tokens, len(simulated_tokens)))
 
     def analyze_equipment_distribution(self, text_tokens: List[str]) -> Dict[str, Any]:
         """Analyze equipment distribution and identify potential issues"""
@@ -108,7 +145,7 @@ class RoomSchemaAnalyzer:
         total_equipment = sum(data['count'] for data in equipment_found.values())
         
         # High equipment density risk
-        if total_equipment > 50:
+        if total_equipment > 20:  # Adjusted threshold for simulation
             risk_factors.append({
                 'type': 'OVERCROWDING',
                 'severity': 'HIGH',
@@ -120,7 +157,7 @@ class RoomSchemaAnalyzer:
         hvac_count = equipment_found.get('HVAC', {}).get('count', 0)
         it_count = equipment_found.get('IT_EQUIPMENT', {}).get('count', 0)
         
-        if hvac_count < it_count * 0.1:
+        if hvac_count < it_count * 0.1 and it_count > 0:
             risk_factors.append({
                 'type': 'POOR_VENTILATION',
                 'severity': 'MEDIUM',
@@ -130,7 +167,7 @@ class RoomSchemaAnalyzer:
         
         # Fire safety analysis
         fire_safety_count = equipment_found.get('FIRE_SAFETY', {}).get('count', 0)
-        if fire_safety_count < total_equipment * 0.05:
+        if fire_safety_count < total_equipment * 0.05 and total_equipment > 0:
             risk_factors.append({
                 'type': 'FIRE_RISK',
                 'severity': 'HIGH',
@@ -153,7 +190,7 @@ class RoomSchemaAnalyzer:
             'risk_factors': risk_factors,
             'total_equipment': total_equipment,
             'risk_score': len([r for r in risk_factors if r['severity'] == 'HIGH']) * 0.4 + 
-                          len([r for r in risk_factors if r['severity'] == 'MEDIUM']) * 0.2
+                         len([r for r in risk_factors if r['severity'] == 'MEDIUM']) * 0.2
         }
 
 # --- Predictive Maintenance Engine ---
@@ -218,7 +255,7 @@ class PredictiveMaintenanceEngine:
         
         # Calculate failure probability
         failure_probability = base_risk + (age_factor * 0.3) + (usage_factor * 0.2) + \
-                              (maintenance_factor * 0.3) + (environmental_score * 0.2)
+                            (maintenance_factor * 0.3) + (environmental_score * 0.2)
         
         failure_probability = min(failure_probability, 1.0)
         
@@ -324,7 +361,7 @@ class SyntheticDataGenerator:
                 maintenance_factor = record['days_since_maintenance'] / 365
                 
                 failure_probability = min(0.1 + age_factor * 0.3 + usage_factor * 0.2 + 
-                                          maintenance_factor * 0.4 + random.uniform(-0.1, 0.1), 1.0)
+                                        maintenance_factor * 0.4 + random.uniform(-0.1, 0.1), 1.0)
                 
                 record['failure_probability'] = max(failure_probability, 0.0)
                 record['failure_mode'] = failure_mode
@@ -632,321 +669,405 @@ def handle_synthetic_data_generation(data_generator):
                     st.write("**Equipment Type Distribution:**")
                     type_counts = synthetic_df['equipment_type'].value_counts()
                     fig = px.bar(x=type_counts.index, y=type_counts.values, 
-                                 title="Equipment Types Generated")
+                               title="Equipment Types Generated")
                     st.plotly_chart(fig, use_container_width=True)
                 
                 with col_stats2:
                     st.write("**Failure Probability Distribution:**")
                     fig = px.histogram(synthetic_df, x='failure_probability', bins=20,
-                                       title="Failure Probability Distribution")
+                                     title="Failure Probability Distribution")
                     st.plotly_chart(fig, use_container_width=True)
                 
                 # Download button
                 csv = synthetic_df.to_csv(index=False)
                 st.download_button(
-                    label="📥 Download Synthetic Data",
+                    label="📥 Download Synthetic Data (CSV)",
                     data=csv,
                     file_name=f"synthetic_maintenance_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv"
                 )
     
     with col2:
-        st.subheader("📋 Data Features")
-        st.write("""
-        **Generated features include:**
+        st.subheader("📋 Data Schema")
+        st.write("**Generated Features:**")
+        schema_info = {
+            'equipment_id': 'Unique equipment identifier',
+            'equipment_type': 'Type of equipment (HVAC, IT, etc.)',
+            'age_days': 'Age of equipment in days',
+            'usage_intensity': 'Usage intensity (0-1)',
+            'days_since_maintenance': 'Days since last maintenance',
+            'environmental_score': 'Environmental conditions score',
+            'temperature_avg': 'Average temperature (°C)',
+            'humidity_avg': 'Average humidity (%)',
+            'vibration_level': 'Vibration level (0-10)',
+            'energy_consumption': 'Energy consumption factor',
+            'error_count_30d': 'Error count in last 30 days',
+            'maintenance_cost_total': 'Total maintenance cost',
+            'failure_probability': 'Predicted failure probability',
+            'will_fail_30d': 'Binary: will fail in 30 days'
+        }
         
-        • Equipment ID & Type
-        • Age and usage metrics
-        • Environmental conditions
-        • Maintenance history
-        • Failure indicators
-        • Location and criticality
-        • Energy consumption
-        • Error counts
-        • Predicted failure modes
-        """)
+        for feature, description in schema_info.items():
+            st.write(f"**{feature}:** {description}")
 
 def handle_predictive_dashboard(maintenance_engine):
     """Handle predictive maintenance dashboard"""
     st.subheader("📊 Predictive Maintenance Dashboard")
     
-    # Generate sample dashboard data
+    # Generate sample real-time data
     np.random.seed(42)  # For consistent demo data
     
-    # Create sample equipment fleet
-    equipment_fleet = []
-    equipment_types = ['HVAC', 'IT_EQUIPMENT', 'ELECTRICAL', 'FIRE_SAFETY']
+    # Time series data
+    dates = pd.date_range(start='2024-01-01', end='2024-12-31', freq='D')
     
-    for i in range(50):
-        equipment_type = np.random.choice(equipment_types)
-        equipment_fleet.append({
-            'id': f"{equipment_type}_{i+1:03d}",
-            'type': equipment_type,
-            'age_days': np.random.randint(30, 2000),
-            'usage_intensity': np.random.uniform(0.2, 0.9),
-            'days_since_maintenance': np.random.randint(1, 300),
-            'environmental_score': np.random.uniform(0.1, 0.9)
-        })
+    # Sample equipment fleet
+    equipment_fleet = [
+        {'id': 'HVAC_001', 'type': 'HVAC', 'location': 'Building A - Floor 1', 'criticality': 'HIGH'},
+        {'id': 'HVAC_002', 'type': 'HVAC', 'location': 'Building A - Floor 2', 'criticality': 'HIGH'},
+        {'id': 'IT_SRV_001', 'type': 'IT_EQUIPMENT', 'location': 'Data Center', 'criticality': 'CRITICAL'},
+        {'id': 'IT_SRV_002', 'type': 'IT_EQUIPMENT', 'location': 'Data Center', 'criticality': 'CRITICAL'},
+        {'id': 'ELEC_001', 'type': 'ELECTRICAL', 'location': 'Main Electrical Room', 'criticality': 'CRITICAL'},
+        {'id': 'FIRE_001', 'type': 'FIRE_SAFETY', 'location': 'Building A - Lobby', 'criticality': 'HIGH'},
+        {'id': 'FIRE_002', 'type': 'FIRE_SAFETY', 'location': 'Building A - Floor 3', 'criticality': 'MEDIUM'},
+        {'id': 'AV_001', 'type': 'AV_EQUIPMENT', 'location': 'Conference Room A', 'criticality': 'LOW'},
+    ]
     
-    # Generate predictions
-    all_predictions = []
-    for equipment in equipment_fleet:
-        current_metrics = {
-            'age_days': equipment['age_days'],
-            'usage_intensity': equipment['usage_intensity'],
-            'days_since_maintenance': equipment['days_since_maintenance'],
-            'environmental_score': equipment['environmental_score'],
-            'temperature': np.random.uniform(0.2, 0.9),
-            'energy_consumption': np.random.uniform(0.3, 1.0)
-        }
+    # Create tabs for different dashboard views
+    tab1, tab2, tab3, tab4 = st.tabs(["🏠 Overview", "📈 Trends", "⚠️ Alerts", "📋 Maintenance Schedule"])
+    
+    with tab1:
+        # Overview metrics
+        col1, col2, col3, col4 = st.columns(4)
         
-        prediction = maintenance_engine.predict_failure_probability(
-            equipment['type'], current_metrics
-        )
+        with col1:
+            st.metric(
+                label="🏭 Total Equipment",
+                value=len(equipment_fleet),
+                delta="2 new this month"
+            )
         
-        prediction['equipment_id'] = equipment['id']
-        prediction['age_days'] = equipment['age_days']
-        prediction['usage_intensity'] = equipment['usage_intensity']
-        all_predictions.append(prediction)
-    
-    # Create dashboard metrics
-    high_risk_count = len([p for p in all_predictions if p['risk_level'] == 'HIGH'])
-    medium_risk_count = len([p for p in all_predictions if p['risk_level'] == 'MEDIUM'])
-    low_risk_count = len([p for p in all_predictions if p['risk_level'] == 'LOW'])
-    
-    # Top-level metrics
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.metric(
-            label="🔴 High Risk Equipment",
-            value=high_risk_count,
-            delta=f"{high_risk_count/len(all_predictions)*100:.1f}%"
-        )
-    
-    with col2:
-        st.metric(
-            label="🟡 Medium Risk Equipment",
-            value=medium_risk_count,
-            delta=f"{medium_risk_count/len(all_predictions)*100:.1f}%"
-        )
-    
-    with col3:
-        st.metric(
-            label="🟢 Low Risk Equipment",
-            value=low_risk_count,
-            delta=f"{low_risk_count/len(all_predictions)*100:.1f}%"
-        )
-    
-    with col4:
-        avg_failure_prob = np.mean([p['failure_probability'] for p in all_predictions])
-        st.metric(
-            label="📊 Avg Failure Probability",
-            value=f"{avg_failure_prob:.1%}",
-            delta=f"{'↑' if avg_failure_prob > 0.5 else '↓'} Risk"
-        )
-    
-    # Charts and visualizations
-    col_chart1, col_chart2 = st.columns(2)
-    
-    with col_chart1:
-        st.subheader("📈 Risk Distribution by Equipment Type")
+        with col2:
+            high_risk_count = 2  # Simulated
+            st.metric(
+                label="🔴 High Risk Equipment",
+                value=high_risk_count,
+                delta="-1 from last week",
+                delta_color="inverse"
+            )
         
-        # Create risk distribution chart
-        risk_data = []
-        for equipment_type in equipment_types:
-            type_predictions = [p for p in all_predictions if p['equipment_type'] == equipment_type]
-            
-            for risk_level in ['HIGH', 'MEDIUM', 'LOW']:
-                count = len([p for p in type_predictions if p['risk_level'] == risk_level])
-                risk_data.append({
-                    'Equipment Type': equipment_type,
-                    'Risk Level': risk_level,
-                    'Count': count
-                })
+        with col3:
+            st.metric(
+                label="💰 Maintenance Budget Used",
+                value="68%",
+                delta="12% this quarter"
+            )
         
-        risk_df = pd.DataFrame(risk_data)
+        with col4:
+            st.metric(
+                label="⚡ System Uptime",
+                value="99.2%",
+                delta="0.3% improvement"
+            )
         
-        fig = px.bar(
-            risk_df,
-            x='Equipment Type',
-            y='Count',
-            color='Risk Level',
-            color_discrete_map={'HIGH': 'red', 'MEDIUM': 'orange', 'LOW': 'green'},
-            title="Risk Distribution by Equipment Type"
-        )
-        st.plotly_chart(fig, use_container_width=True)
-    
-    with col_chart2:
-        st.subheader("🎯 Failure Probability vs Equipment Age")
+        st.divider()
         
-        # Scatter plot of age vs failure probability
-        plot_data = pd.DataFrame([
-            {
-                'Equipment ID': p['equipment_id'],
-                'Age (Days)': p['age_days'],
-                'Failure Probability': p['failure_probability'],
-                'Equipment Type': p['equipment_type'],
-                'Risk Level': p['risk_level']
+        # Equipment status grid
+        st.subheader("🎛️ Equipment Status Grid")
+        
+        # Create predictions for all equipment
+        all_predictions = []
+        for equipment in equipment_fleet:
+            current_metrics = {
+                'age_days': random.randint(365, 2555),
+                'usage_intensity': random.uniform(0.3, 0.9),
+                'days_since_maintenance': random.randint(10, 200),
+                'environmental_score': random.uniform(0.2, 0.8)
             }
-            for p in all_predictions
-        ])
-        
-        fig = px.scatter(
-            plot_data,
-            x='Age (Days)',
-            y='Failure Probability',
-            color='Equipment Type',
-            size='Failure Probability',
-            hover_data=['Equipment ID', 'Risk Level'],
-            title="Equipment Age vs Failure Risk"
-        )
-        st.plotly_chart(fig, use_container_width=True)
-    
-    # High-priority equipment table
-    st.subheader("🚨 Priority Maintenance Schedule")
-    
-    # Filter high and medium risk equipment
-    priority_equipment = [p for p in all_predictions if p['risk_level'] in ['HIGH', 'MEDIUM']]
-    priority_equipment.sort(key=lambda x: x['failure_probability'], reverse=True)
-    
-    if priority_equipment:
-        priority_df = pd.DataFrame([
-            {
-                'Equipment ID': p['equipment_id'],
-                'Type': p['equipment_type'],
-                'Risk Level': p['risk_level'],
-                'Failure Probability': f"{p['failure_probability']:.1%}",
-                'Days to Predicted Failure': p['days_to_predicted_failure'],
-                'Primary Recommendation': p['recommendations'][0] if p['recommendations'] else 'N/A'
-            }
-            for p in priority_equipment[:10]  # Show top 10
-        ])
-        
-        # Style the dataframe
-        def color_risk_level(val):
-            if val == 'HIGH':
-                return 'background-color: #ffcdd2'
-            elif val == 'MEDIUM':
-                return 'background-color: #fff3e0'
-            return ''
-        
-        styled_df = priority_df.style.applymap(color_risk_level, subset=['Risk Level'])
-        st.dataframe(styled_df, use_container_width=True)
-        
-        # Maintenance timeline
-        st.subheader("📅 Maintenance Timeline")
-        
-        # Create Gantt-like chart for maintenance schedule
-        timeline_data = []
-        base_date = datetime.now()
-        
-        for i, p in enumerate(priority_equipment[:10]):
-            start_date = base_date + timedelta(days=i*2)  # Stagger maintenance
-            end_date = start_date + timedelta(days=1)
             
-            timeline_data.append({
-                'Task': f"Maintain {p['equipment_id']}",
-                'Start': start_date,
-                'Finish': end_date,
-                'Risk': p['risk_level'],
-                'Equipment': p['equipment_type']
+            prediction = maintenance_engine.predict_failure_probability(
+                equipment['type'], current_metrics
+            )
+            
+            prediction.update({
+                'equipment_id': equipment['id'],
+                'location': equipment['location'],
+                'criticality': equipment['criticality']
+            })
+            all_predictions.append(prediction)
+        
+        # Display equipment grid
+        cols = st.columns(4)
+        for i, pred in enumerate(all_predictions):
+            with cols[i % 4]:
+                # Color based on risk level
+                if pred['risk_level'] == 'HIGH':
+                    card_color = "#ffebee"
+                    border_color = "#f44336"
+                elif pred['risk_level'] == 'MEDIUM':
+                    card_color = "#fff8e1"
+                    border_color = "#ff9800"
+                else:
+                    card_color = "#e8f5e8"
+                    border_color = "#4caf50"
+                
+                st.markdown(f"""
+                <div style="
+                    background-color: {card_color}; 
+                    border-left: 5px solid {border_color}; 
+                    padding: 1rem; 
+                    border-radius: 5px; 
+                    margin-bottom: 1rem;
+                    height: 180px;
+                ">
+                    <h4 style="margin: 0; font-size: 14px;">{pred['equipment_id']}</h4>
+                    <p style="margin: 5px 0; font-size: 12px; color: #666;">{pred['location']}</p>
+                    <p style="margin: 5px 0; font-size: 12px;"><strong>Risk:</strong> 
+                        <span style="color: {pred['color']};">{pred['risk_level']}</span>
+                    </p>
+                    <p style="margin: 5px 0; font-size: 12px;"><strong>Failure Prob:</strong> {pred['failure_probability']:.1%}</p>
+                    <p style="margin: 5px 0; font-size: 12px;"><strong>Days to Failure:</strong> {pred['days_to_predicted_failure']}</p>
+                    <p style="margin: 5px 0; font-size: 12px;"><strong>Criticality:</strong> {pred['criticality']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+    
+    with tab2:
+        st.subheader("📈 Predictive Analytics Trends")
+        
+        # Generate time series data for trends
+        trend_data = []
+        for i, date in enumerate(dates[-90:]):  # Last 90 days
+            trend_data.append({
+                'date': date,
+                'avg_failure_risk': 0.3 + 0.2 * np.sin(i * 0.1) + np.random.normal(0, 0.05),
+                'maintenance_events': np.random.poisson(2),
+                'system_health': 95 + 5 * np.sin(i * 0.05) + np.random.normal(0, 2),
+                'energy_efficiency': 85 + 10 * np.sin(i * 0.03) + np.random.normal(0, 1)
             })
         
-        timeline_df = pd.DataFrame(timeline_data)
+        trend_df = pd.DataFrame(trend_data)
         
-        fig = px.timeline(
-            timeline_df,
-            x_start="Start",
-            x_end="Finish",
-            y="Task",
-            color="Risk",
-            color_discrete_map={'HIGH': 'red', 'MEDIUM': 'orange'},
-            title="Scheduled Maintenance Timeline"
+        # Risk trend chart
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            fig = px.line(
+                trend_df, 
+                x='date', 
+                y='avg_failure_risk',
+                title="Average Failure Risk Over Time",
+                labels={'avg_failure_risk': 'Failure Risk', 'date': 'Date'}
+            )
+            fig.add_hline(y=config.risk_threshold_high, line_dash="dash", 
+                          line_color="red", annotation_text="High Risk Threshold")
+            fig.add_hline(y=config.risk_threshold_medium, line_dash="dash", 
+                          line_color="orange", annotation_text="Medium Risk Threshold")
+            st.plotly_chart(fig, use_container_width=True)
+        
+        with col2:
+            fig = px.line(
+                trend_df,
+                x='date',
+                y='system_health',
+                title="Overall System Health Score",
+                labels={'system_health': 'Health Score (%)', 'date': 'Date'}
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        
+        # Maintenance events chart
+        fig = px.bar(
+            trend_df,
+            x='date',
+            y='maintenance_events',
+            title="Daily Maintenance Events",
+            labels={'maintenance_events': 'Number of Events', 'date': 'Date'}
         )
-        fig.update_yaxes(autorange="reversed")
         st.plotly_chart(fig, use_container_width=True)
     
-    else:
-        st.success("🎉 No high-priority maintenance required at this time!")
+    with tab3:
+        st.subheader("🚨 Active Alerts & Notifications")
+        
+        # Generate sample alerts
+        alerts = [
+            {
+                'timestamp': datetime.now() - timedelta(hours=2),
+                'severity': 'HIGH',
+                'equipment_id': 'HVAC_001',
+                'alert_type': 'Predicted Failure Risk',
+                'message': 'Equipment failure risk has exceeded 75%. Immediate inspection recommended.',
+                'location': 'Building A - Floor 1'
+            },
+            {
+                'timestamp': datetime.now() - timedelta(hours=8),
+                'severity': 'MEDIUM',
+                'equipment_id': 'IT_SRV_002',
+                'alert_type': 'Temperature Warning',
+                'message': 'Server temperature consistently above normal range for 6+ hours.',
+                'location': 'Data Center'
+            },
+            {
+                'timestamp': datetime.now() - timedelta(days=1),
+                'severity': 'LOW',
+                'equipment_id': 'AV_001',
+                'alert_type': 'Maintenance Due',
+                'message': 'Scheduled maintenance window approaching in 7 days.',
+                'location': 'Conference Room A'
+            }
+        ]
+        
+        # Alert summary
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            high_alerts = len([a for a in alerts if a['severity'] == 'HIGH'])
+            st.metric("🔴 High Priority", high_alerts)
+        with col2:
+            medium_alerts = len([a for a in alerts if a['severity'] == 'MEDIUM'])
+            st.metric("🟡 Medium Priority", medium_alerts)
+        with col3:
+            low_alerts = len([a for a in alerts if a['severity'] == 'LOW'])
+            st.metric("🟢 Low Priority", low_alerts)
+        
+        # Alert details
+        for alert in alerts:
+            severity_colors = {
+                'HIGH': ('#ffebee', '#f44336'),
+                'MEDIUM': ('#fff8e1', '#ff9800'),
+                'LOW': ('#e8f5e8', '#4caf50')
+            }
+            
+            bg_color, border_color = severity_colors[alert['severity']]
+            
+            st.markdown(f"""
+            <div style="
+                background-color: {bg_color}; 
+                border-left: 5px solid {border_color}; 
+                padding: 1rem; 
+                border-radius: 5px; 
+                margin-bottom: 1rem;
+            ">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <h4 style="margin: 0; color: {border_color};">{alert['alert_type']}</h4>
+                        <p style="margin: 5px 0;"><strong>Equipment:</strong> {alert['equipment_id']} ({alert['location']})</p>
+                        <p style="margin: 5px 0;">{alert['message']}</p>
+                        <p style="margin: 5px 0; font-size: 12px; color: #666;">
+                            {alert['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}
+                        </p>
+                    </div>
+                    <span style="
+                        background-color: {border_color}; 
+                        color: white; 
+                        padding: 4px 8px; 
+                        border-radius: 4px; 
+                        font-size: 12px;
+                        font-weight: bold;
+                    ">{alert['severity']}</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
     
-    # Advanced analytics section
-    with st.expander("🔬 Advanced Analytics"):
-        st.subheader("📊 Detailed Equipment Analysis")
+    with tab4:
+        st.subheader("📋 Maintenance Schedule & Planning")
         
-        # Equipment selection for detailed analysis
-        selected_equipment = st.selectbox(
-            "Select Equipment for Detailed Analysis",
-            options=[p['equipment_id'] for p in all_predictions]
-        )
+        # Generate sample maintenance schedule
+        maintenance_schedule = []
+        for i in range(20):
+            equipment = random.choice(equipment_fleet)
+            future_date = datetime.now() + timedelta(days=random.randint(1, 90))
+            
+            maintenance_schedule.append({
+                'date': future_date,
+                'equipment_id': equipment['id'],
+                'equipment_type': equipment['type'],
+                'location': equipment['location'],
+                'maintenance_type': random.choice(['Preventive', 'Corrective', 'Predictive']),
+                'estimated_duration': random.choice(['2 hours', '4 hours', '8 hours', '1 day']),
+                'assigned_technician': random.choice(['John Smith', 'Mary Johnson', 'Bob Wilson', 'Lisa Davis']),
+                'priority': random.choice(['LOW', 'MEDIUM', 'HIGH']),
+                'cost_estimate': random.randint(200, 2000)
+            })
         
-        if selected_equipment:
-            equipment_pred = next(p for p in all_predictions if p['equipment_id'] == selected_equipment)
+        # Sort by date
+        maintenance_schedule.sort(key=lambda x: x['date'])
+        
+        # Display upcoming maintenance
+        st.subheader("📅 Upcoming Maintenance (Next 30 Days)")
+        
+        upcoming = [m for m in maintenance_schedule if m['date'] <= datetime.now() + timedelta(days=30)]
+        
+        if upcoming:
+            # Create calendar view
+            calendar_data = []
+            for maintenance in upcoming:
+                calendar_data.append({
+                    'Date': maintenance['date'].strftime('%Y-%m-%d'),
+                    'Equipment': maintenance['equipment_id'],
+                    'Type': maintenance['maintenance_type'],
+                    'Duration': maintenance['estimated_duration'],
+                    'Technician': maintenance['assigned_technician'],
+                    'Priority': maintenance['priority'],
+                    'Cost': f"${maintenance['cost_estimate']}"
+                })
             
-            col_detail1, col_detail2 = st.columns(2)
+            calendar_df = pd.DataFrame(calendar_data)
             
-            with col_detail1:
-                st.subheader(f"📱 {selected_equipment} Details")
-                
-                # Equipment details
-                st.write(f"**Equipment Type:** {equipment_pred['equipment_type']}")
-                st.write(f"**Risk Level:** {equipment_pred['risk_level']}")
-                st.write(f"**Failure Probability:** {equipment_pred['failure_probability']:.1%}")
-                st.write(f"**Predicted Days to Failure:** {equipment_pred['days_to_predicted_failure']}")
-                st.write(f"**Confidence:** {equipment_pred['confidence']:.1%}")
-                
-                # Risk gauge for individual equipment
-                fig = go.Figure(go.Indicator(
-                    mode = "gauge+number+delta",
-                    value = equipment_pred['failure_probability'],
-                    title = {'text': f"{selected_equipment} Risk Level"},
-                    domain = {'x': [0, 1], 'y': [0, 1]},
-                    gauge = {
-                        'axis': {'range': [0, 1]},
-                        'bar': {'color': equipment_pred['color']},
-                        'steps': [
-                            {'range': [0, 0.4], 'color': "lightgreen"},
-                            {'range': [0.4, 0.7], 'color': "yellow"},
-                            {'range': [0.7, 1], 'color': "red"}
-                        ]
-                    }
-                ))
-                st.plotly_chart(fig, use_container_width=True)
+            # Color code by priority
+            def highlight_priority(row):
+                if row['Priority'] == 'HIGH':
+                    return ['background-color: #ffebee'] * len(row)
+                elif row['Priority'] == 'MEDIUM':
+                    return ['background-color: #fff8e1'] * len(row)
+                else:
+                    return ['background-color: #e8f5e8'] * len(row)
             
-            with col_detail2:
-                st.subheader("💡 Recommendations")
-                for i, rec in enumerate(equipment_pred['recommendations'], 1):
-                    st.write(f"{i}. {rec}")
-                
-                # Historical trend simulation (placeholder)
-                st.subheader("📈 Risk Trend (Simulated)")
-                
-                # Generate simulated historical data
-                dates = pd.date_range(start=datetime.now()-timedelta(days=30), end=datetime.now(), freq='D')
-                base_risk = equipment_pred['failure_probability']
-                trend_data = []
-                
-                for i, date in enumerate(dates):
-                    # Simulate gradual increase in risk over time
-                    risk = max(0, base_risk - 0.3 + (i/len(dates)) * 0.3 + np.random.normal(0, 0.02))
-                    trend_data.append({'Date': date, 'Risk': min(risk, 1.0)})
-                
-                trend_df = pd.DataFrame(trend_data)
-                
-                fig = px.line(
-                    trend_df,
-                    x='Date',
-                    y='Risk',
-                    title=f'{selected_equipment} Risk Trend (30 Days)',
-                    labels={'Risk': 'Failure Probability'}
-                )
-                fig.add_hline(y=config.risk_threshold_high, line_dash="dash", line_color="red",
-                              annotation_text="High Risk Threshold")
-                fig.add_hline(y=config.risk_threshold_medium, line_dash="dash", line_color="orange",
-                              annotation_text="Medium Risk Threshold")
-                
-                st.plotly_chart(fig, use_container_width=True)
+            st.dataframe(
+                calendar_df.style.apply(highlight_priority, axis=1),
+                use_container_width=True
+            )
+            
+            # Maintenance metrics
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                total_cost = sum(m['cost_estimate'] for m in upcoming)
+                st.metric("💰 Total Upcoming Costs", f"${total_cost:,}")
+            
+            with col2:
+                high_priority = len([m for m in upcoming if m['priority'] == 'HIGH'])
+                st.metric("🔴 High Priority Tasks", high_priority)
+            
+            with col3:
+                avg_cost = total_cost // len(upcoming) if upcoming else 0
+                st.metric("📊 Average Task Cost", f"${avg_cost:,}")
+        
+        else:
+            st.info("No maintenance scheduled for the next 30 days.")
+        
+        # Resource planning
+        st.subheader("👥 Resource Allocation")
+        
+        technician_workload = {}
+        for maintenance in upcoming:
+            tech = maintenance['assigned_technician']
+            if tech not in technician_workload:
+                technician_workload[tech] = 0
+            technician_workload[tech] += 1
+        
+        if technician_workload:
+            workload_df = pd.DataFrame([
+                {'Technician': tech, 'Assigned Tasks': count}
+                for tech, count in technician_workload.items()
+            ])
+            
+            fig = px.bar(
+                workload_df,
+                x='Technician',
+                y='Assigned Tasks',
+                title="Technician Workload Distribution (Next 30 Days)",
+                color='Assigned Tasks',
+                color_continuous_scale='blues'
+            )
+            st.plotly_chart(fig, use_container_width=True)
 
-# Run the application
+# --- Run the application ---
 if __name__ == "__main__":
     main()
