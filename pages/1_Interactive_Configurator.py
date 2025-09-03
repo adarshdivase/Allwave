@@ -1295,33 +1295,32 @@ def main():
 
     else:
         # Welcome screen when no recommendations are generated
-        st.markdown("""
-        <div style="text-align: center; padding: 50px;">
-            <h2>🎯 Welcome to AI Room Configurator Pro</h2>
-            <p style="font-size: 1.2em; color: #666;">
-                Get started by configuring your room specifications in the sidebar, 
-                then click "Generate AI Recommendations" to see your custom AV solution.
-            </p>
-            <div style="margin: 30px 0;">
-                <h4>🚀 What You'll Get:</h4>
-                <div style="display: flex; justify-content: center; gap: 30px; margin-top: 20px;">
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; width: 200px;">
-                        <h5>🎯 AI Recommendations</h5>
-                        <p>Smart product selection based on your specific needs</p>
-                    </div>
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; width: 200px;">
-                        <h5>📐 3D Visualization</h5>
-                        <p>See your room with equipment positioned optimally</p>
-                    </div>
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; width: 200px;">
-                        <h5>💰 Cost Analysis</h5>
-                        <p>Complete financial breakdown with ROI projections</p>
-                    </div>
-                </div>
+st.markdown("""
+<div style="text-align: center; padding: 50px;">
+    <h2>🎯 Welcome to AI Room Configurator Pro</h2>
+    <p style="font-size: 1.2em; color: #666;">
+        Get started by configuring your room specifications in the sidebar, 
+        then click "Generate AI Recommendations" to see your custom AV solution.
+    </p>
+    <div style="margin: 30px 0;">
+        <h4>🚀 What You'll Get:</h4>
+        <div style="display: flex; justify-content: center; gap: 30px; margin-top: 20px;">
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; width: 200px;">
+                <h5 style="color: black;">🎯 AI Recommendations</h5>
+                <p style="color: black;">Smart product selection based on your specific needs</p>
+            </div>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; width: 200px;">
+                <h5 style="color: black;">📐 3D Visualization</h5>
+                <p style="color: black;">See your room with equipment positioned optimally</p>
+            </div>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; width: 200px;">
+                <h5 style="color: black;">💰 Cost Analysis</h5>
+                <p style="color: black;">Complete financial breakdown with ROI projections</p>
             </div>
         </div>
-        """, unsafe_allow_html=True)
-
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
