@@ -1,0 +1,27 @@
+Need Analysis Document: NSL - Medchal, Hyderabad
+
+Project Overview:
+Client: NSL
+Location: Medchal District, Gundlapochampally, Hyderabad
+Project Type: AV upgrade for multiple meeting rooms.
+
+Room Specifications (Typical Medium Room):
+- Room Name: "Conference Room 2"
+- Capacity - 12 Pax
+- Dimensions:
+  - Length - 20ft
+  - Width - 15ft
+- Ceiling Height: 9ft
+
+Brief on AV Requirement:
+NSL requires a standardized and reliable video conferencing solution across five medium-sized meeting rooms. The goal is to improve collaboration between their Hyderabad and remote offices. The solution should be cost-effective and easy to manage.
+
+Existing Equipment:
+- Older 55" TVs
+- Basic webcam and speakerphone pucks
+
+Specific Client Requests:
+- A single, all-in-one video bar solution is preferred for simplicity.
+- The system must be certified for Zoom.
+- Wireless content sharing is a mandatory feature.
+- The existing displays need to be replaced with larger, commercial-grade screens.
