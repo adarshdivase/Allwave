@@ -9,4 +9,6 @@ tiktoken
 numpy
 plotly
 openai
-
+PyPDF2
+PyMuPDF
+scikit-learn
