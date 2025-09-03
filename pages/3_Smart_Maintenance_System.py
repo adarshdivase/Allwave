@@ -224,6 +224,13 @@ class PredictiveMaintenanceEngine:
                 'maintenance_interval': 180,  # 6 months
                 'failure_indicators': ['sensor_sensitivity', 'battery_level', 'response_time'],
                 'seasonal_factors': False
+            },
+            # Added for completeness, assuming AV equipment might have a profile
+            'AV_EQUIPMENT': {
+                'expected_life': 7 * 365, # 7 years
+                'maintenance_interval': 365, # 1 year
+                'failure_indicators': ['lamp_hours', 'connection_errors', 'audio_distortion'],
+                'seasonal_factors': False
             }
         }
 
@@ -231,9 +238,15 @@ class PredictiveMaintenanceEngine:
         """Predict failure probability using equipment-specific models"""
         
         if equipment_type not in self.equipment_profiles:
-            return {'error': f'Unknown equipment type: {equipment_type}'}
-        
-        profile = self.equipment_profiles[equipment_type]
+            # Handle unknown equipment types gracefully
+            st.warning(f"No profile found for equipment type: {equipment_type}. Using default values.")
+            default_profile = {
+                'expected_life': 10 * 365,
+                'maintenance_interval': 180
+            }
+            profile = default_profile
+        else:
+            profile = self.equipment_profiles[equipment_type]
         
         # Simulate predictive model (in real implementation, use trained models)
         base_risk = 0.1
@@ -431,7 +444,7 @@ def main():
         
         analysis_mode = st.selectbox(
             "Select Analysis Mode",
-            ["Room Schema Analysis", "Equipment Monitoring", "Synthetic Data Generation", "Predictive Dashboard"]
+            ["Predictive Dashboard", "Room Schema Analysis", "Equipment Monitoring", "Synthetic Data Generation"]
         )
         
         st.header("📊 System Status")
@@ -459,8 +472,8 @@ def handle_schema_analysis(analyzer):
     
     # File upload
     uploaded_files = st.file_uploader(
-        "Upload Room Schematics (PDF, PNG, JPG)",
-        type=['pdf', 'png', 'jpg', 'jpeg'],
+        "Upload Room Schematics (PNG, JPG)",
+        type=['png', 'jpg', 'jpeg'],
         accept_multiple_files=True
     )
     
@@ -474,11 +487,6 @@ def handle_schema_analysis(analyzer):
                 f.write(uploaded_file.getbuffer())
             
             try:
-                # Convert PDF to image if needed
-                if uploaded_file.name.endswith('.pdf'):
-                    st.warning("PDF processing requires additional setup. Please upload image files for demo.")
-                    continue
-                
                 # Display uploaded image
                 image = Image.open(temp_path)
                 st.image(image, caption=f"Floor Plan: {uploaded_file.name}", use_column_width=True)
@@ -528,23 +536,22 @@ def handle_schema_analysis(analyzer):
                     
                     # Risk score gauge
                     fig = go.Figure(go.Indicator(
-                        mode = "gauge+number+delta",
-                        value = risk_score,
+                        mode = "gauge+number",
+                        value = risk_score * 100,
                         domain = {'x': [0, 1], 'y': [0, 1]},
                         title = {'text': "Overall Risk Score"},
-                        delta = {'reference': 0.5},
                         gauge = {
-                            'axis': {'range': [None, 1]},
+                            'axis': {'range': [None, 100]},
                             'bar': {'color': "darkblue"},
                             'steps': [
-                                {'range': [0, 0.4], 'color': "lightgreen"},
-                                {'range': [0.4, 0.7], 'color': "yellow"},
-                                {'range': [0.7, 1], 'color': "red"}
+                                {'range': [0, 40], 'color': "lightgreen"},
+                                {'range': [40, 70], 'color': "yellow"},
+                                {'range': [70, 100], 'color': "red"}
                             ],
                             'threshold': {
                                 'line': {'color': "red", 'width': 4},
                                 'thickness': 0.75,
-                                'value': 0.7
+                                'value': 70
                             }
                         }
                     ))
@@ -631,9 +638,9 @@ def handle_equipment_monitoring(maintenance_engine):
             """, unsafe_allow_html=True)
             
             # Recommendations
-            st.subheader("💡 Recommendations")
-            for rec in pred['recommendations']:
-                st.write(f"• {rec}")
+            with st.expander("💡 View Recommendations"):
+                for rec in pred['recommendations']:
+                    st.write(f"• {rec}")
 
 def handle_synthetic_data_generation(data_generator):
     """Handle synthetic data generation interface"""
@@ -674,15 +681,15 @@ def handle_synthetic_data_generation(data_generator):
                 
                 with col_stats2:
                     st.write("**Failure Probability Distribution:**")
-                    fig = px.histogram(synthetic_df, x='failure_probability', bins=20,
+                    fig = px.histogram(synthetic_df, x='failure_probability', nbins=20,
                                      title="Failure Probability Distribution")
                     st.plotly_chart(fig, use_container_width=True)
                 
                 # Download button
-                csv = synthetic_df.to_csv(index=False)
+                csv_data = synthetic_df.to_csv(index=False).encode('utf-8')
                 st.download_button(
                     label="📥 Download Synthetic Data (CSV)",
-                    data=csv,
+                    data=csv_data,
                     file_name=f"synthetic_maintenance_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv"
                 )
@@ -784,16 +791,40 @@ def handle_predictive_dashboard(maintenance_engine):
                 'environmental_score': random.uniform(0.2, 0.8)
             }
             
-            prediction = maintenance_engine.predict_failure_probability(
-                equipment['type'], current_metrics
-            )
-            
-            prediction.update({
-                'equipment_id': equipment['id'],
-                'location': equipment['location'],
-                'criticality': equipment['criticality']
-            })
-            all_predictions.append(prediction)
+            try:
+                prediction = maintenance_engine.predict_failure_probability(
+                    equipment['type'], current_metrics
+                )
+                
+                # Ensure all required keys are present
+                prediction.update({
+                    'equipment_id': equipment['id'],
+                    'location': equipment['location'],
+                    'criticality': equipment['criticality']
+                })
+                
+                # Add default values for any missing keys
+                prediction.setdefault('failure_probability', 0.0)
+                prediction.setdefault('risk_level', 'LOW')
+                prediction.setdefault('days_to_predicted_failure', 365)
+                prediction.setdefault('color', 'green')
+                
+                all_predictions.append(prediction)
+                
+            except Exception as e:
+                st.error(f"Error processing equipment {equipment['id']}: {str(e)}")
+                # Add a default prediction to prevent crashes
+                default_prediction = {
+                    'equipment_id': equipment['id'],
+                    'location': equipment['location'],
+                    'criticality': equipment['criticality'],
+                    'failure_probability': 0.0,
+                    'risk_level': 'LOW',
+                    'days_to_predicted_failure': 365,
+                    'color': 'green',
+                    'equipment_type': equipment['type']
+                }
+                all_predictions.append(default_prediction)
         
         # Display equipment grid
         cols = st.columns(4)
