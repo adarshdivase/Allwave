@@ -226,13 +226,16 @@ class AdvancedAVRecommender:
 
         if capacity <= 8:
             products = ['Logitech Rally Plus']
-            features = "Auto-framing for small groups"
+            # FIX: Wrapped the feature description in a list
+            features = ["Auto-framing for small groups"]
         elif capacity <= 16:
             products = ['Poly Studio X70']
-            features = "Dual cameras with AI director"
+            # FIX: Wrapped the feature description in a list
+            features = ["Dual cameras with AI director"]
         else:
             products = ['Cisco Room Kit Pro']
-            features = "Triple camera system with speaker tracking"
+            # FIX: Wrapped the feature description in a list
+            features = ["Triple camera system with speaker tracking"]
 
         selected = products[0]
         product_info = self.db.products['cameras'][selected]
@@ -994,15 +997,15 @@ def main():
         # Room characteristics
         st.markdown("### 🏗️ Room Characteristics")
         room_type = st.selectbox("Room Type",
-                                 ['Conference Room', 'Boardroom', 'Training Room', 'Auditorium', 'Huddle Room'])
+                                     ['Conference Room', 'Boardroom', 'Training Room', 'Auditorium', 'Huddle Room'])
 
         windows = st.slider("Window Area (%)", 0, 50, 20)
 
         # Special requirements
         st.markdown("### ⚙️ Special Requirements")
         special_req = st.multiselect("Additional Features",
-                                     ['Recording', 'Live Streaming', 'Wireless Presentation', 'Digital Signage',
-                                      'Room Scheduling', 'Environmental Control'])
+                                         ['Recording', 'Live Streaming', 'Wireless Presentation', 'Digital Signage',
+                                          'Room Scheduling', 'Environmental Control'])
 
         # Usage patterns
         st.markdown("### 📊 Usage Patterns")
