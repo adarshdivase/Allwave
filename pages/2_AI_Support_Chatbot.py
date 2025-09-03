@@ -11,9 +11,6 @@ import re
 from typing import List, Dict, Any
 import json
 from datetime import datetime
-import openai
-from transformers import pipeline
-import requests
 
 warnings.filterwarnings("ignore")
 
