@@ -1,4 +1,3 @@
-# Enhanced AI Support Chatbot with Logical Reasoning and Schema Awareness
 import streamlit as st
 import pandas as pd
 import os
@@ -9,7 +8,6 @@ import numpy as np
 import warnings
 import re
 from typing import List, Dict, Any, Tuple, Optional
-import PyPDF2
 import fitz  # PyMuPDF
 from io import BytesIO
 import json
@@ -36,18 +34,16 @@ config = EnhancedRAGConfig()
 # --- Enhanced Floor Plan and Schema Parser ---
 class FloorPlanAnalyzer:
     """Analyzes floor plans and building schemas for spatial intelligence"""
-    
+
     def __init__(self):
         self.room_mappings = {}
         self.equipment_locations = {}
         self.spatial_relationships = {}
         self.load_floor_plan_data()
-    
+
     def load_floor_plan_data(self):
         """Load and parse floor plan information"""
-        # Parse the provided floor plan data
         self.room_mappings = {
-            # From the floor plan document
             'GYM': {'type': 'fitness', 'equipment': ['leg_press', 'fitness_equipment'], 'floor': 'ground'},
             'KITCHEN': {'type': 'food_service', 'equipment': ['cooking_equipment', 'refrigeration'], 'floor': 'ground'},
             'EXECUTIVE_DINING_1': {'type': 'meeting', 'equipment': ['av_systems', 'displays'], 'floor': 'ground'},
@@ -60,16 +56,14 @@ class FloorPlanAnalyzer:
             'STORE': {'type': 'storage', 'equipment': ['inventory_systems'], 'floor': 'ground'},
             'SERVICE': {'type': 'utility', 'equipment': ['hvac_controls', 'electrical_panels'], 'floor': 'ground'},
         }
-        
-        # Equipment ID mappings from floor plan
+
         self.equipment_locations = {}
         equipment_ids = [
             'A2001', 'A2002', 'A2003', 'A2004', 'A2005', 'A2006', 'A2007', 'A2008', 'A2009', 'A2010',
             'A2160', 'A2161', 'A2162', 'A2170', 'A2171', 'A2172', 'A2225', 'A2226', 'A2227', 'A2228',
             'A2315', 'A2315A', 'A2320', 'A2321', 'A2325', 'A2326', 'A2327', 'A2328', 'A2329', 'A2330'
         ]
-        
-        # Map equipment IDs to likely locations based on floor plan
+
         for eq_id in equipment_ids:
             if eq_id.startswith('A23'):
                 self.equipment_locations[eq_id] = 'TRAINING_ROOMS'
@@ -79,8 +73,8 @@ class FloorPlanAnalyzer:
                 self.equipment_locations[eq_id] = 'MAIN_FLOOR'
             else:
                 self.equipment_locations[eq_id] = 'GENERAL_AREA'
-    
-    def get_room_context(self, room_name: str) -> Dict:
+
+    def get_room_context(self, room_name: str) -> Optional[Dict]:
         """Get contextual information about a room"""
         room_name_upper = room_name.upper()
         for room, details in self.room_mappings.items():
@@ -92,7 +86,7 @@ class FloorPlanAnalyzer:
                     'floor': details['floor']
                 }
         return None
-    
+
     def find_equipment_location(self, equipment_id: str) -> Optional[str]:
         """Find the location of specific equipment"""
         return self.equipment_locations.get(equipment_id.upper())
@@ -100,87 +94,47 @@ class FloorPlanAnalyzer:
 # --- Intelligent Query Processor ---
 class IntelligentQueryProcessor:
     """Advanced query processing with logical reasoning"""
-    
+
     def __init__(self, floor_plan_analyzer: FloorPlanAnalyzer):
         self.floor_plan = floor_plan_analyzer
         self.context_memory = []
-        
+
     def analyze_query_intent(self, query: str, conversation_history: List[Dict] = None) -> Dict:
         """Enhanced query analysis with logical reasoning"""
         query_lower = query.lower()
-        
-        # Intent categories with enhanced detection
+
         intents = {
-            'equipment_search': {
-                'keywords': ['camera', 'projector', 'display', 'audio', 'microphone', 'speaker', 'laptop', 'computer'],
-                'patterns': [r'show.*(?:camera|projector|display)', r'find.*(?:audio|video)', r'where.*(?:equipment|device)'],
-                'confidence': 0
-            },
-            'location_query': {
-                'keywords': ['where', 'location', 'room', 'floor', 'building', 'area'],
-                'patterns': [r'where is', r'located in', r'room.*equipment', r'floor.*equipment'],
-                'confidence': 0
-            },
-            'maintenance_status': {
-                'keywords': ['maintenance', 'service', 'repair', 'status', 'condition', 'health'],
-                'patterns': [r'maintenance.*status', r'when.*service', r'repair.*needed'],
-                'confidence': 0
-            },
-            'specifications': {
-                'keywords': ['specs', 'specification', 'model', 'brand', 'features', 'technical'],
-                'patterns': [r'what.*spec', r'tell me about', r'details.*equipment'],
-                'confidence': 0
-            },
-            'availability': {
-                'keywords': ['available', 'free', 'book', 'schedule', 'use'],
-                'patterns': [r'is.*available', r'can.*use', r'book.*room'],
-                'confidence': 0
-            },
-            'problem_solving': {
-                'keywords': ['problem', 'issue', 'not working', 'broken', 'fix', 'troubleshoot'],
-                'patterns': [r'not working', r'broken', r'problem with', r'issue.*equipment'],
-                'confidence': 0
-            }
+            'equipment_search': {'keywords': ['camera', 'projector', 'display', 'audio', 'microphone', 'speaker', 'laptop', 'computer'], 'patterns': [r'show.*(?:camera|projector|display)', r'find.*(?:audio|video)', r'where.*(?:equipment|device)'], 'confidence': 0},
+            'location_query': {'keywords': ['where', 'location', 'room', 'floor', 'building', 'area'], 'patterns': [r'where is', r'located in', r'room.*equipment', r'floor.*equipment'], 'confidence': 0},
+            'maintenance_status': {'keywords': ['maintenance', 'service', 'repair', 'status', 'condition', 'health'], 'patterns': [r'maintenance.*status', r'when.*service', r'repair.*needed'], 'confidence': 0},
+            'specifications': {'keywords': ['specs', 'specification', 'model', 'brand', 'features', 'technical'], 'patterns': [r'what.*spec', r'tell me about', r'details.*equipment'], 'confidence': 0},
+            'availability': {'keywords': ['available', 'free', 'book', 'schedule', 'use'], 'patterns': [r'is.*available', r'can.*use', r'book.*room'], 'confidence': 0},
+            'problem_solving': {'keywords': ['problem', 'issue', 'not working', 'broken', 'fix', 'troubleshoot'], 'patterns': [r'not working', r'broken', r'problem with', r'issue.*equipment'], 'confidence': 0}
         }
-        
-        # Calculate confidence scores
+
         for intent_name, intent_data in intents.items():
-            # Keyword matching
             keyword_matches = sum(1 for keyword in intent_data['keywords'] if keyword in query_lower)
             intent_data['confidence'] += keyword_matches * 0.3
-            
-            # Pattern matching
             pattern_matches = sum(1 for pattern in intent_data['patterns'] if re.search(pattern, query_lower))
             intent_data['confidence'] += pattern_matches * 0.5
-        
-        primary_intent = max(intents.keys(), key=lambda x: intents[x]['confidence'])
-        
-        # Extract entities
+
+        primary_intent = max(intents.keys(), key=lambda x: intents[x]['confidence']) if any(d['confidence'] > 0 for d in intents.values()) else 'general_query'
+
         entities = self.extract_entities(query)
-        
-        # Determine context from conversation history
         context = self.get_conversational_context(conversation_history) if conversation_history else {}
-        
+
         return {
             'primary_intent': primary_intent,
-            'confidence': intents[primary_intent]['confidence'],
+            'confidence': intents.get(primary_intent, {}).get('confidence', 0),
             'entities': entities,
             'context': context,
-            'requires_logical_reasoning': intents[primary_intent]['confidence'] > 0.5,
+            'requires_logical_reasoning': intents.get(primary_intent, {}).get('confidence', 0) > 0.5,
             'spatial_query': any(word in query_lower for word in ['where', 'location', 'room', 'floor'])
         }
-    
+
     def extract_entities(self, query: str) -> Dict:
         """Extract relevant entities from query"""
-        entities = {
-            'equipment_types': [],
-            'rooms': [],
-            'equipment_ids': [],
-            'brands': [],
-            'actions': []
-        }
-        
-        # Equipment type extraction
+        entities = defaultdict(list)
         equipment_patterns = {
             'cameras': r'\b(?:camera|webcam|camcorder|video camera)\b',
             'displays': r'\b(?:display|monitor|screen|tv|television|projector)\b',
@@ -188,68 +142,47 @@ class IntelligentQueryProcessor:
             'computers': r'\b(?:laptop|computer|pc|workstation|desktop)\b',
             'network': r'\b(?:network|wifi|router|switch|cable)\b'
         }
-        
         for eq_type, pattern in equipment_patterns.items():
             if re.search(pattern, query.lower()):
                 entities['equipment_types'].append(eq_type)
-        
-        # Room extraction
+
         for room in self.floor_plan.room_mappings.keys():
             if room.lower() in query.lower():
                 entities['rooms'].append(room)
-        
-        # Equipment ID extraction (A-series IDs from floor plan)
+
         eq_id_pattern = r'\bA\d{4}[A-Z]?\b'
         entities['equipment_ids'] = re.findall(eq_id_pattern, query.upper())
-        
-        return entities
-    
+        return dict(entities)
+
     def get_conversational_context(self, history: List[Dict]) -> Dict:
         """Extract context from conversation history"""
-        context = {
-            'previous_topics': [],
-            'mentioned_equipment': [],
-            'mentioned_rooms': []
-        }
+        context = defaultdict(list)
+        if not history: return dict(context)
         
-        if not history:
-            return context
-            
-        # Analyze last 3 messages for context
-        recent_messages = history[-6:]  # User and assistant messages
-        
+        recent_messages = history[-6:]
         for message in recent_messages:
             content = message.get('content', '').lower()
-            
-            # Extract previously mentioned equipment
             for eq_type in ['camera', 'projector', 'display', 'audio', 'microphone']:
-                if eq_type in content:
+                if eq_type in content and eq_type not in context['mentioned_equipment']:
                     context['mentioned_equipment'].append(eq_type)
-            
-            # Extract previously mentioned rooms
             for room in self.floor_plan.room_mappings.keys():
-                if room.lower() in content:
+                if room.lower() in content and room not in context['mentioned_rooms']:
                     context['mentioned_rooms'].append(room)
-        
-        return context
+        return dict(context)
 
 # --- Enhanced Response Generator ---
 class LogicalResponseGenerator:
     """Generates logical, contextual responses"""
-    
     def __init__(self, floor_plan_analyzer: FloorPlanAnalyzer):
         self.floor_plan = floor_plan_analyzer
-        
-    def generate_intelligent_response(self, query: str, query_analysis: Dict, 
-                                    search_results: List[Dict], 
-                                    maintenance_data: Dict = None) -> str:
-        """Generate logical, contextual responses"""
-        
+
+    def generate_intelligent_response(self, query: str, query_analysis: Dict,
+                                      search_results: List[Dict],
+                                      maintenance_data: Optional[Dict] = None) -> str:
         intent = query_analysis['primary_intent']
         entities = query_analysis['entities']
         context = query_analysis.get('context', {})
-        
-        # Route to appropriate response generator
+
         if intent == 'equipment_search':
             return self._handle_equipment_search(query, entities, search_results, context)
         elif intent == 'location_query':
@@ -264,394 +197,416 @@ class LogicalResponseGenerator:
             return self._handle_availability_query(query, entities, context)
         else:
             return self._handle_general_query(query, search_results, context)
-    
-    def _handle_equipment_search(self, query: str, entities: Dict, 
-                               search_results: List[Dict], context: Dict) -> str:
-        """Handle equipment search queries with logical reasoning"""
-        
+
+    def _handle_equipment_search(self, query: str, entities: Dict, search_results: List[Dict], context: Dict) -> str:
         response = "**Equipment Search Results**\n\n"
-        
         equipment_types = entities.get('equipment_types', [])
         rooms = entities.get('rooms', [])
-        
+
+        if not equipment_types and not rooms:
+             return self._handle_general_query(query, search_results, context)
+
         if equipment_types:
-            response += f"**Looking for:** {', '.join(equipment_types).title()}\n\n"
-            
-            # Logical reasoning based on room context
-            if rooms:
-                room_context = self.floor_plan.get_room_context(rooms[0])
-                if room_context:
-                    response += f"**Room Context:** {room_context['room']} ({room_context['type']})\n"
-                    response += f"**Typical equipment for this room type:** {', '.join(room_context['typical_equipment'])}\n\n"
-        
-        # Process search results with logical filtering
+            response += f"**Looking for:** {', '.join(et.title() for et in equipment_types)}\n"
+        if rooms:
+            response += f"**In Location:** {', '.join(rooms)}\n\n"
+            room_context = self.floor_plan.get_room_context(rooms[0])
+            if room_context:
+                response += f"**Room Context:** {room_context['room']} ({room_context['type']}) on the {room_context['floor']} floor.\n"
+                response += f"**Typical equipment for this room type:** {', '.join(room_context['typical_equipment'])}\n\n"
+
         relevant_results = []
         for result in search_results:
-            content = result['content'].lower()
-            
-            # Score relevance based on entity matches
+            content_lower = result['content'].lower()
             relevance_score = 0
             for eq_type in equipment_types:
-                if eq_type in content:
+                if eq_type[:-1] in content_lower:  # Match 'camera' for 'cameras'
                     relevance_score += 2
-            
-            # Boost score for room matches
             for room in rooms:
-                if room.lower() in content:
+                if room.lower() in content_lower:
                     relevance_score += 1
-            
             if relevance_score > 0:
                 result['logical_relevance'] = relevance_score
                 relevant_results.append(result)
-        
-        # Sort by logical relevance
+
         relevant_results.sort(key=lambda x: x.get('logical_relevance', 0), reverse=True)
-        
+
         if relevant_results:
-            response += "**Found Equipment:**\n\n"
+            response += "**Found Relevant Information:**\n\n"
             for i, result in enumerate(relevant_results[:3], 1):
-                # Extract specific equipment details
                 equipment_details = self._extract_equipment_details(result['content'])
-                response += f"**{i}. {equipment_details['name'] or 'Equipment Item'}**\n"
-                response += f"   • **Type:** {equipment_details['type'] or 'Not specified'}\n"
-                response += f"   • **Location:** {equipment_details['location'] or 'See details'}\n"
-                response += f"   • **Source:** {os.path.basename(result['source'])}\n\n"
+                response += f"**{i}. {equipment_details.get('name') or 'Relevant Document Snippet'}**\n"
+                response += f"   - **Source:** {os.path.basename(result['source'])}\n"
+                response += f"   - **Preview:** {result['content'][:200]}...\n\n"
         else:
             response += "**No specific equipment found in documents.**\n\n"
-            # Provide logical alternatives
             response += "**Suggestions:**\n"
             if equipment_types:
-                response += f"• Check maintenance records for {equipment_types[0]} equipment\n"
-                response += f"• Look in rooms typically containing {equipment_types[0]} equipment\n"
+                response += f"- Check maintenance records for '{equipment_types[0]}'.\n"
             if rooms:
-                response += f"• Browse all equipment in {rooms[0]}\n"
-        
+                response += f"- Broaden your search to all equipment located in '{rooms[0]}'.\n"
         return response
-    
-    def _handle_location_query(self, query: str, entities: Dict, 
-                             search_results: List[Dict], context: Dict) -> str:
-        """Handle location-based queries with spatial reasoning"""
-        
+
+    def _handle_location_query(self, query: str, entities: Dict, search_results: List[Dict], context: Dict) -> str:
         response = "**Location Information**\n\n"
-        
         equipment_ids = entities.get('equipment_ids', [])
         rooms = entities.get('rooms', [])
-        
-        # Handle specific equipment ID queries
+
+        found = False
         if equipment_ids:
+            found = True
             for eq_id in equipment_ids:
                 location = self.floor_plan.find_equipment_location(eq_id)
                 if location:
-                    response += f"**Equipment {eq_id}:**\n"
-                    response += f"   • **Area:** {location}\n"
-                    response += f"   • **Floor:** Second Floor (based on floor plan)\n\n"
+                    response += f"- **Equipment {eq_id}** is located in the **{location}** area.\n"
                 else:
-                    response += f"**Equipment {eq_id}:** Location not found in floor plan\n\n"
+                    response += f"- Location for Equipment **{eq_id}** not found in the floor plan data.\n"
         
-        # Handle room-based queries
         if rooms:
+            found = True
             for room in rooms:
                 room_info = self.floor_plan.get_room_context(room)
                 if room_info:
-                    response += f"**{room_info['room']}:**\n"
-                    response += f"   • **Type:** {room_info['type'].title()}\n"
-                    response += f"   • **Floor:** {room_info['floor'].title()}\n"
-                    response += f"   • **Typical Equipment:** {', '.join(room_info['typical_equipment'])}\n\n"
+                    response += f"\n**Details for {room_info['room']}:**\n"
+                    response += f"   - **Type:** {room_info['type'].title()}\n"
+                    response += f"   - **Floor:** {room_info['floor'].title()}\n"
+                    response += f"   - **Typical Equipment:** {', '.join(room_info['typical_equipment'])}\n"
         
-        # Add floor plan context
-        response += "**Floor Plan Context:**\n"
-        response += "• **Ground Floor:** Kitchen, Gym, Executive Dining, Consultation Room\n"
-        response += "• **Second Floor:** Training Rooms (6, 7, 8, 10), Meeting Areas\n"
-        response += "• **Equipment IDs:** A-series numbering system used throughout facility\n\n"
+        if not found:
+            response += "I can't seem to identify a specific room or equipment ID in your query. Try asking 'Where is A2315?' or 'Tell me about the GYM'.\n\n"
         
+        response += "\n**General Floor Plan Context:**\n"
+        response += "- **Ground Floor:** Kitchen, Gym, Executive Dining, Consultation Room\n"
+        response += "- **Second Floor:** Training Rooms (6, 7, 8, 10)\n"
         return response
-    
-    def _handle_maintenance_query(self, query: str, entities: Dict, 
-                                maintenance_data: Dict, context: Dict) -> str:
-        """Handle maintenance queries with predictive logic"""
-        
+
+    def _handle_maintenance_query(self, query: str, entities: Dict, maintenance_data: Optional[Dict], context: Dict) -> str:
         response = "**Maintenance Status Analysis**\n\n"
-        
         if not maintenance_data:
-            return "**Error:** Maintenance system not available\n\n"
-        
-        # Logical analysis based on query entities
+            return "**Error:** Maintenance data is not available.\n"
+
         equipment_types = entities.get('equipment_types', [])
-        rooms = entities.get('rooms', [])
-        
-        if equipment_types:
-            # Filter maintenance data by equipment type
-            filtered_equipment = []
-            for eq_id, eq_data in maintenance_data.items():
-                eq_type = eq_data.get('type', '').lower()
-                for search_type in equipment_types:
-                    if search_type in eq_type or any(search_type in keyword for keyword in ['camera', 'audio', 'display']):
-                        filtered_equipment.append({'id': eq_id, **eq_data})
-            
-            if filtered_equipment:
-                # Logical prioritization
-                high_priority = [eq for eq in filtered_equipment if eq['risk_level'] == 'HIGH']
-                
-                response += f"**{equipment_types[0].title()} Equipment Status:**\n"
-                response += f"   • **Total Items:** {len(filtered_equipment)}\n"
-                response += f"   • **High Priority:** {len(high_priority)}\n\n"
-                
-                if high_priority:
-                    response += "**Immediate Action Required:**\n"
-                    for eq in high_priority[:3]:
-                        response += f"• **{eq['id']}** - {eq['failure_probability']:.1%} failure risk\n"
-                        response += f"  Location: {eq['location']} | Last service: {eq['last_maintenance']}\n"
-        
-        return response
-    
-    def _extract_equipment_details(self, content: str) -> Dict:
-        """Extract specific equipment details from content"""
-        details = {'name': None, 'type': None, 'location': None, 'brand': None}
-        
-        # Extract equipment names/models
-        model_patterns = [
-            r'([A-Z]+[0-9]+[A-Z]*)',  # Model numbers like HD450, PTZ200
-            r'([A-Z][a-z]+ [A-Z][a-z]+)',  # Brand Model combinations
+        if not equipment_types:
+            return "Please specify an equipment type to check its maintenance status (e.g., 'camera maintenance')."
+
+        search_type = equipment_types[0]
+        # Match singular form, e.g., 'cameras' -> 'camera'
+        search_type_singular = search_type[:-1] if search_type.endswith('s') else search_type
+
+        filtered_equipment = [
+            {'id': eq_id, **eq_data} 
+            for eq_id, eq_data in maintenance_data.items() 
+            if search_type_singular in eq_data.get('type', '').lower()
         ]
-        
-        for pattern in model_patterns:
-            matches = re.findall(pattern, content)
-            if matches:
-                details['name'] = matches[0]
-                break
-        
-        # Extract types
-        if 'camera' in content.lower():
-            details['type'] = 'Camera'
-        elif 'projector' in content.lower():
-            details['type'] = 'Projector'
-        elif 'microphone' in content.lower():
-            details['type'] = 'Audio'
-        elif 'display' in content.lower():
-            details['type'] = 'Display'
-        
-        return details
-    
-    def _handle_specifications_query(self, query: str, entities: Dict, 
-                                   search_results: List[Dict], context: Dict) -> str:
-        """Handle specification queries"""
-        
-        response = "**Technical Specifications**\n\n"
-        
-        if search_results:
-            for result in search_results[:2]:
-                specs = self._extract_specifications(result['content'])
-                if specs:
-                    response += f"**From {os.path.basename(result['source'])}:**\n"
-                    for key, value in specs.items():
-                        response += f"   • **{key}:** {value}\n"
-                    response += "\n"
-        
+
+        if filtered_equipment:
+            high_priority = [eq for eq in filtered_equipment if eq.get('risk_level') == 'HIGH']
+            response += f"**{search_type.title()} Equipment Status:**\n"
+            response += f"- **Total Items Tracked:** {len(filtered_equipment)}\n"
+            response += f"- **High Priority Items:** {len(high_priority)}\n\n"
+
+            if high_priority:
+                response += "**Immediate Action Recommended:**\n"
+                for eq in high_priority[:3]:
+                    response += (f"- **{eq['id']}** ({eq['type']}) has a **{eq['failure_probability']:.0%} failure risk**.\n"
+                                 f"  - Location: {eq['location']} | Last service: {eq['last_maintenance']}\n")
+        else:
+            response += f"No maintenance records found for '{search_type.title()}'.\n"
         return response
-    
-    def _extract_specifications(self, content: str) -> Dict:
-        """Extract technical specifications from content"""
-        specs = {}
+
+    def _extract_equipment_details(self, content: str) -> Dict:
+        details = {}
+        # Simple extraction, can be improved with more complex regex
+        if 'camera' in content.lower(): details['type'] = 'Camera'
+        elif 'projector' in content.lower(): details['type'] = 'Projector'
+        elif 'microphone' in content.lower(): details['type'] = 'Audio'
+        elif 'display' in content.lower(): details['type'] = 'Display'
         
-        # Common specification patterns
+        model_match = re.search(r'\b([A-Z0-9-]{4,})\b', content)
+        if model_match:
+            details['name'] = model_match.group(1)
+        return details
+
+    def _handle_specifications_query(self, query: str, entities: Dict, search_results: List[Dict], context: Dict) -> str:
+        response = "**Technical Specifications**\n\n"
+        if not search_results:
+            return "I couldn't find any documents that might contain specifications for your query."
+
+        found_specs = False
+        for result in search_results[:2]:
+            specs = self._extract_specifications(result['content'])
+            if specs:
+                found_specs = True
+                response += f"**From {os.path.basename(result['source'])}:**\n"
+                for key, value in specs.items():
+                    response += f"- **{key}:** {value}\n"
+                response += "\n"
+        
+        if not found_specs:
+            response += "No specific technical specs found, but here is the most relevant document snippet:\n"
+            response += f"> {search_results[0]['content'][:400]}...\n"
+
+        return response
+
+    def _extract_specifications(self, content: str) -> Dict:
+        specs = {}
         spec_patterns = [
-            (r'resolution[:\s]+([0-9]+x[0-9]+)', 'Resolution'),
+            (r'resolution[:\s]+([\w\s]+x[\w\s]+)', 'Resolution'),
             (r'brightness[:\s]+([0-9,]+\s*lumens?)', 'Brightness'),
             (r'connectivity[:\s]+([^.\n]+)', 'Connectivity'),
             (r'warranty[:\s]+([^.\n]+)', 'Warranty'),
         ]
-        
         for pattern, key in spec_patterns:
             match = re.search(pattern, content, re.IGNORECASE)
             if match:
                 specs[key] = match.group(1).strip()
-        
         return specs
-    
-    def _handle_problem_solving(self, query: str, entities: Dict, 
-                              search_results: List[Dict], context: Dict) -> str:
-        """Handle troubleshooting and problem-solving queries"""
-        
-        response = "**Problem Analysis & Solutions**\n\n"
-        
-        # Extract problem keywords
-        problem_keywords = ['not working', 'broken', 'error', 'issue', 'problem', 'malfunction']
+
+    def _handle_problem_solving(self, query: str, entities: Dict, search_results: List[Dict], context: Dict) -> str:
+        response = "**Problem Analysis & Suggested Solutions**\n\n"
+        problem_keywords = ['not working', 'broken', 'error', 'issue', 'problem']
         identified_problems = [kw for kw in problem_keywords if kw in query.lower()]
         
         if identified_problems:
-            response += f"**Identified Issue:** {identified_problems[0]}\n\n"
+            response += f"**Identified Issue:** Problem related to '{identified_problems[0]}'.\n\n"
         
-        # Provide logical troubleshooting steps
         equipment_types = entities.get('equipment_types', [])
-        
-        if 'cameras' in equipment_types or 'camera' in query.lower():
+        query_lower = query.lower()
+
+        if 'cameras' in equipment_types or 'camera' in query_lower:
             response += "**Camera Troubleshooting Steps:**\n"
-            response += "1. Check power cable connections\n"
-            response += "2. Verify USB/network cable integrity\n"
-            response += "3. Test camera with different software\n"
-            response += "4. Check driver installation\n"
-            response += "5. Contact IT support if issues persist\n\n"
-        
-        # Add relevant documentation
+            response += "1. Ensure the camera is powered on and the lens cap is removed.\n"
+            response += "2. Check all cable connections (USB, HDMI, Power).\n"
+            response += "3. Restart the connected computer or video system.\n"
+            response += "4. Verify the correct video input is selected in your software.\n"
+            response += "5. If the problem persists, please create a support ticket.\n\n"
+        else:
+            response += "**General Troubleshooting Steps:**\n"
+            response += "1. Check for power and ensure the device is turned on.\n"
+            response += "2. Securely reconnect all relevant cables.\n"
+            response += "3. Power cycle the device (turn it off and on again).\n\n"
+
         if search_results:
-            response += "**Related Documentation:**\n"
+            response += "**Related Documentation Found:**\n"
             for result in search_results[:2]:
-                response += f"• {os.path.basename(result['source'])}\n"
-        
+                response += f"- {os.path.basename(result['source'])}\n"
         return response
-    
+
     def _handle_availability_query(self, query: str, entities: Dict, context: Dict) -> str:
-        """Handle availability and booking queries"""
-        
-        response = "**Availability Information**\n\n"
-        
+        response = "**Availability & Booking Information**\n\n"
         rooms = entities.get('rooms', [])
-        
         if rooms:
             for room in rooms:
                 room_info = self.floor_plan.get_room_context(room)
                 if room_info:
-                    response += f"**{room_info['room']}:**\n"
-                    response += f"   • **Type:** {room_info['type'].title()}\n"
-                    response += f"   • **Equipment:** {', '.join(room_info['typical_equipment'])}\n"
-                    response += f"   • **Status:** Check booking system for current availability\n\n"
-        
-        response += "**Booking Recommendations:**\n"
-        response += "• Contact facility management for room reservations\n"
-        response += "• Check internal booking system\n"
-        response += "• Verify equipment requirements in advance\n\n"
-        
+                    response += f"For **{room_info['room']}**:\n"
+                    response += f"- This is a **{room_info['type']}** type room typically containing: {', '.join(room_info['typical_equipment'])}.\n"
+        response += "\nTo check current availability or to book a room, please refer to the official company-wide booking system.\n"
         return response
-    
+
     def _handle_general_query(self, query: str, search_results: List[Dict], context: Dict) -> str:
-        """Handle general queries with contextual information"""
-        
         response = "**Information Found**\n\n"
-        
         if search_results:
             for i, result in enumerate(search_results[:3], 1):
-                response += f"**{i}. {os.path.basename(result['source'])}**\n"
-                content_preview = result['content'][:300] + "..." if len(result['content']) > 300 else result['content']
-                response += f"{content_preview}\n\n"
+                response += f"**{i}. From: {os.path.basename(result['source'])}**\n"
+                content_preview = result['content'][:300].strip()
+                response += f"> {content_preview}...\n\n"
         else:
-            response += "**No specific information found.**\n\n"
-            response += "**Available Services:**\n"
-            response += "• Equipment location and specifications\n"
-            response += "• Room and facility information\n"
-            response += "• Maintenance status and scheduling\n"
-            response += "• Technical support and troubleshooting\n\n"
-        
+            response += "**I couldn't find specific information for your query.**\n\n"
+            response += "You can ask me about:\n"
+            response += "- Equipment locations (e.g., 'Where is A2315?')\n"
+            response += "- Room details (e.g., 'What's in the GYM?')\n"
+            response += "- Maintenance status (e.g., 'camera maintenance')\n"
+            response += "- Troubleshooting (e.g., 'The projector is not working')\n"
         return response
 
-# Update the main application to use enhanced components
-def create_enhanced_chatbot():
-    """Create the enhanced chatbot with logical reasoning"""
+# --- Helper Functions for Document Processing and Search ---
+
+@st.cache_resource
+def load_model():
+    """Load the sentence transformer model."""
+    return SentenceTransformer('all-MiniLM-L6-v2')
+
+def extract_text_from_doc(uploaded_file):
+    """Extract text from PDF or TXT file."""
+    text = ""
+    try:
+        if uploaded_file.type == "application/pdf":
+            doc = fitz.open(stream=uploaded_file.read(), filetype="pdf")
+            for page in doc:
+                text += page.get_text()
+            doc.close()
+        elif uploaded_file.type == "text/plain":
+            text = uploaded_file.read().decode("utf-8")
+        return text
+    except Exception as e:
+        st.error(f"Error reading {uploaded_file.name}: {e}")
+        return None
+
+def chunk_text(text: str, chunk_size: int, chunk_overlap: int) -> List[str]:
+    """Split text into overlapping chunks."""
+    words = text.split()
+    if not words:
+        return []
+    chunks = []
+    for i in range(0, len(words), chunk_size - chunk_overlap):
+        chunks.append(" ".join(words[i:i + chunk_size]))
+    return chunks
+
+def process_and_index_files(uploaded_files, model, chunk_size, chunk_overlap):
+    """Process uploaded files and create a FAISS index."""
+    all_chunks = []
+    metadata = []
     
-    # Initialize components
-    floor_plan_analyzer = FloorPlanAnalyzer()
-    query_processor = IntelligentQueryProcessor(floor_plan_analyzer)
-    response_generator = LogicalResponseGenerator(floor_plan_analyzer)
+    for file in uploaded_files:
+        text = extract_text_from_doc(file)
+        if text:
+            chunks = chunk_text(text, chunk_size, chunk_overlap)
+            all_chunks.extend(chunks)
+            metadata.extend([{'source': file.name}] * len(chunks))
+
+    if not all_chunks:
+        st.warning("No text could be extracted from the uploaded files.")
+        return None, None, None
+
+    with st.spinner("Creating vector embeddings for the documents... This may take a moment."):
+        embeddings = model.encode(all_chunks, show_progress_bar=True)
+        dimension = embeddings.shape[1]
+        index = faiss.IndexFlatL2(dimension)
+        index.add(np.array(embeddings))
     
+    st.success(f"Successfully indexed {len(all_chunks)} chunks from {len(uploaded_files)} files.")
+    return index, all_chunks, metadata
+
+def search_documents(query: str, model, index, chunks: List[str], metadata: List[Dict], k: int) -> List[Dict]:
+    """Search for relevant documents using FAISS."""
+    query_embedding = model.encode([query])
+    distances, indices = index.search(np.array(query_embedding), k)
+    
+    results = []
+    for i in range(len(indices[0])):
+        idx = indices[0][i]
+        results.append({
+            "content": chunks[idx],
+            "source": metadata[idx]['source'],
+            "score": distances[0][i]
+        })
+    return results
+
+def generate_dummy_maintenance_data():
+    """Creates a sample dictionary of maintenance data."""
     return {
-        'floor_plan': floor_plan_analyzer,
-        'query_processor': query_processor,
-        'response_generator': response_generator
+        "A2315": {"type": "PTZ Camera", "location": "TRAINING_ROOM_6", "last_maintenance": "2025-07-15", "failure_probability": 0.85, "risk_level": "HIGH"},
+        "A2320": {"type": "Ceiling Microphone", "location": "TRAINING_ROOM_7", "last_maintenance": "2025-08-01", "failure_probability": 0.20, "risk_level": "LOW"},
+        "A2225": {"type": "8K Display", "location": "EXECUTIVE_DINING_1", "last_maintenance": "2025-06-20", "failure_probability": 0.92, "risk_level": "HIGH"},
+        "CAM-04": {"type": "Security Camera", "location": "Lobby", "last_maintenance": "2025-08-22", "failure_probability": 0.40, "risk_level": "MEDIUM"},
     }
 
-# Enhanced main function with intelligent processing
+# --- Main Application ---
+
 def main():
-    """Enhanced main Streamlit application"""
-    st.set_page_config(
-        page_title="Intelligent AI Support System",
-        page_icon="🧠",
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
-    
-    # Initialize enhanced chatbot
-    if 'enhanced_chatbot' not in st.session_state:
-        st.session_state.enhanced_chatbot = create_enhanced_chatbot()
-    
-    chatbot_components = st.session_state.enhanced_chatbot
+    st.set_page_config(page_title="Intelligent AI Support System", page_icon="🧠", layout="wide")
     
     st.title("🧠 Intelligent AI Support System")
     st.subheader("Advanced Equipment Management with Spatial Intelligence")
     
-    # Enhanced chat interface
-    if 'chat_history' not in st.session_state:
+    # Initialize components and state
+    if 'enhanced_chatbot' not in st.session_state:
+        floor_plan_analyzer = FloorPlanAnalyzer()
+        st.session_state.enhanced_chatbot = {
+            'floor_plan': floor_plan_analyzer,
+            'query_processor': IntelligentQueryProcessor(floor_plan_analyzer),
+            'response_generator': LogicalResponseGenerator(floor_plan_analyzer)
+        }
         st.session_state.chat_history = []
+        st.session_state.search_ready = False
+        st.session_state.maintenance_data = generate_dummy_maintenance_data()
     
-    # Query input
-    query = st.chat_input("Ask me about equipment, locations, maintenance, or any technical questions...")
+    chatbot_components = st.session_state.enhanced_chatbot
+    model = load_model()
+
+    # --- Sidebar for File Upload and Control ---
+    with st.sidebar:
+        st.header("📚 Document Management")
+        uploaded_files = st.file_uploader(
+            "Upload technical manuals, floor plans, etc. (PDF, TXT)",
+            type=["pdf", "txt"],
+            accept_multiple_files=True
+        )
+
+        if st.button("Process and Index Documents"):
+            if uploaded_files:
+                index, chunks, metadata = process_and_index_files(
+                    uploaded_files, model, config.chunk_size, config.chunk_overlap
+                )
+                if index is not None:
+                    st.session_state.search_index = index
+                    st.session_state.chunks = chunks
+                    st.session_state.chunk_metadata = metadata
+                    st.session_state.search_ready = True
+            else:
+                st.warning("Please upload at least one document.")
+        
+        st.divider()
+        st.header("🏢 Facility Information")
+        st.subheader("📐 Floor Plan Overview")
+        floor_plan = chatbot_components['floor_plan']
+        for room, details in floor_plan.room_mappings.items():
+            st.write(f"- **{room}** ({details['type'].title()})")
+        
+        st.subheader("⚡ Quick Queries")
+        if st.button("📷 Find all cameras"):
+            st.session_state.quick_query = "Show me all cameras in the building"
+            st.rerun()
+        if st.button("🏢 Room equipment"):
+            st.session_state.quick_query = "What equipment is in the training rooms?"
+            st.rerun()
+        if st.button("📍 Equipment location"):
+            st.session_state.quick_query = "Where is equipment A2315 located?"
+            st.rerun()
+
+    # --- Main Chat Interface ---
     
+    # Handle quick queries
+    if st.session_state.get("quick_query"):
+        query = st.session_state.pop("quick_query")
+        st.chat_input("Ask me anything...", disabled=True) # Disable input while processing
+    else:
+        query = st.chat_input("Ask me about equipment, locations, or maintenance...")
+
     if query:
-        # Add user message
         st.session_state.chat_history.append({"role": "user", "content": query})
         
-        # Process query with enhanced intelligence
-        with st.spinner("🧠 Analyzing query and generating intelligent response..."):
-            
-            # Analyze query with logical reasoning
-            query_analysis = chatbot_components['query_processor'].analyze_query_intent(
-                query, st.session_state.chat_history
-            )
-            
-            # Search documents (using existing search function)
-            search_results = []
-            if st.session_state.get('search_ready', False):
+        if not st.session_state.search_ready:
+            st.warning("Please upload and process documents first to enable search functionality.")
+            response = "I'm ready to help, but you need to upload and process some documents using the sidebar first so I have information to search through."
+        else:
+            with st.spinner("🧠 Analyzing query and searching documents..."):
+                query_analysis = chatbot_components['query_processor'].analyze_query_intent(
+                    query, st.session_state.chat_history
+                )
+                
                 search_results = search_documents(
                     query,
+                    model,
                     st.session_state.search_index,
                     st.session_state.chunks,
                     st.session_state.chunk_metadata,
-                    k=8
+                    k=config.top_k_retrieval
                 )
-            
-            # Generate intelligent response
-            response = chatbot_components['response_generator'].generate_intelligent_response(
-                query, query_analysis, search_results, 
-                st.session_state.get('maintenance_data', {})
-            )
-            
-            # Add debug info for development
-            with st.expander("🔍 Query Analysis (Debug)", expanded=False):
-                st.json(query_analysis)
+                
+                response = chatbot_components['response_generator'].generate_intelligent_response(
+                    query, query_analysis, search_results,
+                    st.session_state.get('maintenance_data', {})
+                )
         
-        # Add assistant response
         st.session_state.chat_history.append({"role": "assistant", "content": response})
-    
+        st.rerun() # Rerun to display the latest message
+
     # Display chat history
     for message in st.session_state.chat_history:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
-    
-    # Sidebar with enhanced information
-    with st.sidebar:
-        st.header("🏢 Facility Information")
-        
-        # Floor plan summary
-        st.subheader("📐 Floor Plan Overview")
-        floor_plan = chatbot_components['floor_plan']
-        
-        st.write("**Rooms Available:**")
-        for room, details in floor_plan.room_mappings.items():
-            st.write(f"• **{room}** ({details['type']})")
-        
-        st.write("**Equipment Zones:**")
-        st.write("• Training Rooms: A23xx series")
-        st.write("• Executive Areas: A22xx series") 
-        st.write("• Main Floor: A21xx series")
-        
-        # Quick actions
-        st.subheader("⚡ Quick Queries")
-        if st.button("📷 Find all cameras"):
-            st.session_state.quick_query = "Show me all cameras in the building"
-        
-        if st.button("🏢 Room equipment"):
-            st.session_state.quick_query = "What equipment is in the training rooms?"
-        
-        if st.button("📍 Equipment locations"):
-            st.session_state.quick_query = "Where is equipment A2315 located?"
 
 if __name__ == "__main__":
     main()
