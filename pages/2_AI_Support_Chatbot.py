@@ -9,652 +9,381 @@ import numpy as np
 import warnings
 import re
 from typing import List, Dict, Any
-import json
-from datetime import datetime
 
 warnings.filterwarnings("ignore")
 
-# --- Enhanced RAG Configuration ---
+# --- Simple but Effective RAG Configuration ---
 class RAGConfig:
     def __init__(self):
-        self.chunk_size = 512
+        self.chunk_size = 400
         self.chunk_overlap = 50
-        self.top_k_retrieval = 5
-        self.similarity_threshold = 0.3
+        self.top_k_retrieval = 8
+        self.similarity_threshold = 0.1  # Lower threshold to get more results
         self.max_context_length = 2000
-        self.use_reranking = True
 
 config = RAGConfig()
 
-# --- Advanced Text Processing ---
-def advanced_text_preprocessing(text: str) -> str:
-    """Advanced text preprocessing with domain-specific cleaning"""
-    text = re.sub(r'[^\w\s\.\,\;\:\!\?\-\(\)]', ' ', text)
+# --- Simple Text Processing ---
+def clean_text(text: str) -> str:
+    """Simple but effective text cleaning"""
+    # Remove extra whitespace and normalize
     text = re.sub(r'\s+', ' ', text.strip())
-    text = re.sub(r'\b(ID|id):\s*(\w+)', r'identifier \2', text)
-    text = re.sub(r'\b(P\d+|HIGH|LOW|MEDIUM)\b', lambda m: f'priority_{m.group().lower()}', text)
     return text
 
-def extract_entities(text: str) -> Dict[str, List[str]]:
-    """Extract key entities from text using simple pattern matching"""
-    entities = {
-        'equipment': [],
-        'issues': [],
-        'priorities': [],
-        'dates': [],
-        'locations': []
-    }
-    
-    equipment_patterns = [
-        r'\b(camera|laptop|pc|computer|microphone|speaker|projector|monitor)\w*\b',
-        r'\b(audio|video|hardware|software)\s+\w+\b'
-    ]
-    
-    for pattern in equipment_patterns:
-        entities['equipment'].extend(re.findall(pattern, text, re.IGNORECASE))
-    
-    issue_patterns = [
-        r'\b(error|bug|issue|problem|failure|crash)\w*\b',
-        r'\b(not working|broken|failed|timeout)\b'
-    ]
-    
-    for pattern in issue_patterns:
-        entities['issues'].extend(re.findall(pattern, text, re.IGNORECASE))
-    
-    entities['priorities'] = re.findall(r'\b(high|medium|low|critical|urgent)\b', text, re.IGNORECASE)
-    entities['dates'] = re.findall(r'\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}/\d{1,2}/\d{4}\b', text)
-    entities['locations'] = re.findall(r'\b(mumbai|delhi|bangalore|chennai|office|room\s*\d+)\b', text, re.IGNORECASE)
-    
-    return entities
-
-def intelligent_chunking(text: str, chunk_size: int = 512, overlap: int = 50) -> List[Dict[str, Any]]:
-    """Create intelligent chunks with metadata"""
+def simple_chunking(text: str, chunk_size: int = 400) -> List[str]:
+    """Simple but effective chunking"""
+    words = text.split()
     chunks = []
-    sentences = re.split(r'(?<=[.!?])\s+', text)
     
-    current_chunk = []
-    current_size = 0
-    
-    for sentence in sentences:
-        sentence_size = len(sentence)
-        
-        if current_size + sentence_size > chunk_size and current_chunk:
-            chunk_text = ' '.join(current_chunk)
-            entities = extract_entities(chunk_text)
-            
-            chunks.append({
-                'text': chunk_text,
-                'entities': entities,
-                'size': current_size,
-                'sentence_count': len(current_chunk)
-            })
-            
-            if overlap > 0 and len(current_chunk) > 1:
-                current_chunk = current_chunk[-1:]
-                current_size = len(current_chunk[0])
-            else:
-                current_chunk = []
-                current_size = 0
-        
-        current_chunk.append(sentence)
-        current_size += sentence_size
-    
-    if current_chunk:
-        chunk_text = ' '.join(current_chunk)
-        entities = extract_entities(chunk_text)
-        chunks.append({
-            'text': chunk_text,
-            'entities': entities,
-            'size': current_size,
-            'sentence_count': len(current_chunk)
-        })
+    for i in range(0, len(words), chunk_size - 50):  # 50 word overlap
+        chunk = ' '.join(words[i:i + chunk_size])
+        if len(chunk.strip()) > 50:  # Only add substantial chunks
+            chunks.append(chunk.strip())
     
     return chunks
 
-def analyze_query_intent(query: str) -> Dict[str, Any]:
-    """Analyze query to understand user intent"""
+def detect_query_type(query: str) -> str:
+    """Simple query type detection"""
     query_lower = query.lower()
     
-    intent_patterns = {
-        'equipment_inquiry': [
-            r'\b(what|show|list|find).*\b(camera|laptop|pc|audio|video|equipment)\b',
-            r'\b(which|what type).*\b(device|hardware|equipment)\b'
-        ],
-        'issue_tracking': [
-            r'\b(issue|problem|error|bug|ticket)\b',
-            r'\b(not working|broken|failed|down)\b',
-            r'\b(report|status|update).*\b(issue|problem)\b'
-        ],
-        'project_status': [
-            r'\b(project|status|progress|update)\b',
-            r'\b(how.*going|what.*happening)\b'
-        ],
-        'comparison': [
-            r'\b(compare|difference|better|vs|versus)\b',
-            r'\b(which.*better|should.*choose)\b'
-        ],
-        'recommendation': [
-            r'\b(recommend|suggest|advice|best)\b',
-            r'\b(what.*should|which.*use)\b'
-        ]
-    }
-    
-    detected_intents = []
-    for intent, patterns in intent_patterns.items():
-        for pattern in patterns:
-            if re.search(pattern, query_lower):
-                detected_intents.append(intent)
-                break
-    
-    query_entities = extract_entities(query)
-    
-    return {
-        'intents': detected_intents,
-        'entities': query_entities,
-        'query_type': 'factual' if any(word in query_lower for word in ['what', 'when', 'where', 'who', 'how']) else 'action',
-        'complexity': 'complex' if len(query.split()) > 10 or '?' in query else 'simple'
-    }
+    if any(word in query_lower for word in ['camera', 'video', 'recording', 'webcam']):
+        return 'camera'
+    elif any(word in query_lower for word in ['audio', 'microphone', 'speaker', 'sound', 'mic']):
+        return 'audio'
+    elif any(word in query_lower for word in ['laptop', 'computer', 'pc', 'workstation']):
+        return 'computer'
+    elif any(word in query_lower for word in ['projector', 'display', 'monitor', 'screen']):
+        return 'display'
+    elif any(word in query_lower for word in ['issue', 'problem', 'error', 'bug', 'ticket']):
+        return 'issue'
+    elif any(word in query_lower for word in ['all', 'everything', 'complete', 'full', 'entire']):
+        return 'comprehensive'
+    else:
+        return 'general'
 
-def group_results_by_relevance(results: List[Dict], query_analysis: Dict) -> Dict:
-    """Group results by relevance levels"""
-    grouped = {
-        'high_relevance': [],
-        'medium_relevance': [],
-        'low_relevance': []
-    }
-    
-    for result in results:
-        score = result.get('enhanced_score', result['score'])
-        if score > 0.7:
-            grouped['high_relevance'].append(result)
-        elif score > 0.4:
-            grouped['medium_relevance'].append(result)
-        else:
-            grouped['low_relevance'].append(result)
-    
-    return grouped
-
-def generate_contextual_details(grouped_results: Dict) -> str:
-    """Generate additional contextual details"""
-    details = ""
-    
-    sources = set()
-    for category in grouped_results.values():
-        for result in category:
-            sources.add(os.path.basename(result['source']))
-    
-    if sources:
-        details += f"**Sources consulted:** {', '.join(sources)}\n\n"
-    
-    return details
-
-def generate_equipment_response(query: str, grouped_results: Dict, query_analysis: Dict) -> str:
-    """Generate equipment-focused response"""
-    response = "Based on your equipment inventory and documentation, here's what I found:\n\n"
-    
-    equipment_items = []
-    for result in grouped_results.get('high_relevance', [])[:3]:
-        content = result['content']
-        equipment_matches = re.findall(r'\b(camera|laptop|pc|audio|video|microphone|speaker)\w*[^.]*', content, re.IGNORECASE)
-        equipment_items.extend(equipment_matches)
-    
-    if equipment_items:
-        response += "**Available Equipment:**\n"
-        for i, item in enumerate(set(equipment_items[:5]), 1):
-            response += f"{i}. {item.strip()}\n"
-        response += "\n"
-    
-    response += generate_contextual_details(grouped_results)
-    return response
-
-def generate_issue_response(query: str, grouped_results: Dict, query_analysis: Dict) -> str:
-    """Generate issue-focused response"""
-    response = "Here's what I found regarding issues and tickets:\n\n"
-    
-    issues = []
-    priorities = []
-    
-    for result in grouped_results.get('high_relevance', [])[:3]:
-        entities = result.get('entities', {})
-        issues.extend(entities.get('issues', []))
-        priorities.extend(entities.get('priorities', []))
-    
-    if issues:
-        response += "**Identified Issues:**\n"
-        for issue in set(issues[:5]):
-            response += f"• {issue}\n"
-        response += "\n"
-    
-    if priorities:
-        response += f"**Priority Levels:** {', '.join(set(priorities))}\n\n"
-    
-    response += generate_contextual_details(grouped_results)
-    return response
-
-def generate_project_response(query: str, grouped_results: Dict, query_analysis: Dict) -> str:
-    """Generate project status response"""
-    response = "Here's the project information I found:\n\n"
-    
-    projects = []
-    locations = []
-    
-    for result in grouped_results.get('high_relevance', [])[:3]:
-        content = result['content']
-        entities = result.get('entities', {})
-        
-        project_matches = re.findall(r'\b(project|status|progress|update|milestone)\w*[^.]*', content, re.IGNORECASE)
-        projects.extend(project_matches)
-        locations.extend(entities.get('locations', []))
-    
-    if projects:
-        response += "**Project Updates:**\n"
-        for project in set(projects[:5]):
-            response += f"• {project.strip()}\n"
-        response += "\n"
-    
-    if locations:
-        response += f"**Locations:** {', '.join(set(locations))}\n\n"
-    
-    response += generate_contextual_details(grouped_results)
-    return response
-
-def generate_comparison_response(query: str, grouped_results: Dict, query_analysis: Dict) -> str:
-    """Generate comparison-focused response"""
-    response = "Here's a comparison based on available information:\n\n"
-    
-    items = []
-    for result in grouped_results.get('high_relevance', [])[:4]:
-        content = result['content'][:200] + "..." if len(result['content']) > 200 else result['content']
-        source = os.path.basename(result['source'])
-        items.append(f"**{source}:** {content}")
-    
-    if items:
-        for i, item in enumerate(items, 1):
-            response += f"{i}. {item}\n\n"
-    
-    response += "💡 **Recommendation:** Compare these options based on your specific requirements.\n"
-    return response
-
-def generate_recommendation_response(query: str, grouped_results: Dict, query_analysis: Dict) -> str:
-    """Generate recommendation-focused response"""
-    response = "Based on the available information, here are my recommendations:\n\n"
-    
-    top_results = grouped_results.get('high_relevance', [])[:3]
-    if not top_results:
-        top_results = grouped_results.get('medium_relevance', [])[:3]
-    
-    if top_results:
-        response += "**Top Recommendations:**\n"
-        for i, result in enumerate(top_results, 1):
-            content = result['content'][:150] + "..." if len(result['content']) > 150 else result['content']
-            source = os.path.basename(result['source'])
-            response += f"{i}. **From {source}:** {content}\n\n"
-    
-    response += "💡 **Next Steps:** Consider these factors when making your decision.\n"
-    return response
-
-def generate_general_response(query: str, grouped_results: Dict, query_analysis: Dict) -> str:
-    """Generate general response with smart summarization"""
-    response = "Based on your query, here's the most relevant information:\n\n"
-    
-    top_results = grouped_results.get('high_relevance', [])[:2]
-    if not top_results:
-        top_results = grouped_results.get('medium_relevance', [])[:2]
-    
-    for i, result in enumerate(top_results, 1):
-        source_name = os.path.basename(result['source'])
-        content = result['content'][:300] + "..." if len(result['content']) > 300 else result['content']
-        
-        response += f"**{i}. From {source_name}:**\n"
-        response += f"{content}\n\n"
-    
-    response += generate_smart_suggestions(query, query_analysis)
-    return response
-
-def generate_smart_suggestions(query: str, query_analysis: Dict) -> str:
-    """Generate smart follow-up suggestions"""
-    suggestions = "💡 **You might also want to ask:**\n"
-    
-    if 'equipment' in str(query_analysis['entities']):
-        suggestions += "• 'What are the specifications of [equipment name]?'\n"
-        suggestions += "• 'Are there any issues with this equipment?'\n"
-    
-    if query_analysis.get('complexity') == 'simple':
-        suggestions += "• Try asking for more specific details\n"
-        suggestions += "• Ask for comparisons between options\n"
-    
-    return suggestions
-
-def generate_no_results_response(query: str, query_analysis: Dict) -> str:
-    """Generate helpful response when no results found"""
-    response = "I couldn't find specific information about that in your documents, but let me help you:\n\n"
-    
-    if 'equipment' in str(query_analysis['entities']):
-        response += "**For equipment queries, try:**\n"
-        response += "• 'Show me all cameras'\n"
-        response += "• 'List audio equipment'\n"
-        response += "• 'What laptops are available?'\n\n"
-    
-    response += "**General tips:**\n"
-    response += "• Try using different keywords\n"
-    response += "• Ask about specific categories (equipment, issues, projects)\n"
-    response += "• Check if your documents contain the information you're looking for\n"
-    
-    return response
-
-def generate_smart_response(query: str, results: List[Dict], query_analysis: Dict) -> str:
-    """Generate contextually aware responses using retrieved information"""
-    
-    if not results:
-        return generate_no_results_response(query, query_analysis)
-    
-    grouped_results = group_results_by_relevance(results, query_analysis)
-    primary_intent = query_analysis['intents'][0] if query_analysis['intents'] else 'general'
-    
-    response_generators = {
-        'equipment_inquiry': generate_equipment_response,
-        'issue_tracking': generate_issue_response,
-        'project_status': generate_project_response,
-        'comparison': generate_comparison_response,
-        'recommendation': generate_recommendation_response
-    }
-    
-    generator = response_generators.get(primary_intent, generate_general_response)
-    return generator(query, grouped_results, query_analysis)
-
-def rerank_results(query: str, results: List[Dict], query_analysis: Dict) -> List[Dict]:
-    """Rerank results based on query intent and entity matching"""
-    def calculate_relevance_score(result, query_analysis):
-        score = result['score']
-        
-        result_entities = result.get('entities', {})
-        query_entities = query_analysis['entities']
-        
-        entity_boost = 0
-        for entity_type in query_entities:
-            if entity_type in result_entities:
-                common_entities = set(query_entities[entity_type]) & set(result_entities[entity_type])
-                entity_boost += len(common_entities) * 0.1
-        
-        content_lower = result['content'].lower()
-        for intent in query_analysis['intents']:
-            if intent == 'equipment_inquiry' and any(word in content_lower for word in ['camera', 'laptop', 'audio', 'video']):
-                score += 0.2
-            elif intent == 'issue_tracking' and any(word in content_lower for word in ['error', 'issue', 'problem', 'ticket']):
-                score += 0.2
-            elif intent == 'project_status' and any(word in content_lower for word in ['project', 'status', 'progress']):
-                score += 0.2
-        
-        return score + entity_boost
-    
-    for result in results:
-        result['enhanced_score'] = calculate_relevance_score(result, query_analysis)
-    
-    return sorted(results, key=lambda x: x['enhanced_score'], reverse=True)
-
-def enhance_query_with_domain_knowledge(query: str, query_analysis: Dict) -> str:
-    """Enhance query with domain-specific knowledge"""
-    enhanced = query
-    
-    domain_expansions = {
-        'camera': 'camera video recording device',
-        'laptop': 'laptop computer pc workstation',
-        'issue': 'issue problem error bug ticket',
-        'audio': 'audio sound microphone speaker'
-    }
-    
-    for term, expansion in domain_expansions.items():
-        if term in query.lower():
-            enhanced += f" {expansion}"
-    
-    return enhanced
-
+# --- Document Processing ---
 @st.cache_resource
-def load_and_process_documents():
-    """Enhanced document loading with better processing"""
+def load_documents_simple():
+    """Load documents with simple but effective processing"""
+    st.info("🔍 Loading documents...")
+    
     documents = []
     file_paths = []
-    document_metadata = []
+    file_metadata = []
     
-    file_patterns = {
-        "**/*.txt": "text",
-        "**/*.md": "text", 
-        "**/*.csv": "csv",
-        "**/*.json": "json"
-    }
+    # Look for files
+    file_patterns = ["**/*.txt", "**/*.md", "**/*.csv"]
     
-    for pattern, file_type in file_patterns.items():
+    for pattern in file_patterns:
         files = glob.glob(pattern, recursive=True)
         
         for file_path in files:
             try:
-                metadata = {
-                    'file_path': file_path,
-                    'file_type': file_type,
-                    'file_name': os.path.basename(file_path),
-                    'file_size': os.path.getsize(file_path),
-                    'last_modified': datetime.fromtimestamp(os.path.getmtime(file_path))
-                }
+                file_name = os.path.basename(file_path)
                 
-                if file_type == "csv":
-                    df = pd.read_csv(file_path, encoding='latin-1')
-                    content = f"CSV Data from {metadata['file_name']}:\n"
-                    # Include more rows and better formatting for CSV data
-                    if len(df) > 0:
-                        # Get column names and sample data
-                        content += f"Columns: {', '.join(df.columns.tolist())}\n"
-                        content += "Sample Data:\n"
-                        content += df.head(15).to_string(index=False, max_colwidth=50)
-                    metadata['rows'] = len(df)
-                    metadata['columns'] = list(df.columns)
-                elif file_type == "json":
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        json_data = json.load(f)
-                        content = f"JSON Data from {metadata['file_name']}:\n"
-                        content += json.dumps(json_data, indent=2)[:1000]
+                if file_path.endswith('.csv'):
+                    # Handle CSV files
+                    try:
+                        df = pd.read_csv(file_path, encoding='latin-1')
+                        
+                        # Create a readable content representation
+                        content = f"Equipment Data from {file_name}:\n\n"
+                        content += f"Total items: {len(df)}\n"
+                        content += f"Columns: {', '.join(df.columns)}\n\n"
+                        
+                        # Add all data in a searchable format
+                        for idx, row in df.head(50).iterrows():  # First 50 rows
+                            row_text = ""
+                            for col, val in row.items():
+                                if pd.notna(val):
+                                    row_text += f"{col}: {val} | "
+                            content += f"Item {idx + 1}: {row_text}\n"
+                        
+                        st.success(f"✅ CSV Loaded: {file_name} ({len(df)} rows)")
+                        
+                    except Exception as e:
+                        # Fallback: read as text
+                        with open(file_path, 'r', encoding='latin-1', errors='ignore') as f:
+                            content = f"Data from {file_name}:\n\n" + f.read()
+                        st.warning(f"⚠️ CSV read as text: {file_name}")
+                        
                 else:
+                    # Handle text files
                     with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                         content = f.read()
+                    st.success(f"✅ Text Loaded: {file_name}")
                 
-                if content.strip():
-                    processed_content = advanced_text_preprocessing(content)
-                    documents.append(processed_content)
+                if content and len(content.strip()) > 20:
+                    documents.append(clean_text(content))
                     file_paths.append(file_path)
-                    document_metadata.append(metadata)
-                    st.success(f"✅ Loaded: {metadata['file_name']}")
-                    
+                    file_metadata.append({
+                        'name': file_name,
+                        'path': file_path,
+                        'type': 'csv' if file_path.endswith('.csv') else 'text',
+                        'size': len(content)
+                    })
+                
             except Exception as e:
-                st.warning(f"⚠️ Skipped {file_path}: {str(e)}")
+                st.error(f"❌ Error loading {file_path}: {str(e)}")
     
-    return documents, file_paths, document_metadata
+    st.info(f"📚 Total documents loaded: {len(documents)}")
+    return documents, file_paths, file_metadata
 
 @st.cache_resource
-def create_enhanced_search_index(_documents, _file_paths, _metadata):
-    """Create enhanced search index with intelligent chunking"""
+def create_search_index(_documents, _file_paths, _metadata):
+    """Create search index with better chunking"""
     if not _documents:
         return None, None, None, None, None
+    
+    st.info("🔨 Creating search index...")
     
     all_chunks = []
     chunk_sources = []
     chunk_metadata = []
     
-    for i, doc in enumerate(_documents):
-        chunks = intelligent_chunking(doc, config.chunk_size, config.chunk_overlap)
+    for i, (doc, file_path, metadata) in enumerate(zip(_documents, _file_paths, _metadata)):
+        chunks = simple_chunking(doc, config.chunk_size)
         
         for chunk in chunks:
-            all_chunks.append(chunk['text'])
-            chunk_sources.append(_file_paths[i])
-            chunk_metadata.append({
-                **_metadata[i],
-                **chunk
-            })
+            all_chunks.append(chunk)
+            chunk_sources.append(file_path)
+            chunk_metadata.append(metadata)
     
-    st.info(f"📄 Created {len(all_chunks)} intelligent chunks with metadata")
+    st.info(f"📄 Created {len(all_chunks)} searchable chunks")
     
-    model = SentenceTransformer('all-MiniLM-L12-v2')
-    embeddings = model.encode(all_chunks, show_progress_bar=True, batch_size=32)
+    # Create embeddings
+    model = SentenceTransformer('all-MiniLM-L6-v2')  # Lighter, faster model
     
+    st.info("🧠 Generating embeddings...")
+    embeddings = model.encode(all_chunks, show_progress_bar=True, batch_size=16)
+    
+    # Create FAISS index
     dimension = embeddings.shape[1]
     index = faiss.IndexFlatIP(dimension)
     
+    # Normalize for cosine similarity
     faiss.normalize_L2(embeddings)
     index.add(embeddings.astype('float32'))
     
+    st.success("✅ Search index created successfully!")
+    
     return index, all_chunks, chunk_sources, chunk_metadata, model
 
-def enhanced_search(index, chunks, chunk_sources, chunk_metadata, model, query: str) -> List[Dict]:
-    """Enhanced search with query analysis and reranking"""
-    if index is None:
+def search_documents(index, chunks, chunk_sources, chunk_metadata, model, query: str, k: int = 8):
+    """Simple but effective search"""
+    if index is None or not chunks:
         return []
     
     try:
-        query_analysis = analyze_query_intent(query)
-        enhanced_query = enhance_query_with_domain_knowledge(query, query_analysis)
-        
-        query_embedding = model.encode([enhanced_query])
+        # Create query embedding
+        query_embedding = model.encode([query])
         faiss.normalize_L2(query_embedding)
         
-        scores, indices = index.search(query_embedding.astype('float32'), config.top_k_retrieval)
+        # Search
+        scores, indices = index.search(query_embedding.astype('float32'), min(k, len(chunks)))
         
         results = []
         for i, idx in enumerate(indices[0]):
             if idx < len(chunks) and scores[0][i] > config.similarity_threshold:
-                result = {
+                results.append({
                     'content': chunks[idx],
                     'source': chunk_sources[idx],
                     'metadata': chunk_metadata[idx],
                     'score': float(scores[0][i]),
-                    'entities': chunk_metadata[idx].get('entities', {})
-                }
-                results.append(result)
+                    'rank': i + 1
+                })
         
-        if config.use_reranking and results:
-            results = rerank_results(query, results, query_analysis)
-        
-        return results[:config.top_k_retrieval]
+        return results
         
     except Exception as e:
         st.error(f"Search error: {str(e)}")
         return []
 
-# --- Main Streamlit Interface ---
-st.set_page_config(page_title="Smart AI Support Assistant", page_icon="🤖", layout="wide")
-
-st.title("🤖 Smart AI Support Assistant")
-st.markdown("*Powered by Advanced RAG - Intelligent retrieval and contextual understanding*")
-
-# Sidebar for configuration
-with st.sidebar:
-    st.header("⚙️ RAG Configuration")
+# --- Response Generation ---
+def generate_response(query: str, search_results: List[Dict]) -> str:
+    """Generate response based on search results"""
     
-    config.top_k_retrieval = st.slider("Results to retrieve", 3, 10, 5)
-    config.similarity_threshold = st.slider("Similarity threshold", 0.1, 0.8, 0.3)
-    config.use_reranking = st.checkbox("Enable smart reranking", True)
-    
-    st.header("📊 System Status")
+    if not search_results:
+        return f"""I couldn't find specific information about "{query}" in your documents.
 
-# Initialize the enhanced system
-with st.spinner("🔄 Initializing Smart RAG System..."):
-    documents, file_paths, metadata = load_and_process_documents()
+**What I can help you find:**
+• Equipment information (cameras, audio, computers)
+• Issue tracking and tickets
+• Project documentation
+• Technical specifications
+
+**Try asking:**
+• "Show me all equipment"
+• "What cameras are available?"
+• "List audio equipment"
+• "What's in the inventory?"
+
+**Loaded files:** {', '.join([meta.get('name', 'Unknown') for _, _, meta, _, _ in zip([], [], file_metadata, [], []) if 'file_metadata' in globals()])}"""
+
+    query_type = detect_query_type(query)
+    
+    # Start response
+    response = f"Here's what I found for your query about **{query}**:\n\n"
+    
+    # Group results by source
+    results_by_source = {}
+    for result in search_results[:6]:  # Top 6 results
+        source_name = os.path.basename(result['source'])
+        if source_name not in results_by_source:
+            results_by_source[source_name] = []
+        results_by_source[source_name].append(result)
+    
+    # Generate response for each source
+    for source_name, source_results in results_by_source.items():
+        response += f"### 📄 From {source_name}\n\n"
+        
+        # Show relevant content from this source
+        shown_content = set()  # Avoid duplicates
+        item_count = 0
+        
+        for result in source_results:
+            if item_count >= 5:  # Max 5 items per source
+                break
+                
+            content = result['content']
+            
+            # For CSV data, extract individual items
+            if 'csv' in source_name.lower() and 'Item' in content:
+                items = re.findall(r'Item \d+: (.+)', content)
+                for item in items[:5]:
+                    if item not in shown_content and len(item.strip()) > 20:
+                        # Clean up the item display
+                        clean_item = item.replace(' | ', ' • ').strip(' •')
+                        response += f"• {clean_item}\n"
+                        shown_content.add(item)
+                        item_count += 1
+                        if item_count >= 5:
+                            break
+            else:
+                # For other content, show relevant snippets
+                if content[:100] not in shown_content:
+                    content_preview = content[:200] + "..." if len(content) > 200 else content
+                    response += f"• {content_preview}\n"
+                    shown_content.add(content[:100])
+                    item_count += 1
+        
+        response += "\n"
+    
+    # Add summary
+    response += f"---\n\n**Found {len(search_results)} relevant results** from {len(results_by_source)} source(s)\n\n"
+    
+    # Add suggestions based on query type
+    if query_type == 'camera':
+        response += "💡 **Related queries:** Try asking about 'video equipment' or 'recording devices'\n"
+    elif query_type == 'audio':
+        response += "💡 **Related queries:** Try asking about 'microphones' or 'sound systems'\n"
+    elif query_type == 'comprehensive':
+        response += "💡 **Tip:** For specific categories, try 'cameras', 'audio equipment', or 'computers'\n"
+    else:
+        response += "💡 **Tip:** Be more specific for better results (e.g., 'Canon cameras' or 'wireless microphones')\n"
+    
+    return response
+
+# --- Main Streamlit App ---
+st.set_page_config(page_title="Simple Smart Chatbot", page_icon="🤖", layout="wide")
+
+st.title("🤖 Simple Smart Support Chatbot")
+st.markdown("*Direct access to your documents - no complex processing, just results!*")
+
+# Load data
+with st.spinner("Loading your documents..."):
+    documents, file_paths, file_metadata = load_documents_simple()
     
     if not documents:
         st.error("❌ No documents found!")
-        st.markdown("""
-        **Please add documents to your repository:**
+        st.info("""
+        **Add files to your repository:**
+        - CSV files (equipment lists, inventory)
         - Text files (.txt, .md)
-        - CSV files with JIRA/ticket data (.csv)
-        - JSON configuration files (.json)
+        - Place them in the same directory as this script
         """)
         st.stop()
 
-with st.spinner("🧠 Building Enhanced Search Index..."):
-    index, chunks, chunk_sources, chunk_metadata, model = create_enhanced_search_index(
-        documents, file_paths, metadata
+# Create search index
+with st.spinner("Building search capabilities..."):
+    index, chunks, chunk_sources, chunk_metadata, model = create_search_index(
+        documents, file_paths, file_metadata
     )
     
     if index is None:
         st.error("❌ Failed to create search index")
         st.stop()
 
-st.success("✅ Smart RAG System Ready! Ask me anything!")
+st.success("🚀 Chatbot ready! Your documents are loaded and searchable.")
+
+# Sidebar info
+with st.sidebar:
+    st.header("📊 Loaded Data")
+    for meta in file_metadata:
+        st.write(f"📄 **{meta['name']}** ({meta['type']}, {meta['size']:,} chars)")
+    
+    st.header("🔧 Configuration")
+    st.write(f"🔍 Chunks: {len(chunks) if 'chunks' in locals() else 0}")
+    st.write(f"🎯 Search Results: {config.top_k_retrieval}")
+    st.write(f"📏 Similarity Threshold: {config.similarity_threshold}")
 
 # Chat interface
 if "messages" not in st.session_state:
     st.session_state.messages = []
-    welcome_msg = """Hello! 👋 I'm your Smart AI Support Assistant powered by advanced RAG technology.
+    
+    # Welcome message
+    welcome = f"""👋 **Welcome!** I've loaded {len(documents)} document(s) and I'm ready to help!
 
-I can provide intelligent, contextual answers about your documents and JIRA tickets. I understand intent, extract entities, and provide logical reasoning.
+**What I can do:**
+• Find equipment in your inventory
+• Search through your documents
+• Answer questions about your data
 
-**What makes me smart:**
-• 🧠 Intent understanding and entity extraction
-• 🔍 Advanced retrieval with reranking
-• 📊 Contextual response generation
-• 💡 Smart suggestions and follow-ups
+**Your loaded files:**
+{chr(10).join([f"• {meta['name']}" for meta in file_metadata])}
 
-**Try these types of questions:**
-• "Compare the audio equipment options we have"
-• "What critical issues need immediate attention?"
-• "Recommend the best camera for video meetings"
-• "Show me all network-related problems from last month"
+**Try asking:**
+• "Show me all cameras"
+• "What audio equipment do we have?"
+• "List everything in the inventory"
+• "Find projectors"
 
 What would you like to know?"""
     
-    st.session_state.messages.append({"role": "assistant", "content": welcome_msg})
+    st.session_state.messages.append({"role": "assistant", "content": welcome})
 
-# Display chat messages
+# Display chat history
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
 # Chat input
-if prompt := st.chat_input("Ask your smart question here..."):
+if prompt := st.chat_input("Ask me about your equipment and documents..."):
+    # Add user message
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
     
+    # Generate response
     with st.chat_message("assistant"):
-        with st.spinner("🤔 Analyzing your question and searching intelligently..."):
-            query_analysis = analyze_query_intent(prompt)
-            
-            search_results = enhanced_search(
-                index, chunks, chunk_sources, chunk_metadata, model, prompt
+        with st.spinner("🔍 Searching through your documents..."):
+            # Search for relevant information
+            search_results = search_documents(
+                index, chunks, chunk_sources, chunk_metadata, model, prompt, config.top_k_retrieval
             )
             
-            response = generate_smart_response(prompt, search_results, query_analysis)
+            # Generate response
+            response = generate_response(prompt, search_results)
             st.markdown(response)
             
-            with st.expander("🔍 Query Analysis & Results"):
-                st.json({
-                    "detected_intents": query_analysis['intents'],
-                    "extracted_entities": query_analysis['entities'],
-                    "query_type": query_analysis['query_type'],
-                    "results_found": len(search_results),
-                    "top_sources": [os.path.basename(r['source']) for r in search_results[:3]]
-                })
+            # Debug info
+            if search_results:
+                with st.expander("🔍 Search Details"):
+                    st.write(f"**Query:** {prompt}")
+                    st.write(f"**Results found:** {len(search_results)}")
+                    for i, result in enumerate(search_results[:3]):
+                        st.write(f"**Result {i+1}:** Score: {result['score']:.3f}, Source: {os.path.basename(result['source'])}")
     
+    # Add assistant response to history
     st.session_state.messages.append({"role": "assistant", "content": response})
-
-# Update sidebar stats
-with st.sidebar:
-    if 'documents' in locals():
-        st.metric("📄 Documents", len(documents))
-    if 'chunks' in locals():
-        st.metric("🔍 Smart Chunks", len(chunks))
     
-    st.header("📈 Performance")
-    st.metric("🎯 Retrieval Method", "Vector + Rerank")
-    st.metric("🧠 Model", "all-MiniLM-L12-v2")
-    
-    st.header("💡 Smart Features")
-    st.markdown("""
-    ✅ Intent Detection
-    ✅ Entity Extraction  
-    ✅ Contextual Reranking
-    ✅ Smart Chunking
-    ✅ Query Enhancement
-    ✅ Logical Reasoning
-    """)
-    
-    if st.button("🔄 Refresh System"):
-        st.cache_resource.clear()
-        st.rerun()
