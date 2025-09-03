@@ -29,11 +29,8 @@ config = RAGConfig()
 # --- Advanced Text Processing ---
 def advanced_text_preprocessing(text: str) -> str:
     """Advanced text preprocessing with domain-specific cleaning"""
-    # Remove special characters but keep meaningful punctuation
     text = re.sub(r'[^\w\s\.\,\;\:\!\?\-\(\)]', ' ', text)
-    # Normalize whitespace
     text = re.sub(r'\s+', ' ', text.strip())
-    # Handle common IT/JIRA terminology
     text = re.sub(r'\b(ID|id):\s*(\w+)', r'identifier \2', text)
     text = re.sub(r'\b(P\d+|HIGH|LOW|MEDIUM)\b', lambda m: f'priority_{m.group().lower()}', text)
     return text
@@ -48,7 +45,6 @@ def extract_entities(text: str) -> Dict[str, List[str]]:
         'locations': []
     }
     
-    # Equipment patterns
     equipment_patterns = [
         r'\b(camera|laptop|pc|computer|microphone|speaker|projector|monitor)\w*\b',
         r'\b(audio|video|hardware|software)\s+\w+\b'
@@ -57,7 +53,6 @@ def extract_entities(text: str) -> Dict[str, List[str]]:
     for pattern in equipment_patterns:
         entities['equipment'].extend(re.findall(pattern, text, re.IGNORECASE))
     
-    # Issue patterns
     issue_patterns = [
         r'\b(error|bug|issue|problem|failure|crash)\w*\b',
         r'\b(not working|broken|failed|timeout)\b'
@@ -66,23 +61,15 @@ def extract_entities(text: str) -> Dict[str, List[str]]:
     for pattern in issue_patterns:
         entities['issues'].extend(re.findall(pattern, text, re.IGNORECASE))
     
-    # Priority patterns
     entities['priorities'] = re.findall(r'\b(high|medium|low|critical|urgent)\b', text, re.IGNORECASE)
-    
-    # Date patterns
     entities['dates'] = re.findall(r'\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}/\d{1,2}/\d{4}\b', text)
-    
-    # Location patterns
     entities['locations'] = re.findall(r'\b(mumbai|delhi|bangalore|chennai|office|room\s*\d+)\b', text, re.IGNORECASE)
     
     return entities
 
-# --- Intelligent Chunking ---
 def intelligent_chunking(text: str, chunk_size: int = 512, overlap: int = 50) -> List[Dict[str, Any]]:
     """Create intelligent chunks with metadata"""
     chunks = []
-    
-    # Split by sentences first
     sentences = re.split(r'(?<=[.!?])\s+', text)
     
     current_chunk = []
@@ -102,7 +89,6 @@ def intelligent_chunking(text: str, chunk_size: int = 512, overlap: int = 50) ->
                 'sentence_count': len(current_chunk)
             })
             
-            # Handle overlap
             if overlap > 0 and len(current_chunk) > 1:
                 current_chunk = current_chunk[-1:]
                 current_size = len(current_chunk[0])
@@ -113,7 +99,6 @@ def intelligent_chunking(text: str, chunk_size: int = 512, overlap: int = 50) ->
         current_chunk.append(sentence)
         current_size += sentence_size
     
-    # Add remaining chunk
     if current_chunk:
         chunk_text = ' '.join(current_chunk)
         entities = extract_entities(chunk_text)
@@ -126,7 +111,6 @@ def intelligent_chunking(text: str, chunk_size: int = 512, overlap: int = 50) ->
     
     return chunks
 
-# --- Query Understanding ---
 def analyze_query_intent(query: str) -> Dict[str, Any]:
     """Analyze query to understand user intent"""
     query_lower = query.lower()
@@ -162,7 +146,6 @@ def analyze_query_intent(query: str) -> Dict[str, Any]:
                 detected_intents.append(intent)
                 break
     
-    # Extract key entities from query
     query_entities = extract_entities(query)
     
     return {
@@ -172,64 +155,38 @@ def analyze_query_intent(query: str) -> Dict[str, Any]:
         'complexity': 'complex' if len(query.split()) > 10 or '?' in query else 'simple'
     }
 
-# --- Enhanced Retrieval with Reranking ---
-def rerank_results(query: str, results: List[Dict], query_analysis: Dict) -> List[Dict]:
-    """Rerank results based on query intent and entity matching"""
-    def calculate_relevance_score(result, query_analysis):
-        score = result['score']  # Base similarity score
-        
-        # Boost based on entity matching
-        result_entities = result.get('entities', {})
-        query_entities = query_analysis['entities']
-        
-        entity_boost = 0
-        for entity_type in query_entities:
-            if entity_type in result_entities:
-                common_entities = set(query_entities[entity_type]) & set(result_entities[entity_type])
-                entity_boost += len(common_entities) * 0.1
-        
-        # Intent-based boosting
-        content_lower = result['content'].lower()
-        for intent in query_analysis['intents']:
-            if intent == 'equipment_inquiry' and any(word in content_lower for word in ['camera', 'laptop', 'audio', 'video']):
-                score += 0.2
-            elif intent == 'issue_tracking' and any(word in content_lower for word in ['error', 'issue', 'problem', 'ticket']):
-                score += 0.2
-            elif intent == 'project_status' and any(word in content_lower for word in ['project', 'status', 'progress']):
-                score += 0.2
-        
-        return score + entity_boost
-    
-    # Calculate enhanced scores
-    for result in results:
-        result['enhanced_score'] = calculate_relevance_score(result, query_analysis)
-    
-    # Sort by enhanced score
-    return sorted(results, key=lambda x: x['enhanced_score'], reverse=True)
-
-# --- Smart Response Generation ---
-def generate_smart_response(query: str, results: List[Dict], query_analysis: Dict) -> str:
-    """Generate contextually aware responses using retrieved information"""
-    
-    if not results:
-        return generate_no_results_response(query, query_analysis)
-    
-    # Group results by source type and intent
-    grouped_results = group_results_by_relevance(results, query_analysis)
-    
-    # Generate response based on intent
-    primary_intent = query_analysis['intents'][0] if query_analysis['intents'] else 'general'
-    
-    response_generators = {
-        'equipment_inquiry': generate_equipment_response,
-        'issue_tracking': generate_issue_response,
-        'project_status': generate_project_response,
-        'comparison': generate_comparison_response,
-        'recommendation': generate_recommendation_response
+def group_results_by_relevance(results: List[Dict], query_analysis: Dict) -> Dict:
+    """Group results by relevance levels"""
+    grouped = {
+        'high_relevance': [],
+        'medium_relevance': [],
+        'low_relevance': []
     }
     
-    generator = response_generators.get(primary_intent, generate_general_response)
-    return generator(query, grouped_results, query_analysis)
+    for result in results:
+        score = result.get('enhanced_score', result['score'])
+        if score > 0.7:
+            grouped['high_relevance'].append(result)
+        elif score > 0.4:
+            grouped['medium_relevance'].append(result)
+        else:
+            grouped['low_relevance'].append(result)
+    
+    return grouped
+
+def generate_contextual_details(grouped_results: Dict) -> str:
+    """Generate additional contextual details"""
+    details = ""
+    
+    sources = set()
+    for category in grouped_results.values():
+        for result in category:
+            sources.add(os.path.basename(result['source']))
+    
+    if sources:
+        details += f"**Sources consulted:** {', '.join(sources)}\n\n"
+    
+    return details
 
 def generate_equipment_response(query: str, grouped_results: Dict, query_analysis: Dict) -> str:
     """Generate equipment-focused response"""
@@ -238,7 +195,6 @@ def generate_equipment_response(query: str, grouped_results: Dict, query_analysi
     equipment_items = []
     for result in grouped_results.get('high_relevance', [])[:3]:
         content = result['content']
-        # Extract equipment information
         equipment_matches = re.findall(r'\b(camera|laptop|pc|audio|video|microphone|speaker)\w*[^.]*', content, re.IGNORECASE)
         equipment_items.extend(equipment_matches)
     
@@ -248,9 +204,7 @@ def generate_equipment_response(query: str, grouped_results: Dict, query_analysi
             response += f"{i}. {item.strip()}\n"
         response += "\n"
     
-    # Add contextual information
     response += generate_contextual_details(grouped_results)
-    
     return response
 
 def generate_issue_response(query: str, grouped_results: Dict, query_analysis: Dict) -> str:
@@ -275,14 +229,74 @@ def generate_issue_response(query: str, grouped_results: Dict, query_analysis: D
         response += f"**Priority Levels:** {', '.join(set(priorities))}\n\n"
     
     response += generate_contextual_details(grouped_results)
+    return response
+
+def generate_project_response(query: str, grouped_results: Dict, query_analysis: Dict) -> str:
+    """Generate project status response"""
+    response = "Here's the project information I found:\n\n"
     
+    projects = []
+    locations = []
+    
+    for result in grouped_results.get('high_relevance', [])[:3]:
+        content = result['content']
+        entities = result.get('entities', {})
+        
+        project_matches = re.findall(r'\b(project|status|progress|update|milestone)\w*[^.]*', content, re.IGNORECASE)
+        projects.extend(project_matches)
+        locations.extend(entities.get('locations', []))
+    
+    if projects:
+        response += "**Project Updates:**\n"
+        for project in set(projects[:5]):
+            response += f"• {project.strip()}\n"
+        response += "\n"
+    
+    if locations:
+        response += f"**Locations:** {', '.join(set(locations))}\n\n"
+    
+    response += generate_contextual_details(grouped_results)
+    return response
+
+def generate_comparison_response(query: str, grouped_results: Dict, query_analysis: Dict) -> str:
+    """Generate comparison-focused response"""
+    response = "Here's a comparison based on available information:\n\n"
+    
+    items = []
+    for result in grouped_results.get('high_relevance', [])[:4]:
+        content = result['content'][:200] + "..." if len(result['content']) > 200 else result['content']
+        source = os.path.basename(result['source'])
+        items.append(f"**{source}:** {content}")
+    
+    if items:
+        for i, item in enumerate(items, 1):
+            response += f"{i}. {item}\n\n"
+    
+    response += "💡 **Recommendation:** Compare these options based on your specific requirements.\n"
+    return response
+
+def generate_recommendation_response(query: str, grouped_results: Dict, query_analysis: Dict) -> str:
+    """Generate recommendation-focused response"""
+    response = "Based on the available information, here are my recommendations:\n\n"
+    
+    top_results = grouped_results.get('high_relevance', [])[:3]
+    if not top_results:
+        top_results = grouped_results.get('medium_relevance', [])[:3]
+    
+    if top_results:
+        response += "**Top Recommendations:**\n"
+        for i, result in enumerate(top_results, 1):
+            content = result['content'][:150] + "..." if len(result['content']) > 150 else result['content']
+            source = os.path.basename(result['source'])
+            response += f"{i}. **From {source}:** {content}\n\n"
+    
+    response += "💡 **Next Steps:** Consider these factors when making your decision.\n"
     return response
 
 def generate_general_response(query: str, grouped_results: Dict, query_analysis: Dict) -> str:
     """Generate general response with smart summarization"""
     response = "Based on your query, here's the most relevant information:\n\n"
     
-    # Prioritize high-relevance results
     top_results = grouped_results.get('high_relevance', [])[:2]
     if not top_results:
         top_results = grouped_results.get('medium_relevance', [])[:2]
@@ -294,25 +308,8 @@ def generate_general_response(query: str, grouped_results: Dict, query_analysis:
         response += f"**{i}. From {source_name}:**\n"
         response += f"{content}\n\n"
     
-    # Add smart suggestions
     response += generate_smart_suggestions(query, query_analysis)
-    
     return response
-
-def generate_contextual_details(grouped_results: Dict) -> str:
-    """Generate additional contextual details"""
-    details = ""
-    
-    # Add source information
-    sources = set()
-    for category in grouped_results.values():
-        for result in category:
-            sources.add(os.path.basename(result['source']))
-    
-    if sources:
-        details += f"**Sources consulted:** {', '.join(sources)}\n\n"
-    
-    return details
 
 def generate_smart_suggestions(query: str, query_analysis: Dict) -> str:
     """Generate smart follow-up suggestions"""
@@ -332,7 +329,6 @@ def generate_no_results_response(query: str, query_analysis: Dict) -> str:
     """Generate helpful response when no results found"""
     response = "I couldn't find specific information about that in your documents, but let me help you:\n\n"
     
-    # Provide suggestions based on query analysis
     if 'equipment' in str(query_analysis['entities']):
         response += "**For equipment queries, try:**\n"
         response += "• 'Show me all cameras'\n"
@@ -346,26 +342,73 @@ def generate_no_results_response(query: str, query_analysis: Dict) -> str:
     
     return response
 
-def group_results_by_relevance(results: List[Dict], query_analysis: Dict) -> Dict:
-    """Group results by relevance levels"""
-    grouped = {
-        'high_relevance': [],
-        'medium_relevance': [],
-        'low_relevance': []
+def generate_smart_response(query: str, results: List[Dict], query_analysis: Dict) -> str:
+    """Generate contextually aware responses using retrieved information"""
+    
+    if not results:
+        return generate_no_results_response(query, query_analysis)
+    
+    grouped_results = group_results_by_relevance(results, query_analysis)
+    primary_intent = query_analysis['intents'][0] if query_analysis['intents'] else 'general'
+    
+    response_generators = {
+        'equipment_inquiry': generate_equipment_response,
+        'issue_tracking': generate_issue_response,
+        'project_status': generate_project_response,
+        'comparison': generate_comparison_response,
+        'recommendation': generate_recommendation_response
     }
     
-    for result in results:
-        score = result.get('enhanced_score', result['score'])
-        if score > 0.7:
-            grouped['high_relevance'].append(result)
-        elif score > 0.4:
-            grouped['medium_relevance'].append(result)
-        else:
-            grouped['low_relevance'].append(result)
-    
-    return grouped
+    generator = response_generators.get(primary_intent, generate_general_response)
+    return generator(query, grouped_results, query_analysis)
 
-# --- Enhanced Document Processing ---
+def rerank_results(query: str, results: List[Dict], query_analysis: Dict) -> List[Dict]:
+    """Rerank results based on query intent and entity matching"""
+    def calculate_relevance_score(result, query_analysis):
+        score = result['score']
+        
+        result_entities = result.get('entities', {})
+        query_entities = query_analysis['entities']
+        
+        entity_boost = 0
+        for entity_type in query_entities:
+            if entity_type in result_entities:
+                common_entities = set(query_entities[entity_type]) & set(result_entities[entity_type])
+                entity_boost += len(common_entities) * 0.1
+        
+        content_lower = result['content'].lower()
+        for intent in query_analysis['intents']:
+            if intent == 'equipment_inquiry' and any(word in content_lower for word in ['camera', 'laptop', 'audio', 'video']):
+                score += 0.2
+            elif intent == 'issue_tracking' and any(word in content_lower for word in ['error', 'issue', 'problem', 'ticket']):
+                score += 0.2
+            elif intent == 'project_status' and any(word in content_lower for word in ['project', 'status', 'progress']):
+                score += 0.2
+        
+        return score + entity_boost
+    
+    for result in results:
+        result['enhanced_score'] = calculate_relevance_score(result, query_analysis)
+    
+    return sorted(results, key=lambda x: x['enhanced_score'], reverse=True)
+
+def enhance_query_with_domain_knowledge(query: str, query_analysis: Dict) -> str:
+    """Enhance query with domain-specific knowledge"""
+    enhanced = query
+    
+    domain_expansions = {
+        'camera': 'camera video recording device',
+        'laptop': 'laptop computer pc workstation',
+        'issue': 'issue problem error bug ticket',
+        'audio': 'audio sound microphone speaker'
+    }
+    
+    for term, expansion in domain_expansions.items():
+        if term in query.lower():
+            enhanced += f" {expansion}"
+    
+    return enhanced
+
 @st.cache_resource
 def load_and_process_documents():
     """Enhanced document loading with better processing"""
@@ -396,7 +439,7 @@ def load_and_process_documents():
                 if file_type == "csv":
                     df = pd.read_csv(file_path, encoding='latin-1')
                     content = f"CSV Data from {metadata['file_name']}:\n"
-                    content += df.head(10).to_string(index=False)  # Limit to first 10 rows
+                    content += df.head(10).to_string(index=False)
                     metadata['rows'] = len(df)
                     metadata['columns'] = list(df.columns)
                 elif file_type == "json":
@@ -443,15 +486,12 @@ def create_enhanced_search_index(_documents, _file_paths, _metadata):
     
     st.info(f"📄 Created {len(all_chunks)} intelligent chunks with metadata")
     
-    # Use a more powerful sentence transformer
-    model = SentenceTransformer('all-MiniLM-L12-v2')  # Better model
+    model = SentenceTransformer('all-MiniLM-L12-v2')
     embeddings = model.encode(all_chunks, show_progress_bar=True, batch_size=32)
     
-    # Create FAISS index with better configuration
     dimension = embeddings.shape[1]
-    index = faiss.IndexFlatIP(dimension)  # Inner product for cosine similarity
+    index = faiss.IndexFlatIP(dimension)
     
-    # Normalize embeddings for cosine similarity
     faiss.normalize_L2(embeddings)
     index.add(embeddings.astype('float32'))
     
@@ -463,13 +503,9 @@ def enhanced_search(index, chunks, chunk_sources, chunk_metadata, model, query: 
         return []
     
     try:
-        # Analyze query intent
         query_analysis = analyze_query_intent(query)
-        
-        # Enhance query with domain-specific terms
         enhanced_query = enhance_query_with_domain_knowledge(query, query_analysis)
         
-        # Perform vector search
         query_embedding = model.encode([enhanced_query])
         faiss.normalize_L2(query_embedding)
         
@@ -487,7 +523,6 @@ def enhanced_search(index, chunks, chunk_sources, chunk_metadata, model, query: 
                 }
                 results.append(result)
         
-        # Apply reranking if enabled
         if config.use_reranking and results:
             results = rerank_results(query, results, query_analysis)
         
@@ -496,24 +531,6 @@ def enhanced_search(index, chunks, chunk_sources, chunk_metadata, model, query: 
     except Exception as e:
         st.error(f"Search error: {str(e)}")
         return []
-
-def enhance_query_with_domain_knowledge(query: str, query_analysis: Dict) -> str:
-    """Enhance query with domain-specific knowledge"""
-    enhanced = query
-    
-    # Add synonyms and related terms
-    domain_expansions = {
-        'camera': 'camera video recording device',
-        'laptop': 'laptop computer pc workstation',
-        'issue': 'issue problem error bug ticket',
-        'audio': 'audio sound microphone speaker'
-    }
-    
-    for term, expansion in domain_expansions.items():
-        if term in query.lower():
-            enhanced += f" {expansion}"
-    
-    return enhanced
 
 # --- Main Streamlit Interface ---
 st.set_page_config(page_title="Smart AI Support Assistant", page_icon="🤖", layout="wide")
@@ -564,10 +581,10 @@ if "messages" not in st.session_state:
 I can provide intelligent, contextual answers about your documents and JIRA tickets. I understand intent, extract entities, and provide logical reasoning.
 
 **What makes me smart:**
-- 🧠 Intent understanding and entity extraction
-- 🔍 Advanced retrieval with reranking
-- 📊 Contextual response generation
-- 💡 Smart suggestions and follow-ups
+• 🧠 Intent understanding and entity extraction
+• 🔍 Advanced retrieval with reranking
+• 📊 Contextual response generation
+• 💡 Smart suggestions and follow-ups
 
 **Try these types of questions:**
 • "Compare the audio equipment options we have"
@@ -592,19 +609,15 @@ if prompt := st.chat_input("Ask your smart question here..."):
     
     with st.chat_message("assistant"):
         with st.spinner("🤔 Analyzing your question and searching intelligently..."):
-            # Analyze query
             query_analysis = analyze_query_intent(prompt)
             
-            # Perform enhanced search
             search_results = enhanced_search(
                 index, chunks, chunk_sources, chunk_metadata, model, prompt
             )
             
-            # Generate smart response
             response = generate_smart_response(prompt, search_results, query_analysis)
             st.markdown(response)
             
-            # Show debug info in expander
             with st.expander("🔍 Query Analysis & Results"):
                 st.json({
                     "detected_intents": query_analysis['intents'],
