@@ -510,7 +510,7 @@ def main():
     st.title("🧠 Intelligent AI Support System")
     st.subheader("Advanced Equipment Management with Spatial Intelligence")
     
-    # Initialize components and state
+    # Ensure all required session state keys are initialized on every run
     if 'enhanced_chatbot' not in st.session_state:
         floor_plan_analyzer = FloorPlanAnalyzer()
         st.session_state.enhanced_chatbot = {
@@ -518,8 +518,11 @@ def main():
             'query_processor': IntelligentQueryProcessor(floor_plan_analyzer),
             'response_generator': LogicalResponseGenerator(floor_plan_analyzer)
         }
+    if 'chat_history' not in st.session_state:
         st.session_state.chat_history = []
+    if 'search_ready' not in st.session_state:
         st.session_state.search_ready = False
+    if 'maintenance_data' not in st.session_state:
         st.session_state.maintenance_data = generate_dummy_maintenance_data()
     
     chatbot_components = st.session_state.enhanced_chatbot
@@ -570,7 +573,7 @@ def main():
     # Handle quick queries
     if st.session_state.get("quick_query"):
         query = st.session_state.pop("quick_query")
-        st.chat_input("Ask me anything...", disabled=True) # Disable input while processing
+        st.chat_input("Ask me anything...", disabled=True)
     else:
         query = st.chat_input("Ask me about equipment, locations, or maintenance...")
 
@@ -601,7 +604,7 @@ def main():
                 )
         
         st.session_state.chat_history.append({"role": "assistant", "content": response})
-        st.rerun() # Rerun to display the latest message
+        st.rerun()
 
     # Display chat history
     for message in st.session_state.chat_history:
