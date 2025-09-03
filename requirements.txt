@@ -1,20 +1,27 @@
-streamlit
-pandas
-matplotlib
-langchain
-langchain-community
-sentence-transformers
-faiss-cpu
-tiktoken
-numpy
-plotly
-openai
-PyPDF2
-PyMuPDF
-scikit-learn
-opencv-python
-Pillow
-pytesseract
-seaborn
-joblib
-google.generativeai
+ requirements.txt
+
+# Core for Chatbot
+streamlit==1.35.0
+pandas==2.2.2
+google.generativeai==0.5.4
+sentence-transformers==2.7.0
+faiss-cpu==1.8.0
+numpy==1.26.4
+PyMuPDF==1.24.2
+PyPDF2==3.0.1
+
+# For Other Pages & Data Science Tasks
+matplotlib==3.8.4
+langchain==0.2.1
+langchain-community==0.2.1
+scikit-learn==1.5.0
+opencv-python==4.9.0.80
+Pillow==10.3.0
+pytesseract==0.3.10
+seaborn==0.13.2
+joblib==1.4.2
+plotly==5.22.0
+
+# Optional (if you use OpenAI elsewhere)
+openai==1.28.0
+tiktoken==0.7.0
