@@ -27,14 +27,12 @@ try:
     CV2_AVAILABLE = True
 except ImportError:
     CV2_AVAILABLE = False
-    st.warning("⚠️ OpenCV not available. Image processing features will be limited.")
 
 try:
     import pytesseract
     TESSERACT_AVAILABLE = True
 except ImportError:
     TESSERACT_AVAILABLE = False
-    st.warning("⚠️ Tesseract OCR not available. Text extraction from images will be simulated.")
 
 try:
     from sentence_transformers import SentenceTransformer
@@ -190,7 +188,7 @@ class RoomSchemaAnalyzer:
             'risk_factors': risk_factors,
             'total_equipment': total_equipment,
             'risk_score': len([r for r in risk_factors if r['severity'] == 'HIGH']) * 0.4 + 
-                         len([r for r in risk_factors if r['severity'] == 'MEDIUM']) * 0.2
+                          len([r for r in risk_factors if r['severity'] == 'MEDIUM']) * 0.2
         }
 
 # --- Predictive Maintenance Engine ---
@@ -268,7 +266,7 @@ class PredictiveMaintenanceEngine:
         
         # Calculate failure probability
         failure_probability = base_risk + (age_factor * 0.3) + (usage_factor * 0.2) + \
-                            (maintenance_factor * 0.3) + (environmental_score * 0.2)
+                              (maintenance_factor * 0.3) + (environmental_score * 0.2)
         
         failure_probability = min(failure_probability, 1.0)
         
@@ -374,7 +372,7 @@ class SyntheticDataGenerator:
                 maintenance_factor = record['days_since_maintenance'] / 365
                 
                 failure_probability = min(0.1 + age_factor * 0.3 + usage_factor * 0.2 + 
-                                        maintenance_factor * 0.4 + random.uniform(-0.1, 0.1), 1.0)
+                                          maintenance_factor * 0.4 + random.uniform(-0.1, 0.1), 1.0)
                 
                 record['failure_probability'] = max(failure_probability, 0.0)
                 record['failure_mode'] = failure_mode
@@ -401,6 +399,12 @@ def main():
         initial_sidebar_state="expanded"
     )
     
+    # Check for optional dependencies and show warnings after setting the page config
+    if not CV2_AVAILABLE:
+        st.warning("⚠️ OpenCV not available. Image processing features will be limited.")
+    if not TESSERACT_AVAILABLE:
+        st.warning("⚠️ Tesseract OCR not available. Text extraction from images will be simulated.")
+        
     # Custom CSS
     st.markdown("""
     <style>
@@ -677,13 +681,13 @@ def handle_synthetic_data_generation(data_generator):
                     st.write("**Equipment Type Distribution:**")
                     type_counts = synthetic_df['equipment_type'].value_counts()
                     fig = px.bar(x=type_counts.index, y=type_counts.values, 
-                               title="Equipment Types Generated")
+                                 title="Equipment Types Generated")
                     st.plotly_chart(fig, use_container_width=True)
                 
                 with col_stats2:
                     st.write("**Failure Probability Distribution:**")
                     fig = px.histogram(synthetic_df, x='failure_probability', nbins=20,
-                                     title="Failure Probability Distribution")
+                                       title="Failure Probability Distribution")
                     st.plotly_chart(fig, use_container_width=True)
                 
                 # Download button
