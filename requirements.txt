@@ -12,3 +12,8 @@ openai
 PyPDF2
 PyMuPDF
 scikit-learn
+opencv-python
+Pillow
+pytesseract
+seaborn
+joblib
