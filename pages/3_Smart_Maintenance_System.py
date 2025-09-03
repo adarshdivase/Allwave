@@ -412,15 +412,16 @@ def main():
             color: white;
             text-align: center;
         }
-        .risk-high { background-color: #ffebee; border-left: 5px solid #f44336; padding: 1rem; border-radius: 5px; }
-        .risk-medium { background-color: #fff8e1; border-left: 5px solid #ff9800; padding: 1rem; border-radius: 5px; }
-        .risk-low { background-color: #e8f5e8; border-left: 5px solid #4caf50; padding: 1rem; border-radius: 5px; }
+        .risk-high { background-color: #ffebee; border-left: 5px solid #f44336; padding: 1rem; border-radius: 5px; color: black; }
+        .risk-medium { background-color: #fff8e1; border-left: 5px solid #ff9800; padding: 1rem; border-radius: 5px; color: black; }
+        .risk-low { background-color: #e8f5e8; border-left: 5px solid #4caf50; padding: 1rem; border-radius: 5px; color: black; }
         .metric-card { 
             background: white; 
             padding: 1.5rem; 
             border-radius: 10px; 
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 1rem;
+            color: black;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -849,6 +850,7 @@ def handle_predictive_dashboard(maintenance_engine):
                     border-radius: 5px; 
                     margin-bottom: 1rem;
                     height: 180px;
+                    color: black; /* Ensure text is black */
                 ">
                     <h4 style="margin: 0; font-size: 14px;">{pred['equipment_id']}</h4>
                     <p style="margin: 5px 0; font-size: 12px; color: #666;">{pred['location']}</p>
@@ -959,7 +961,7 @@ def handle_predictive_dashboard(maintenance_engine):
         
         # Alert details
         for alert in alerts:
-            # Modified severity_colors to use black text
+            # Set colors for background, border, and ensure text is black
             severity_colors = {
                 'HIGH': ('#ffebee', '#f44336', 'black'),
                 'MEDIUM': ('#fff8e1', '#ff9800', 'black'),
