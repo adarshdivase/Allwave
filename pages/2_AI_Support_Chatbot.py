@@ -1,3 +1,4 @@
+# app.py
 import streamlit as st
 import pandas as pd
 import os
@@ -14,79 +15,49 @@ from datetime import datetime, timedelta
 import random
 from dataclasses import dataclass
 import google.generativeai as genai
-import mailbox # Standard library for email processing
+import mailbox  # Standard library for email processing
 from email import policy
 from email.parser import BytesParser
 
 # --- Basic Configuration ---
 warnings.filterwarnings("ignore")
+st.set_page_config(
+    page_title="AI Support Chatbot",
+    page_icon="🤖",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 # --- Enhanced RAG Configuration ---
 @dataclass
 class RAGConfig:
     chunk_size: int = 500
     top_k_retrieval: int = 5
-    # FIX: Corrected the similarity threshold to a realistic value for cosine similarity
-    similarity_threshold: float = 0.4
+    similarity_threshold: float = 0.4 # Corrected threshold
 
 config = RAGConfig()
 
-# --- Predictive Maintenance Integration ---
-@dataclass
-class MaintenanceConfig:
-    """Configuration for predictive maintenance system"""
-    risk_threshold_high: float = 0.7
-    risk_threshold_medium: float = 0.4
-
-maintenance_config = MaintenanceConfig()
-
+# --- Predictive Maintenance Integration (Simulation) ---
 class MaintenancePipeline:
-    """Pipeline connecting chatbot with a simulated predictive maintenance system"""
     def __init__(self):
-        self.equipment_profiles = {
-            'HVAC': {'expected_life': 15 * 365, 'maintenance_interval': 90},
-            'IT_EQUIPMENT': {'expected_life': 5 * 365, 'maintenance_interval': 180},
-            'ELECTRICAL': {'expected_life': 20 * 365, 'maintenance_interval': 365},
-            'FIRE_SAFETY': {'expected_life': 10 * 365, 'maintenance_interval': 180}
-        }
         self.maintenance_data = self._load_maintenance_data()
 
     def _load_maintenance_data(self) -> Dict:
-        """Generates realistic-looking maintenance data for the demo"""
         equipment_data = {}
-        equipment_types = ['HVAC', 'IT_EQUIPMENT', 'ELECTRICAL', 'FIRE_SAFETY', 'AV_EQUIPMENT']
-
-        for i in range(50):
-            equipment_id = f"{random.choice(equipment_types)}_{str(i+1).zfill(3)}"
-            equipment_type = equipment_id.split('_')[0]
-            age_days = random.randint(30, self.equipment_profiles.get(equipment_type, {}).get('expected_life', 7000))
-            days_since_maintenance = random.randint(5, 300)
-
-            # Simplified failure probability calculation
-            age_factor = age_days / self.equipment_profiles.get(equipment_type, {}).get('expected_life', 7000)
-            maintenance_factor = days_since_maintenance / self.equipment_profiles.get(equipment_type, {}).get('maintenance_interval', 365)
-            failure_probability = min(0.1 + age_factor * 0.5 + maintenance_factor * 0.4, 0.99)
-
-            risk_level = 'LOW'
-            if failure_probability >= maintenance_config.risk_threshold_high:
-                risk_level = 'HIGH'
-            elif failure_probability >= maintenance_config.risk_threshold_medium:
-                risk_level = 'MEDIUM'
-
-            equipment_data[equipment_id] = {
-                'type': equipment_type,
-                'location': random.choice(['Building A', 'Building B', 'Server Room', 'Main Hall']),
-                'failure_probability': failure_probability,
-                'risk_level': risk_level,
-                'last_maintenance': (datetime.now() - timedelta(days=days_since_maintenance)).strftime('%Y-%m-%d'),
+        equipment_types = ['HVAC', 'IT_EQUIPMENT', 'ELECTRICAL', 'FIRE_SAFETY']
+        for i in range(20):
+            eq_type = random.choice(equipment_types)
+            fail_prob = random.uniform(0.1, 0.9)
+            equipment_data[f"{eq_type}_{i+1}"] = {
+                'type': eq_type,
+                'location': f"Building A - Floor {random.randint(1,4)}",
+                'failure_probability': fail_prob,
+                'risk_level': 'HIGH' if fail_prob > 0.7 else 'MEDIUM' if fail_prob > 0.4 else 'LOW',
                 'next_maintenance': (datetime.now() + timedelta(days=random.randint(7, 90))).strftime('%Y-%m-%d'),
-                'maintenance_cost': random.randint(200, 5000),
+                'maintenance_cost': random.randint(200, 5000)
             }
         return equipment_data
-
-    def get_equipment_by_type(self, equipment_type: str) -> List[Dict]:
-        return [{'id': eid, **edata} for eid, edata in self.maintenance_data.items() if edata['type'] == equipment_type.upper()]
-
+    
     def get_equipment_by_risk(self, risk_level: str) -> List[Dict]:
         return [{'id': eid, **edata} for eid, edata in self.maintenance_data.items() if edata['risk_level'] == risk_level.upper()]
 
@@ -94,14 +65,6 @@ class MaintenancePipeline:
         target_date = datetime.now() + timedelta(days=days_ahead)
         items = [{'id': eid, **edata} for eid, edata in self.maintenance_data.items() if datetime.strptime(edata['next_maintenance'], '%Y-%m-%d') <= target_date]
         return sorted(items, key=lambda x: x['next_maintenance'])
-
-    def generate_maintenance_recommendations(self, equipment_data: Dict) -> List[str]:
-        recommendations = []
-        if equipment_data.get('risk_level') == 'HIGH':
-            recommendations.extend(["🚨 URGENT: Schedule immediate inspection.", "📋 Create detailed maintenance plan."])
-        elif equipment_data.get('risk_level') == 'MEDIUM':
-            recommendations.extend(["⚠️ Schedule preventive maintenance soon.", "📊 Increase monitoring frequency."])
-        return recommendations
 
 # --- LLM and Response Generation ---
 try:
@@ -111,66 +74,27 @@ except Exception as e:
     st.error(f"Failed to configure Gemini API. Please check your API key in secrets.toml: {e}")
     GEMINI_MODEL = None
 
-def detect_query_intent(query: str) -> Dict[str, Any]:
-    """Uses simple keyword matching to detect user intent for context retrieval"""
-    query_lower = query.lower()
-    intents = {
-        'risk': ['risk', 'failure', 'predict', 'probability', 'alert', 'warning'],
-        'schedule': ['schedule', 'calendar', 'upcoming', 'planned', 'when'],
-        'status': ['status', 'health', 'condition', 'state', 'check'],
-        'recommendation': ['recommend', 'suggest', 'advice', 'should'],
-    }
-    categories = {
-        'hvac': ['hvac', 'air', 'conditioning', 'heating'],
-        'it_equipment': ['it', 'computer', 'server', 'network'],
-        'electrical': ['electrical', 'power', 'circuit'],
-        'fire_safety': ['fire', 'smoke', 'alarm', 'sprinkler'],
-    }
-
-    detected_intent = next((intent for intent, keywords in intents.items() if any(kw in query_lower for kw in keywords)), None)
-    detected_category = next((cat for cat, keywords in categories.items() if any(kw in query_lower for kw in keywords)), None)
-
-    return {'maintenance_intent': detected_intent, 'category': detected_category}
-
 def get_maintenance_context(query: str, maintenance_pipeline: MaintenancePipeline) -> str:
-    """Retrieves and formats maintenance data as text context for the LLM"""
-    query_info = detect_query_intent(query)
-    intent = query_info.get('maintenance_intent')
+    query_lower = query.lower()
     context_parts = []
-
-    if intent == 'risk':
+    if any(kw in query_lower for kw in ['risk', 'failure', 'alert']):
         high_risk = maintenance_pipeline.get_equipment_by_risk('HIGH')
         if high_risk:
             context_parts.append("High-Risk Equipment Data:")
             for eq in high_risk[:5]:
                 context_parts.append(f"- ID: {eq['id']}, Type: {eq['type']}, Location: {eq['location']}, Failure Probability: {eq['failure_probability']:.1%}")
-    elif intent == 'schedule':
+    elif any(kw in query_lower for kw in ['schedule', 'calendar', 'upcoming']):
         schedule = maintenance_pipeline.get_maintenance_schedule(30)
         if schedule:
             context_parts.append("Upcoming Maintenance Schedule (Next 30 Days):")
             for item in schedule[:8]:
-                context_parts.append(f"- ID: {item['id']}, Date: {item['date']}, Location: {item['location']}, Cost: ${item['maintenance_cost']}")
-    elif intent == 'status' and query_info.get('category'):
-        equipment_list = maintenance_pipeline.get_equipment_by_type(query_info['category'])
-        if equipment_list:
-            context_parts.append(f"Status for {query_info['category'].replace('_', ' ').title()} Equipment:")
-            for eq in equipment_list[:6]:
-                context_parts.append(f"- ID: {eq['id']}, Location: {eq['location']}, Risk: {eq['risk_level']}, Last Service: {eq['last_maintenance']}")
-    elif intent == 'recommendation':
-        high_risk = maintenance_pipeline.get_equipment_by_risk('HIGH')
-        if high_risk:
-            context_parts.append("Recommendations for High-Risk Equipment:")
-            for eq in high_risk[:3]:
-                recs = maintenance_pipeline.generate_maintenance_recommendations(eq)
-                context_parts.append(f"For {eq['id']} ({eq['type']}): {', '.join(recs)}")
-
+                # FIX: Corrected item['date'] to item['next_maintenance']
+                context_parts.append(f"- ID: {item['id']}, Date: {item['next_maintenance']}, Location: {item['location']}, Cost: ${item['maintenance_cost']}")
     return "\n".join(context_parts)
 
 def generate_llm_response(query: str, search_results: List[Dict], maintenance_pipeline: MaintenancePipeline) -> str:
-    """Generates a response using the Gemini LLM, backed by retrieved context"""
     if not GEMINI_MODEL:
         return "The AI model is not configured. Please check your API key."
-
     doc_context = ""
     if search_results:
         doc_context += "Relevant information from your documents:\n"
@@ -178,29 +102,20 @@ def generate_llm_response(query: str, search_results: List[Dict], maintenance_pi
             source = os.path.basename(result['source'])
             content_preview = result['content'].strip().replace('\n', ' ')
             doc_context += f"- From '{source}': \"{content_preview}\"\n"
-
     maintenance_context = get_maintenance_context(query, maintenance_pipeline)
-
     if not doc_context and not maintenance_context:
         high_risk_count = len(maintenance_pipeline.get_equipment_by_risk('HIGH'))
         upcoming_maintenance = len(maintenance_pipeline.get_maintenance_schedule(7))
         return f"""🤔 I couldn't find any specific information for "{query}".
-
 🔍 **You can ask me about:**
-- The status of equipment like 'HVAC' or 'IT equipment'.
 - The maintenance schedule or high-risk items.
 - Information from your uploaded documents (e.g., "troubleshooting guide for cameras").
-
 📊 **Current System Status:**
 - 🚨 High risk equipment: {high_risk_count}
-- 📅 Maintenance due this week: {upcoming_maintenance}
-"""
+- 📅 Maintenance due this week: {upcoming_maintenance}"""
 
-    prompt = f"""
-You are an expert AI assistant for a facilities management team. Your goal is to provide clear, concise, and helpful answers based ONLY on the context provided below.
-
+    prompt = f"""You are an expert AI assistant. Your goal is to provide clear, concise answers based ONLY on the context provided below.
 **User's Question:** "{query}"
-
 ---
 **Context from Documents:**
 {doc_context if doc_context else "No relevant document context found."}
@@ -208,9 +123,7 @@ You are an expert AI assistant for a facilities management team. Your goal is to
 **Context from Predictive Maintenance System:**
 {maintenance_context if maintenance_context else "No relevant maintenance data found for this specific query."}
 ---
-
-Based on all the context above, provide a direct and helpful answer. If the context is insufficient, state that you cannot find the answer in the available data. Synthesize information from both sources if applicable.
-"""
+Based on all the context above, provide a direct and helpful answer."""
     try:
         response = GEMINI_MODEL.generate_content(prompt)
         return response.text
@@ -220,8 +133,7 @@ Based on all the context above, provide a direct and helpful answer. If the cont
 
 # --- Document Processing and Search ---
 def clean_text(text: str) -> str:
-    text = re.sub(r'\s+', ' ', text.strip())
-    return text
+    return re.sub(r'\s+', ' ', text.strip())
 
 def smart_chunking(text: str, chunk_size: int) -> List[str]:
     sentences = re.split(r'(?<=[.!?])\s+', text)
@@ -244,143 +156,94 @@ def extract_text_from_pdf(file_path: str) -> str:
         return ""
 
 def extract_text_from_email(msg) -> str:
-    """Extracts the plain text body from an email message object."""
     if msg.is_multipart():
         for part in msg.walk():
-            content_type = part.get_content_type()
-            if content_type == "text/plain" and "attachment" not in str(part.get("Content-Disposition")):
+            if part.get_content_type() == "text/plain" and "attachment" not in str(part.get("Content-Disposition")):
                 try:
                     return part.get_payload(decode=True).decode(part.get_content_charset() or 'utf-8')
-                except (UnicodeDecodeError, AttributeError):
-                    continue
-    else:
-        if msg.get_content_type() == "text/plain":
-            try:
-                return msg.get_payload(decode=True).decode(msg.get_content_charset() or 'utf-8')
-            except (UnicodeDecodeError, AttributeError):
-                return ""
-    return "" # Fallback if no plain text part is found
+                except: continue
+    elif msg.get_content_type() == "text/plain":
+        try:
+            return msg.get_payload(decode=True).decode(msg.get_content_charset() or 'utf-8')
+        except: return ""
+    return ""
 
 def format_email_for_rag(msg) -> str:
-    """Formats an email message into a structured string for the RAG system."""
     body = extract_text_from_email(msg)
-    if not body:
-        return "" # Skip emails without a readable plain text body
-
+    if not body: return ""
     return f"""--- Email ---
 From: {msg['From']}
 To: {msg['To']}
 Subject: {msg['Subject']}
 Date: {msg['Date']}
-
 {body.strip()}
---- End Email ---
-"""
+--- End Email ---"""
 
 @st.cache_resource
 def load_and_process_documents():
-    """Loads all supported documents (including emails), extracts text, and returns them."""
-    docs, file_paths, metadata = [], [], []
-    # ADDED .eml and .mbox to file patterns
     file_patterns = ["**/*.txt", "**/*.md", "**/*.csv", "**/*.pdf", "**/*.eml", "**/*.mbox"]
     all_files = [f for pattern in file_patterns for f in glob.glob(pattern, recursive=True)]
+    docs, file_paths = [], []
 
     progress_bar = st.progress(0, text="Loading documents...")
     for i, file_path in enumerate(all_files):
         file_name = os.path.basename(file_path)
         progress_bar.progress((i + 1) / len(all_files), text=f"Processing: {file_name}")
         content = ""
-
-        if file_path.endswith('.pdf'):
-            content = extract_text_from_pdf(file_path)
+        if file_path.endswith('.pdf'): content = extract_text_from_pdf(file_path)
         elif file_path.endswith('.eml'):
-            with open(file_path, 'rb') as f:
-                msg = BytesParser(policy=policy.default).parse(f)
-                content = format_email_for_rag(msg)
+            with open(file_path, 'rb') as f: content = format_email_for_rag(BytesParser(policy=policy.default).parse(f))
         elif file_path.endswith('.mbox'):
-            mbox_content = []
-            mbox = mailbox.mbox(file_path)
-            for msg in mbox:
-                formatted_email = format_email_for_rag(msg)
-                if formatted_email:
-                    mbox_content.append(formatted_email)
-            content = "\n\n".join(mbox_content)
-        else: # Handles .txt, .md, .csv
+            mbox_content = [format_email_for_rag(msg) for msg in mailbox.mbox(file_path)]
+            content = "\n\n".join(filter(None, mbox_content))
+        else:
             try:
                 with open(file_path, 'r', encoding='utf-8') as f: content = f.read()
-            except Exception:
-                try:
-                    with open(file_path, 'r', encoding='latin-1') as f: content = f.read()
-                except Exception as e:
-                    st.warning(f"Could not read text file {file_name}. Error: {e}")
-
+            except:
+                with open(file_path, 'r', encoding='latin-1') as f: content = f.read()
+        
         if content and len(content.strip()) > 50:
             docs.append(clean_text(content))
             file_paths.append(file_path)
-            metadata.append({'name': file_name, 'path': file_path})
-
     progress_bar.empty()
     if docs: st.success(f"Successfully loaded and processed {len(docs)} documents!")
-    return docs, file_paths, metadata
+    return docs, file_paths
 
 @st.cache_resource
-def create_search_index(_documents, _file_paths, _metadata):
-    """Creates a FAISS vector search index from the document contents."""
-    st.info("🧠 Building semantic search index... This might take a moment.")
+def create_search_index(_documents, _file_paths):
     model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-
     all_chunks, chunk_metadata = [], []
     for i, doc in enumerate(_documents):
         chunks = smart_chunking(doc, config.chunk_size)
         all_chunks.extend(chunks)
-        chunk_metadata.extend([{'source_index': i, 'path': _file_paths[i]}] * len(chunks))
-
-    if not all_chunks:
-        st.error("No content could be chunked for indexing.")
-        return None, None, [], []
-
+        chunk_metadata.extend([{'path': _file_paths[i]}] * len(chunks))
+    if not all_chunks: return None, None, [], []
     with st.spinner("Embedding documents for semantic search..."):
         embeddings = model.encode(all_chunks, show_progress_bar=True, normalize_embeddings=True)
-
-    # Use IndexFlatIP for cosine similarity with normalized embeddings
     index = faiss.IndexFlatIP(embeddings.shape[1])
     index.add(embeddings.astype('float32'))
-
     st.success(f"✅ Search index created with {len(all_chunks)} text chunks.")
     return index, model, all_chunks, chunk_metadata
 
 def search_documents(query: str, index, model, chunks: List[str], metadata: List[Dict]) -> List[Dict]:
-    """Performs a semantic search against the FAISS index."""
     if not query or index is None: return []
     query_embedding = model.encode([query], normalize_embeddings=True)
-
-    # scores are cosine similarities (higher is better)
     scores, indices = index.search(query_embedding.astype('float32'), config.top_k_retrieval)
-
     results = []
     for i, idx in enumerate(indices[0]):
-        # FIX: The threshold check now uses the corrected value and works as intended
         if idx != -1 and scores[0][i] > config.similarity_threshold:
-             results.append({
-                'content': chunks[idx],
-                'source': metadata[idx]['path'],
-                'similarity': scores[0][i]
-            })
-
+             results.append({'content': chunks[idx], 'source': metadata[idx]['path'], 'similarity': scores[0][i]})
     return sorted(results, key=lambda x: x['similarity'], reverse=True)
 
+# --- Main App Interface ---
+st.title("🤖 AI Support Chatbot")
+st.markdown("Ask questions about your documents, emails, or maintenance schedules.")
 
-# --- Main Streamlit Application ---
-st.set_page_config(page_title="AI Support Chatbot", page_icon="🤖", layout="wide")
-st.title("🤖 AI Support Chatbot with Predictive Maintenance")
-st.markdown("This chatbot uses a **Retrieval-Augmented Generation (RAG)** system to answer questions based on your documents (including emails) and a **Predictive Maintenance** system to provide real-time equipment health analysis.")
-
-# --- Initialization ---
 try:
     maintenance_pipeline = MaintenancePipeline()
-    docs, paths, meta = load_and_process_documents()
+    docs, paths = load_and_process_documents()
     if docs:
-        search_index, model, all_chunks, chunk_meta = create_search_index(docs, paths, meta)
+        search_index, model, all_chunks, chunk_meta = create_search_index(docs, paths)
     else:
         search_index, model, all_chunks, chunk_meta = None, None, [], []
         st.warning("No documents found. The chatbot will only use maintenance data.")
@@ -388,15 +251,14 @@ except Exception as e:
     st.error(f"An error occurred during initialization: {e}")
     search_index, maintenance_pipeline = None, None
 
-# --- Chat Interface ---
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "Hi! How can I help you today? Ask about equipment, documents, or maintenance schedules."}]
+    st.session_state.messages = [{"role": "assistant", "content": "Hi! How can I help you today?"}]
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-if prompt := st.chat_input("Ask a question about your equipment or documents..."):
+if prompt := st.chat_input("Ask a question..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
