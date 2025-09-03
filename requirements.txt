@@ -17,4 +17,3 @@ Pillow
 pytesseract
 seaborn
 joblib
-sqlite3
