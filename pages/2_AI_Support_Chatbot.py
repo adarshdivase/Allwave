@@ -14,6 +14,9 @@ from datetime import datetime, timedelta
 import random
 from dataclasses import dataclass
 import google.generativeai as genai
+import mailbox # Standard library for email processing
+from email import policy
+from email.parser import BytesParser
 
 # --- Basic Configuration ---
 warnings.filterwarnings("ignore")
@@ -23,7 +26,8 @@ warnings.filterwarnings("ignore")
 class RAGConfig:
     chunk_size: int = 500
     top_k_retrieval: int = 5
-    similarity_threshold: float = 1.5 # L2 distance threshold; lower is more similar. 1.5 is permissive.
+    # FIX: Corrected the similarity threshold to a realistic value for cosine similarity
+    similarity_threshold: float = 0.4
 
 config = RAGConfig()
 
@@ -51,24 +55,24 @@ class MaintenancePipeline:
         """Generates realistic-looking maintenance data for the demo"""
         equipment_data = {}
         equipment_types = ['HVAC', 'IT_EQUIPMENT', 'ELECTRICAL', 'FIRE_SAFETY', 'AV_EQUIPMENT']
-        
+
         for i in range(50):
             equipment_id = f"{random.choice(equipment_types)}_{str(i+1).zfill(3)}"
             equipment_type = equipment_id.split('_')[0]
             age_days = random.randint(30, self.equipment_profiles.get(equipment_type, {}).get('expected_life', 7000))
             days_since_maintenance = random.randint(5, 300)
-            
+
             # Simplified failure probability calculation
             age_factor = age_days / self.equipment_profiles.get(equipment_type, {}).get('expected_life', 7000)
             maintenance_factor = days_since_maintenance / self.equipment_profiles.get(equipment_type, {}).get('maintenance_interval', 365)
             failure_probability = min(0.1 + age_factor * 0.5 + maintenance_factor * 0.4, 0.99)
-            
+
             risk_level = 'LOW'
             if failure_probability >= maintenance_config.risk_threshold_high:
                 risk_level = 'HIGH'
             elif failure_probability >= maintenance_config.risk_threshold_medium:
                 risk_level = 'MEDIUM'
-            
+
             equipment_data[equipment_id] = {
                 'type': equipment_type,
                 'location': random.choice(['Building A', 'Building B', 'Server Room', 'Main Hall']),
@@ -90,7 +94,7 @@ class MaintenancePipeline:
         target_date = datetime.now() + timedelta(days=days_ahead)
         items = [{'id': eid, **edata} for eid, edata in self.maintenance_data.items() if datetime.strptime(edata['next_maintenance'], '%Y-%m-%d') <= target_date]
         return sorted(items, key=lambda x: x['next_maintenance'])
-        
+
     def generate_maintenance_recommendations(self, equipment_data: Dict) -> List[str]:
         recommendations = []
         if equipment_data.get('risk_level') == 'HIGH':
@@ -122,10 +126,10 @@ def detect_query_intent(query: str) -> Dict[str, Any]:
         'electrical': ['electrical', 'power', 'circuit'],
         'fire_safety': ['fire', 'smoke', 'alarm', 'sprinkler'],
     }
-    
+
     detected_intent = next((intent for intent, keywords in intents.items() if any(kw in query_lower for kw in keywords)), None)
     detected_category = next((cat for cat, keywords in categories.items() if any(kw in query_lower for kw in keywords)), None)
-    
+
     return {'maintenance_intent': detected_intent, 'category': detected_category}
 
 def get_maintenance_context(query: str, maintenance_pipeline: MaintenancePipeline) -> str:
@@ -159,17 +163,17 @@ def get_maintenance_context(query: str, maintenance_pipeline: MaintenancePipelin
             for eq in high_risk[:3]:
                 recs = maintenance_pipeline.generate_maintenance_recommendations(eq)
                 context_parts.append(f"For {eq['id']} ({eq['type']}): {', '.join(recs)}")
-    
+
     return "\n".join(context_parts)
 
 def generate_llm_response(query: str, search_results: List[Dict], maintenance_pipeline: MaintenancePipeline) -> str:
     """Generates a response using the Gemini LLM, backed by retrieved context"""
     if not GEMINI_MODEL:
         return "The AI model is not configured. Please check your API key."
-    
+
     doc_context = ""
     if search_results:
-        doc_context += "Relevant information from documents:\n"
+        doc_context += "Relevant information from your documents:\n"
         for result in search_results[:3]:
             source = os.path.basename(result['source'])
             content_preview = result['content'].strip().replace('\n', ' ')
@@ -236,20 +240,49 @@ def extract_text_from_pdf(file_path: str) -> str:
         with fitz.open(file_path) as doc:
             return "".join(page.get_text() for page in doc)
     except Exception as e:
-        st.warning(f"Could not read {os.path.basename(file_path)} with PyMuPDF, trying PyPDF2. Error: {e}")
-        try:
-            with open(file_path, 'rb') as f:
-                reader = PyPDF2.PdfReader(f)
-                return "".join(page.extract_text() for page in reader.pages)
-        except Exception as e2:
-            st.error(f"Failed to read PDF {os.path.basename(file_path)} with both methods. Error: {e2}")
-            return ""
+        st.warning(f"Could not read {os.path.basename(file_path)} with PyMuPDF. Error: {e}")
+        return ""
+
+def extract_text_from_email(msg) -> str:
+    """Extracts the plain text body from an email message object."""
+    if msg.is_multipart():
+        for part in msg.walk():
+            content_type = part.get_content_type()
+            if content_type == "text/plain" and "attachment" not in str(part.get("Content-Disposition")):
+                try:
+                    return part.get_payload(decode=True).decode(part.get_content_charset() or 'utf-8')
+                except (UnicodeDecodeError, AttributeError):
+                    continue
+    else:
+        if msg.get_content_type() == "text/plain":
+            try:
+                return msg.get_payload(decode=True).decode(msg.get_content_charset() or 'utf-8')
+            except (UnicodeDecodeError, AttributeError):
+                return ""
+    return "" # Fallback if no plain text part is found
+
+def format_email_for_rag(msg) -> str:
+    """Formats an email message into a structured string for the RAG system."""
+    body = extract_text_from_email(msg)
+    if not body:
+        return "" # Skip emails without a readable plain text body
+
+    return f"""--- Email ---
+From: {msg['From']}
+To: {msg['To']}
+Subject: {msg['Subject']}
+Date: {msg['Date']}
+
+{body.strip()}
+--- End Email ---
+"""
 
 @st.cache_resource
 def load_and_process_documents():
-    """Loads all supported documents, extracts text, and returns them."""
+    """Loads all supported documents (including emails), extracts text, and returns them."""
     docs, file_paths, metadata = [], [], []
-    file_patterns = ["**/*.txt", "**/*.md", "**/*.csv", "**/*.pdf"]
+    # ADDED .eml and .mbox to file patterns
+    file_patterns = ["**/*.txt", "**/*.md", "**/*.csv", "**/*.pdf", "**/*.eml", "**/*.mbox"]
     all_files = [f for pattern in file_patterns for f in glob.glob(pattern, recursive=True)]
 
     progress_bar = st.progress(0, text="Loading documents...")
@@ -257,19 +290,35 @@ def load_and_process_documents():
         file_name = os.path.basename(file_path)
         progress_bar.progress((i + 1) / len(all_files), text=f"Processing: {file_name}")
         content = ""
+
         if file_path.endswith('.pdf'):
             content = extract_text_from_pdf(file_path)
-        else:
+        elif file_path.endswith('.eml'):
+            with open(file_path, 'rb') as f:
+                msg = BytesParser(policy=policy.default).parse(f)
+                content = format_email_for_rag(msg)
+        elif file_path.endswith('.mbox'):
+            mbox_content = []
+            mbox = mailbox.mbox(file_path)
+            for msg in mbox:
+                formatted_email = format_email_for_rag(msg)
+                if formatted_email:
+                    mbox_content.append(formatted_email)
+            content = "\n\n".join(mbox_content)
+        else: # Handles .txt, .md, .csv
             try:
                 with open(file_path, 'r', encoding='utf-8') as f: content = f.read()
             except Exception:
-                with open(file_path, 'r', encoding='latin-1') as f: content = f.read()
-        
+                try:
+                    with open(file_path, 'r', encoding='latin-1') as f: content = f.read()
+                except Exception as e:
+                    st.warning(f"Could not read text file {file_name}. Error: {e}")
+
         if content and len(content.strip()) > 50:
             docs.append(clean_text(content))
             file_paths.append(file_path)
             metadata.append({'name': file_name, 'path': file_path})
-    
+
     progress_bar.empty()
     if docs: st.success(f"Successfully loaded and processed {len(docs)} documents!")
     return docs, file_paths, metadata
@@ -279,23 +328,24 @@ def create_search_index(_documents, _file_paths, _metadata):
     """Creates a FAISS vector search index from the document contents."""
     st.info("🧠 Building semantic search index... This might take a moment.")
     model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-    
+
     all_chunks, chunk_metadata = [], []
     for i, doc in enumerate(_documents):
         chunks = smart_chunking(doc, config.chunk_size)
         all_chunks.extend(chunks)
         chunk_metadata.extend([{'source_index': i, 'path': _file_paths[i]}] * len(chunks))
-            
+
     if not all_chunks:
         st.error("No content could be chunked for indexing.")
         return None, None, [], []
 
     with st.spinner("Embedding documents for semantic search..."):
         embeddings = model.encode(all_chunks, show_progress_bar=True, normalize_embeddings=True)
-    
-    index = faiss.IndexFlatIP(embeddings.shape[1]) # Using Inner Product for cosine similarity
+
+    # Use IndexFlatIP for cosine similarity with normalized embeddings
+    index = faiss.IndexFlatIP(embeddings.shape[1])
     index.add(embeddings.astype('float32'))
-    
+
     st.success(f"✅ Search index created with {len(all_chunks)} text chunks.")
     return index, model, all_chunks, chunk_metadata
 
@@ -303,19 +353,27 @@ def search_documents(query: str, index, model, chunks: List[str], metadata: List
     """Performs a semantic search against the FAISS index."""
     if not query or index is None: return []
     query_embedding = model.encode([query], normalize_embeddings=True)
-    distances, indices = index.search(query_embedding.astype('float32'), config.top_k_retrieval)
-    
+
+    # scores are cosine similarities (higher is better)
+    scores, indices = index.search(query_embedding.astype('float32'), config.top_k_retrieval)
+
     results = []
     for i, idx in enumerate(indices[0]):
-        if idx != -1 and distances[0][i] > config.similarity_threshold:
-             results.append({'content': chunks[idx], 'source': metadata[idx]['path'], 'similarity': distances[0][i]})
+        # FIX: The threshold check now uses the corrected value and works as intended
+        if idx != -1 and scores[0][i] > config.similarity_threshold:
+             results.append({
+                'content': chunks[idx],
+                'source': metadata[idx]['path'],
+                'similarity': scores[0][i]
+            })
+
     return sorted(results, key=lambda x: x['similarity'], reverse=True)
 
 
 # --- Main Streamlit Application ---
 st.set_page_config(page_title="AI Support Chatbot", page_icon="🤖", layout="wide")
 st.title("🤖 AI Support Chatbot with Predictive Maintenance")
-st.markdown("This chatbot uses a **Retrieval-Augmented Generation (RAG)** system to answer questions based on your documents and a **Predictive Maintenance** system to provide real-time equipment health analysis.")
+st.markdown("This chatbot uses a **Retrieval-Augmented Generation (RAG)** system to answer questions based on your documents (including emails) and a **Predictive Maintenance** system to provide real-time equipment health analysis.")
 
 # --- Initialization ---
 try:
