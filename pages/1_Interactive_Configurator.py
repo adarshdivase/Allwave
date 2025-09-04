@@ -596,7 +596,7 @@ class MaximizedAVRecommender:
         
         room_volume = specs['length'] * specs['width'] * specs['ceiling_height']
         surface_area = 2 * (specs['length'] * specs['width'] + specs['length'] * specs['ceiling_height'] + specs['width'] * specs['ceiling_height'])
-        rt60_estimate = 0.161 * room_volume / (absorption_coeff * surface_area)
+        rt60_estimate = 0.161 * room_volume / (absorption_coeff * surface_area) if absorption_coeff > 0 else float('inf')
         return {
             'rt60_estimate': f"{rt60_estimate:.2f} seconds", 'acoustic_treatment_needed': rt60_estimate > 0.8,
             'sound_masking_recommended': 'Speech Privacy Important' in env.get('acoustic_features', []),
@@ -685,53 +685,9 @@ class EnhancedLighting:
         self.direct_intensity = 0.7
         self.shadow_softness = 0.5
 
-    def calculate_lighting(self, position: np.ndarray, normal: np.ndarray) -> float:
-        """Calculate lighting at a point"""
-        ambient = self.ambient_intensity
-        diffuse = self.calculate_diffuse(position, normal)
-        specular = self.calculate_specular(position, normal)
-        shadow = self.calculate_shadow(position)
-        return (ambient + diffuse * shadow) * (1 + specular)
-
-    def calculate_diffuse(self, position: np.ndarray, normal: np.ndarray) -> float:
-        """Calculate diffuse lighting"""
-        light_positions = self.get_light_positions()
-        total_diffuse = 0.0
-        for light_pos in light_positions:
-            light_dir = light_pos - position
-            light_dir = light_dir / np.linalg.norm(light_dir)
-            diffuse = max(0, np.dot(normal, light_dir))
-            distance = np.linalg.norm(light_pos - position)
-            attenuation = 1.0 / (1.0 + 0.1 * distance + 0.01 * distance * distance)
-            total_diffuse += diffuse * attenuation
-        return min(1.0, total_diffuse * self.direct_intensity)
-
-    def calculate_specular(self, position: np.ndarray, normal: np.ndarray) -> float:
-        """Calculate specular highlights"""
-        camera_pos = np.array([self.room_specs['length'] * 1.5, self.room_specs['width'] * 1.5, self.room_specs['ceiling_height'] * 1.2])
-        view_dir = camera_pos - position
-        view_dir = view_dir / np.linalg.norm(view_dir)
-        total_specular = 0.0
-        for light_pos in self.get_light_positions():
-            light_dir = light_pos - position
-            light_dir = light_dir / np.linalg.norm(light_dir)
-            reflect_dir = 2 * np.dot(normal, light_dir) * normal - light_dir
-            spec = max(0, np.dot(view_dir, reflect_dir)) ** 32
-            total_specular += spec
-        return min(1.0, total_specular * 0.3)
-
-    def calculate_shadow(self, position: np.ndarray) -> float:
-        """Calculate soft shadows"""
-        shadow = 1.0
-        for light_pos in self.get_light_positions():
-            shadow_ray = light_pos - position
-            distance = np.linalg.norm(shadow_ray)
-            shadow *= 1.0 - self.shadow_softness / (1.0 + distance)
-        return max(0.2, shadow)
-
     def get_light_positions(self) -> List[np.ndarray]:
         """Get light positions in the room"""
-        length, width, height = self.room_specs['length'], self.room_specs['width'], self.room_specs['ceiling_height']
+        length, width, height = (self.room_specs['length'], self.room_specs['width'], self.room_specs['ceiling_height'])
         return [
             np.array([length * 0.25, width * 0.25, height - 0.1]), np.array([length * 0.75, width * 0.25, height - 0.1]),
             np.array([length * 0.25, width * 0.75, height - 0.1]), np.array([length * 0.75, width * 0.75, height - 0.1])
@@ -789,36 +745,21 @@ class EnhancedVisualizationEngine:
         colors = self.color_schemes[viz_config['style_options']['color_scheme']]
         lighting = self.lighting_modes[viz_config['style_options']['lighting_mode']]
         
-        # Add room structure
         self._add_room_structure(fig, room_specs, colors, lighting)
         
-        # Add core elements based on configuration
-        if viz_config['room_elements']['show_table']:
-            self._add_table(fig, room_specs, colors, viz_config['style_options']['table_style'])
-        if viz_config['room_elements']['show_chairs']:
-            self._add_seating(fig, room_specs, colors, viz_config['style_options']['chair_style'])
-        if viz_config['room_elements']['show_displays']:
-            self._add_display_system(fig, room_specs, colors, recommendations)
-        if viz_config['room_elements']['show_cameras']:
-            self._add_camera_system(fig, room_specs, colors, recommendations)
-        if viz_config['room_elements']['show_lighting']:
-            self._add_lighting_system(fig, room_specs, colors, lighting)
-        if viz_config['room_elements']['show_speakers']:
-            self._add_audio_system(fig, room_specs, colors, recommendations)
-        if viz_config['room_elements']['show_control']:
-            self._add_control_system(fig, room_specs, colors)
-        if viz_config['room_elements']['show_whiteboard']:
-            self._add_whiteboard(fig, room_specs, colors)
-        if viz_config['room_elements']['show_credenza']:
-            self._add_credenza(fig, room_specs, colors)
-        if viz_config['advanced_features']['show_measurements']:
-            self._add_measurements(fig, room_specs)
-        if viz_config['advanced_features']['show_zones']:
-            self._add_coverage_zones(fig, room_specs)
-        if viz_config['advanced_features']['show_cable_paths']:
-            self._add_cable_management(fig, room_specs, colors)
-        if viz_config['advanced_features']['show_network']:
-            self._add_network_points(fig, room_specs)
+        if viz_config['room_elements']['show_table']: self._add_table(fig, room_specs, colors, viz_config['style_options']['table_style'])
+        if viz_config['room_elements']['show_chairs']: self._add_seating(fig, room_specs, colors, viz_config['style_options']['chair_style'])
+        if viz_config['room_elements']['show_displays']: self._add_display_system(fig, room_specs, colors, recommendations)
+        if viz_config['room_elements']['show_cameras']: self._add_camera_system(fig, room_specs, colors, recommendations)
+        if viz_config['room_elements']['show_lighting']: self._add_lighting_system(fig, room_specs, colors, lighting)
+        if viz_config['room_elements']['show_speakers']: self._add_audio_system(fig, room_specs, colors, recommendations)
+        if viz_config['room_elements']['show_control']: self._add_control_system(fig, room_specs, colors)
+        if viz_config['room_elements']['show_whiteboard']: self._add_whiteboard(fig, room_specs, colors)
+        if viz_config['room_elements']['show_credenza']: self._add_credenza(fig, room_specs, colors)
+        if viz_config['advanced_features']['show_measurements']: self._add_measurements(fig, room_specs)
+        if viz_config['advanced_features']['show_zones']: self._add_coverage_zones(fig, room_specs)
+        if viz_config['advanced_features']['show_cable_paths']: self._add_cable_management(fig, room_specs, colors)
+        if viz_config['advanced_features']['show_network']: self._add_network_points(fig, room_specs)
         
         self._update_camera_view(fig, room_specs, viz_config['style_options']['view_angle'])
         self._update_layout(fig, room_specs)
@@ -829,27 +770,20 @@ class EnhancedVisualizationEngine:
         """Add room structure with proper lighting configuration"""
         length, width, height = specs['length'], specs['width'], specs['ceiling_height']
         
-        # Configure lighting parameters properly
-        lighting_config = dict(
-            ambient=lighting.get('ambient', 0.4),
-            diffuse=lighting.get('diffuse', 0.6),
-            fresnel=0.2,
-            specular=0.3,
-            roughness=0.7
-        )
+        lighting_config = {**lighting, 'fresnel': 0.2, 'specular': 0.3, 'roughness': 0.7}
+        # Remove non-plotly keys before passing
+        lighting_config.pop('color', None)
+        lighting_config.pop('intensity', None)
         
-        # Floor with enhanced texture
-        i, j = np.meshgrid(np.linspace(0, length, 2), np.linspace(0, width, 2))
-        k = np.zeros_like(i)
-        
-        fig.add_trace(go.Surface(x=i, y=j, z=k, colorscale=[[0, colors['floor']], [1, colors['floor']]], showscale=False, lighting=lighting_config, name='Floor'))
+        # Floor
+        fig.add_trace(go.Surface(x=[[0, length], [0, length]], y=[[0, 0], [width, width]], z=[[0, 0], [0, 0]], colorscale=[[0, colors['floor']], [1, colors['floor']]], showscale=False, lighting=lighting_config, name='Floor'))
         
         # Walls
         fig.add_trace(go.Surface(x=[[0, 0], [0, 0]], y=[[0, width], [0, width]], z=[[0, 0], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, lighting=lighting_config, opacity=0.9, name='Back Wall'))
         fig.add_trace(go.Surface(x=[[0, length], [0, length]], y=[[0, 0], [0, 0]], z=[[0, 0], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, lighting=lighting_config, opacity=0.8, name='Left Wall'))
         fig.add_trace(go.Surface(x=[[0, length], [0, length]], y=[[width, width], [width, width]], z=[[0, 0], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, lighting=lighting_config, opacity=0.8, name='Right Wall'))
         
-        # Add ceiling for completeness
+        # Ceiling
         fig.add_trace(go.Surface(x=[[0, length], [0, length]], y=[[0, 0], [width, width]], z=[[height, height], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, lighting=lighting_config, opacity=0.7, name='Ceiling'))
 
     def _add_table(self, fig, specs, colors, table_style):
@@ -1232,23 +1166,14 @@ def main():
 
         with tab3:
             st.subheader("Interactive Room Visualization")
-            
-            viz_config = {
-                'room_elements': room_elements_config,
-                'style_options': style_config,
-                'advanced_features': advanced_config
-            }
-            
+            viz_config = {'room_elements': room_elements_config, 'style_options': style_config, 'advanced_features': advanced_config}
             viz_engine = EnhancedVisualizationEngine()
-            
             fig_3d = viz_engine.create_3d_room_visualization(room_specs, recommendations, viz_config)
-            
             st.plotly_chart(fig_3d, use_container_width=True)
             st.plotly_chart(EnhancedVisualizationEngine.create_equipment_layout_2d(room_specs, recommendations), use_container_width=True)
 
         with tab4:
             st.subheader("Alternative Configurations & Smart Upgrade Planner")
-            
             if recommendations.get('alternatives'):
                 st.markdown("#### Alternative Configurations")
                 for tier_name, alt_config in recommendations['alternatives'].items():
@@ -1267,7 +1192,6 @@ def main():
                 upgrade = recommendations['upgrade_path'][0] 
                 smart_plan = recommender._generate_smart_upgrade_plan(room_specs, st.session_state.budget_tier, upgrade['estimated_cost'])
                 # (Smart Plan display logic is omitted for brevity but should be here)
-
 
         with tab5:
             st.subheader("Professional Report Summary")
