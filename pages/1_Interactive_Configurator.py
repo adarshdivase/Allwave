@@ -288,6 +288,7 @@ class EnhancedProductDatabase:
         }
 
 class MaximizedAVRecommender:
+    # This class remains unchanged, content omitted for brevity
     def __init__(self):
         self.db = EnhancedProductDatabase()
     
@@ -474,7 +475,7 @@ class MaximizedAVRecommender:
     
     def _analyze_room_characteristics(self, specs):
         room_area = specs['length'] * specs['width']
-        aspect_ratio = max(specs['length'], specs['width']) / min(specs['length'], specs['width'])
+        aspect_ratio = max(specs['length'], specs['width']) / min(specs['length'], specs['width']) if min(specs['length'], specs['width']) > 0 else 1
         
         return {
             'size_category': self._categorize_room_size(room_area),
@@ -513,57 +514,28 @@ class MaximizedAVRecommender:
                     'Essential software upgrades and licensing',
                     'Control system programming optimization',
                     'Staff training on current systems'
-                ],
-                'cost_percentage': 0.15,
-                'focus': 'Maximizing current infrastructure'
+                ], 'cost_percentage': 0.15, 'focus': 'Maximizing current infrastructure'
             },
             'Phase 1 (3-6 months)': {
-                'priorities': [
-                    'Display system upgrade',
-                    'Camera system enhancement',
-                    'Basic audio improvements'
-                ],
-                'cost_percentage': 0.35,
-                'focus': 'Core AV capabilities'
+                'priorities': ['Display system upgrade','Camera system enhancement','Basic audio improvements'],
+                'cost_percentage': 0.35, 'focus': 'Core AV capabilities'
             },
             'Phase 2 (6-9 months)': {
-                'priorities': [
-                    'Advanced audio processing implementation',
-                    'Lighting control system upgrade',
-                    'Room automation integration'
-                ],
-                'cost_percentage': 0.30,
-                'focus': 'Enhanced functionality'
+                'priorities': ['Advanced audio processing implementation','Lighting control system upgrade','Room automation integration'],
+                'cost_percentage': 0.30, 'focus': 'Enhanced functionality'
             },
             'Final Phase (9-12 months)': {
-                'priorities': [
-                    'Premium features activation',
-                    'AI analytics integration',
-                    'Complete system optimization'
-                ],
-                'cost_percentage': 0.20,
-                'focus': 'Premium capabilities'
+                'priorities': ['Premium features activation','AI analytics integration','Complete system optimization'],
+                'cost_percentage': 0.20, 'focus': 'Premium capabilities'
             }
         }
-
-        # Calculate phase-wise budgets
         for phase in phases.values():
             phase['budget'] = estimated_cost * phase['cost_percentage']
-            
-        # Add ROI metrics
         roi_metrics = {
-            'Productivity Gain': '15-20%',
-            'Energy Savings': '10-15%',
-            'Maintenance Cost Reduction': '25-30%',
-            'System Downtime Reduction': '40-50%'
+            'Productivity Gain': '15-20%', 'Energy Savings': '10-15%',
+            'Maintenance Cost Reduction': '25-30%', 'System Downtime Reduction': '40-50%'
         }
-
-        return {
-            'phases': phases,
-            'roi_metrics': roi_metrics,
-            'total_investment': estimated_cost,
-            'monthly_investment': estimated_cost / 12 if estimated_cost > 0 else 0
-        }
+        return {'phases': phases, 'roi_metrics': roi_metrics, 'total_investment': estimated_cost, 'monthly_investment': estimated_cost / 12 if estimated_cost > 0 else 0}
     
     def _calculate_brightness_needs(self, specs):
         env = specs.get('environment', {})
@@ -654,7 +626,7 @@ class MaximizedAVRecommender:
         return challenges if challenges else ["Standard lighting requirements"]
     
     def _analyze_capacity_efficiency(self, specs):
-        efficiency = specs['capacity'] / (specs['length'] * specs['width'])
+        efficiency = specs['capacity'] / (specs['length'] * specs['width']) if (specs['length'] * specs['width']) > 0 else 0
         if efficiency > 0.5: return "High density - space optimization good"
         elif efficiency > 0.3: return "Moderate density - balanced layout"
         else: return "Low density - spacious environment"
@@ -665,19 +637,11 @@ class MaximizedAVRecommender:
 
 # --- NEW Visualization Engine with Material/Lighting Sim ---
 class EnhancedMaterials:
-    """Material definitions for realistic rendering"""
     @staticmethod
     def get_material_presets():
-        return {
-            'wood': {'base_color': '#8B4513','roughness': 0.7,'metallic': 0.0,'normal_strength': 1.0,'ambient_occlusion': 0.8,'grain_scale': 0.5},
-            'metal': {'base_color': '#B8B8B8','roughness': 0.2,'metallic': 0.9,'normal_strength': 0.5,'ambient_occlusion': 0.3},
-            'glass': {'base_color': '#FFFFFF','roughness': 0.05,'metallic': 0.9,'normal_strength': 0.1,'ambient_occlusion': 0.1,'opacity': 0.3},
-            'fabric': {'base_color': '#303030','roughness': 0.9,'metallic': 0.0,'normal_strength': 0.8,'ambient_occlusion': 0.7},
-            'display': {'base_color': '#000000','roughness': 0.1,'metallic': 0.5,'normal_strength': 0.2,'ambient_occlusion': 0.2,'emission': 0.2}
-        }
+        return {'wood': {'base_color': '#8B4513','roughness': 0.7,'metallic': 0.0,'normal_strength': 1.0,'ambient_occlusion': 0.8,'grain_scale': 0.5},'metal': {'base_color': '#B8B8B8','roughness': 0.2,'metallic': 0.9,'normal_strength': 0.5,'ambient_occlusion': 0.3},'glass': {'base_color': '#FFFFFF','roughness': 0.05,'metallic': 0.9,'normal_strength': 0.1,'ambient_occlusion': 0.1,'opacity': 0.3},'fabric': {'base_color': '#303030','roughness': 0.9,'metallic': 0.0,'normal_strength': 0.8,'ambient_occlusion': 0.7},'display': {'base_color': '#000000','roughness': 0.1,'metallic': 0.5,'normal_strength': 0.2,'ambient_occlusion': 0.2,'emission': 0.2}}
 
 class EnhancedLighting:
-    """Advanced lighting calculations"""
     def __init__(self, room_specs: Dict[str, Any]):
         self.room_specs = room_specs
         self.ambient_intensity = 0.3
@@ -685,30 +649,17 @@ class EnhancedLighting:
         self.shadow_softness = 0.5
 
     def get_light_positions(self) -> List[np.ndarray]:
-        """Get light positions in the room"""
         length, width, height = (self.room_specs['length'], self.room_specs['width'], self.room_specs['ceiling_height'])
-        return [
-            np.array([length * 0.25, width * 0.25, height - 0.1]), np.array([length * 0.75, width * 0.25, height - 0.1]),
-            np.array([length * 0.25, width * 0.75, height - 0.1]), np.array([length * 0.75, width * 0.75, height - 0.1])
-        ]
+        return [np.array([length*0.25, width*0.25, height-0.1]), np.array([length*0.75, width*0.25, height-0.1]), np.array([length*0.25, width*0.75, height-0.1]), np.array([length*0.75, width*0.75, height-0.1])]
 
 class TextureGenerator:
-    """Generate realistic textures for materials"""
     @staticmethod
     def create_wood_texture(size: tuple, grain_scale: float = 0.5) -> np.ndarray:
         x, y = np.linspace(0, size[0] * grain_scale, size[0]), np.linspace(0, size[1] * grain_scale, size[1])
         X, Y = np.meshgrid(x, y)
         noise = np.random.normal(0, 1, size) * 0.1
-        grain = np.sin(X * 10) * 0.5 + 0.5 + np.sin(X * 20 + Y * 5) * 0.2 + noise
+        grain = np.sin(X*10)*0.5 + 0.5 + np.sin(X*20 + Y*5)*0.2 + noise
         return np.clip(grain, 0, 1)
-
-    @staticmethod
-    def create_fabric_texture(size: tuple, scale: float = 1.0) -> np.ndarray:
-        x, y = np.linspace(0, size[0] * scale, size[0]), np.linspace(0, size[1] * scale, size[1])
-        X, Y = np.meshgrid(x, y)
-        weave_x, weave_y = np.sin(X * 20) * 0.5 + 0.5, np.sin(Y * 20) * 0.5 + 0.5
-        texture = weave_x * weave_y + np.random.normal(0, 1, size) * 0.1
-        return np.clip(texture, 0, 1)
 
 class EnhancedVisualizationEngine:
     def __init__(self):
@@ -753,29 +704,14 @@ class EnhancedVisualizationEngine:
         return fig
 
     def _add_room_structure(self, fig, specs, colors, lighting):
-        """Add room structure with proper lighting configuration"""
         length, width, height = specs['length'], specs['width'], specs['ceiling_height']
+        lighting_config = {'ambient': lighting.get('ambient',0.4),'diffuse': lighting.get('diffuse',0.6),'fresnel': 0.2,'specular': 0.3,'roughness': 0.7}
         
-        # Configure lighting parameters properly
-        lighting_config = {
-            'ambient': lighting.get('ambient', 0.4),
-            'diffuse': lighting.get('diffuse', 0.6),
-            'fresnel': 0.2, 'specular': 0.3, 'roughness': 0.7
-        }
-        
-        # Floor with enhanced texture
-        i, j = np.meshgrid(np.linspace(0, length, 2), np.linspace(0, width, 2))
-        k = np.zeros_like(i)
-        
-        fig.add_trace(go.Surface(x=i, y=j, z=k, colorscale=[[0, colors['floor']], [1, colors['floor']]], showscale=False, lighting=lighting_config, name='Floor'))
-        
-        # Walls
-        fig.add_trace(go.Surface(x=[[0, 0], [0, 0]], y=[[0, width], [0, width]], z=[[0, 0], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, lighting=lighting_config, opacity=0.9, name='Back Wall'))
-        fig.add_trace(go.Surface(x=[[0, length], [0, length]], y=[[0, 0], [0, 0]], z=[[0, 0], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, lighting=lighting_config, opacity=0.8, name='Left Wall'))
-        fig.add_trace(go.Surface(x=[[0, length], [0, length]], y=[[width, width], [width, width]], z=[[0, 0], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, lighting=lighting_config, opacity=0.8, name='Right Wall'))
-        
-        # Add ceiling for completeness
-        fig.add_trace(go.Surface(x=[[0, length], [0, length]], y=[[0, 0], [width, width]], z=[[height, height], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, lighting=lighting_config, opacity=0.9, name='Ceiling'))
+        fig.add_trace(go.Surface(x=[[0,length],[0,length]],y=[[0,0],[width,width]],z=[[0,0],[0,0]],colorscale=[[0,colors['floor']],[1,colors['floor']]],showscale=False,lighting=lighting_config,name='Floor'))
+        fig.add_trace(go.Surface(x=[[0,0],[0,0]],y=[[0,width],[0,width]],z=[[0,0],[height,height]],colorscale=[[0,colors['wall']],[1,colors['wall']]],showscale=False,lighting=lighting_config,opacity=0.9,name='Back Wall'))
+        fig.add_trace(go.Surface(x=[[0,length],[0,length]],y=[[0,0],[0,0]],z=[[0,0],[height,height]],colorscale=[[0,colors['wall']],[1,colors['wall']]],showscale=False,lighting=lighting_config,opacity=0.8,name='Left Wall'))
+        fig.add_trace(go.Surface(x=[[0,length],[0,length]],y=[[width,width],[width,width]],z=[[0,0],[height,height]],colorscale=[[0,colors['wall']],[1,colors['wall']]],showscale=False,lighting=lighting_config,opacity=0.8,name='Right Wall'))
+        fig.add_trace(go.Surface(x=[[0,length],[0,length]],y=[[0,0],[width,width]],z=[[height,height],[height,height]],colorscale=[[0,colors['wall']],[1,colors['wall']]],showscale=False,lighting=lighting_config,opacity=0.9,name='Ceiling'))
 
     def _add_table(self, fig, specs, colors, table_style):
         length, width = specs['length'], specs['width']
@@ -783,95 +719,90 @@ class EnhancedVisualizationEngine:
         table_length, table_width = min(length * 0.6, 5), min(width * 0.4, 2)
         
         if table_style in ['rectangular', 'boat-shaped', 'modular']:
-            x, y = np.meshgrid(np.linspace(table_x_center - table_length/2, table_x_center + table_length/2, 2), np.linspace(table_y_center - table_width/2, table_y_center + table_width/2, 2))
+            x, y = np.meshgrid(np.linspace(table_x_center-table_length/2,table_x_center+table_length/2,2),np.linspace(table_y_center-table_width/2,table_y_center+table_width/2,2))
             z = np.full_like(x, table_height)
-            fig.add_trace(go.Surface(x=x, y=y, z=z, colorscale=[[0, colors['wood']], [1, colors['wood']]], showscale=False, name='Table'))
+            fig.add_trace(go.Surface(x=x,y=y,z=z,colorscale=[[0,colors['wood']],[1,colors['wood']]],showscale=False,name='Table'))
         elif table_style == 'oval':
-            theta = np.linspace(0, 2 * np.pi, 50)
-            x_outline = table_x_center + (table_length / 2) * np.cos(theta)
-            y_outline = table_y_center + (table_width / 2) * np.sin(theta)
-            x_verts = np.concatenate(([table_x_center], x_outline))
-            y_verts = np.concatenate(([table_y_center], y_outline))
+            theta = np.linspace(0, 2*np.pi, 50)
+            x_outline, y_outline = table_x_center+(table_length/2)*np.cos(theta), table_y_center+(table_width/2)*np.sin(theta)
+            x_verts, y_verts = np.concatenate(([table_x_center],x_outline)), np.concatenate(([table_y_center],y_outline))
             z_verts = np.full_like(x_verts, table_height)
-            i_faces = [0] * (len(x_outline) - 1)
-            j_faces = list(range(1, len(x_outline)))
-            k_faces = list(range(2, len(x_outline) + 1))
-            fig.add_trace(go.Mesh3d(x=x_verts, y=y_verts, z=z_verts, i=i_faces, j=j_faces, k=k_faces, color=colors['wood'], name='Table'))
+            i_faces, j_faces, k_faces = [0]*(len(x_outline)-1), list(range(1,len(x_outline))), list(range(2,len(x_outline)+1))
+            fig.add_trace(go.Mesh3d(x=x_verts,y=y_verts,z=z_verts,i=i_faces,j=j_faces,k=k_faces,color=colors['wood'],name='Table'))
 
     def _add_seating(self, fig, specs, colors, chair_style):
         length, width, capacity = specs['length'], specs['width'], specs['capacity']
-        table_length, table_width = min(length * 0.6, 5), min(width * 0.4, 2)
-        table_x_center, table_y_center = length * 0.55, width * 0.5
-        chairs_per_side = min(6, capacity // 2)
-
+        table_length, table_width = min(length*0.6,5), min(width*0.4,2)
+        table_x_center, table_y_center = length*0.55, width*0.5
+        chairs_per_side = min(6, capacity//2)
         for i in range(chairs_per_side):
-            x_pos = table_x_center - table_length/2 + ((i + 0.5) * table_length / chairs_per_side)
-            for offset in [-1, 1]:
-                y_pos = table_y_center + offset * (table_width/2 + 0.5)
-                if chair_style in ['modern', 'casual']:
-                    fig.add_trace(go.Scatter3d(x=[x_pos], y=[y_pos], z=[0.4], mode='markers', marker=dict(size=10, symbol='square', color=colors['accent']), name='Chair'))
-                elif chair_style in ['executive', 'training']:
-                    fig.add_trace(go.Mesh3d(x=[x_pos-0.2, x_pos+0.2, x_pos+0.2, x_pos-0.2], y=[y_pos, y_pos, y_pos, y_pos], z=[0.4, 0.4, 1.0, 1.0], i=[0,0],j=[1,2],k=[2,3], color=colors['metal'], name='Chair'))
+            x_pos = table_x_center - table_length/2 + ((i+0.5)*table_length/chairs_per_side)
+            for offset in [-1,1]:
+                y_pos = table_y_center+offset*(table_width/2+0.5)
+                if chair_style in ['modern','casual']:
+                    fig.add_trace(go.Scatter3d(x=[x_pos],y=[y_pos],z=[0.4],mode='markers',marker=dict(size=10,symbol='square',color=colors['accent']),name='Chair'))
+                elif chair_style in ['executive','training']:
+                    fig.add_trace(go.Mesh3d(x=[x_pos-0.2,x_pos+0.2,x_pos+0.2,x_pos-0.2],y=[y_pos,y_pos,y_pos,y_pos],z=[0.4,0.4,1.0,1.0],i=[0,0],j=[1,2],k=[2,3],color=colors['metal'],name='Chair'))
 
     def _add_display_system(self, fig, specs, colors, recommendations):
         width, height = specs['width'], specs['ceiling_height']
-        screen_width, screen_height = min(3.5, width * 0.6), min(3.5, width * 0.6) * 9/16
-        screen_y_center, screen_z_center = width / 2, height * 0.5
-        fig.add_trace(go.Mesh3d(x=[0.05]*4, y=[screen_y_center-screen_width/2, screen_y_center+screen_width/2, screen_y_center+screen_width/2, screen_y_center-screen_width/2], z=[screen_z_center-screen_height/2, screen_z_center-screen_height/2, screen_z_center+screen_height/2, screen_z_center+screen_height/2], i=[0,0],j=[1,2],k=[2,3], color=colors['screen'], name='Display'))
+        screen_width, screen_height = min(3.5,width*0.6), min(3.5,width*0.6)*9/16
+        screen_y_center, screen_z_center = width/2, height*0.5
+        fig.add_trace(go.Mesh3d(x=[0.05]*4,y=[screen_y_center-screen_width/2,screen_y_center+screen_width/2,screen_y_center+screen_width/2,screen_y_center-screen_width/2],z=[screen_z_center-screen_height/2,screen_z_center-screen_height/2,screen_z_center+screen_height/2,screen_z_center+screen_height/2],i=[0,0],j=[1,2],k=[2,3],color=colors['screen'],name='Display'))
 
     def _add_camera_system(self, fig, specs, colors, recommendations):
         width, height = specs['width'], specs['ceiling_height']
-        screen_height = min(3.5, width * 0.6) * 9 / 16
-        camera_z = height * 0.5 + screen_height / 2 + 0.1
-        fig.add_trace(go.Scatter3d(x=[0.08], y=[width/2], z=[camera_z], mode='markers', marker=dict(size=8, symbol='diamond', color=colors['screen']), name='Camera'))
+        screen_height = min(3.5,width*0.6)*9/16
+        camera_z = height*0.5 + screen_height/2 + 0.1
+        fig.add_trace(go.Scatter3d(x=[0.08],y=[width/2],z=[camera_z],mode='markers',marker=dict(size=8,symbol='diamond',color=colors['screen']),name='Camera'))
 
     def _add_lighting_system(self, fig, specs, colors, lighting):
         length, width, height = specs['length'], specs['width'], specs['ceiling_height']
         light_color = lighting['color']
         for i in range(2):
             for j in range(3):
-                fig.add_trace(go.Scatter3d(x=[length * (i + 1)/3], y=[width * (j + 1)/4], z=[height-0.05], mode='markers', marker=dict(size=7, color=light_color, symbol='circle'), name='Lighting'))
+                fig.add_trace(go.Scatter3d(x=[length*(i+1)/3],y=[width*(j+1)/4],z=[height-0.05],mode='markers',marker=dict(size=7,color=light_color,symbol='circle'),name='Lighting'))
 
     def _add_audio_system(self, fig, specs, colors, recommendations):
         length, width, height = specs['length'], specs['width'], specs['ceiling_height']
         for i in [0.25, 0.75]:
             for j in [0.25, 0.75]:
-                fig.add_trace(go.Scatter3d(x=[length*i], y=[width*j], z=[height-0.1], mode='markers', marker=dict(size=6, color=colors['metal'], symbol='circle-open'), name='Speaker'))
-                
+                fig.add_trace(go.Scatter3d(x=[length*i],y=[width*j],z=[height-0.1],mode='markers',marker=dict(size=6,color=colors['metal'],symbol='circle-open'),name='Speaker'))
+
     def _add_control_system(self, fig, specs, colors):
         length, width, height = specs['length'], specs['width'], specs['ceiling_height']
-        fig.add_trace(go.Scatter3d(x=[length - 0.1], y=[width * 0.8], z=[height * 0.4], mode='markers', marker=dict(size=10, symbol='square', color=colors['accent']), name='Control Panel'))
-    
+        fig.add_trace(go.Scatter3d(x=[length-0.1],y=[width*0.8],z=[height*0.4],mode='markers',marker=dict(size=10,symbol='square',color=colors['accent']),name='Control Panel'))
+
     def _add_whiteboard(self, fig, specs, colors):
         length, width, height = specs['length'], specs['width'], specs['ceiling_height']
-        wb_width, wb_height = min(2, width * 0.4), min(2, width * 0.4) * 3/4
-        fig.add_trace(go.Mesh3d(x=[length-0.05]*4, y=[width/2-wb_width/2, width/2+wb_width/2, width/2+wb_width/2, width/2-wb_width/2], z=[height*0.3, height*0.3, height*0.3+wb_height, height*0.3+wb_height], i=[0,0],j=[1,2],k=[2,3], color=colors['glass'], opacity=0.8, name='Whiteboard'))
-    
+        wb_width, wb_height = min(2,width*0.4), min(2,width*0.4)*3/4
+        fig.add_trace(go.Mesh3d(x=[length-0.05]*4,y=[width/2-wb_width/2,width/2+wb_width/2,width/2+wb_width/2,width/2-wb_width/2],z=[height*0.3,height*0.3,height*0.3+wb_height,height*0.3+wb_height],i=[0,0],j=[1,2],k=[2,3],color=colors['glass'],opacity=0.8,name='Whiteboard'))
+
     def _add_credenza(self, fig, specs, colors):
         length, width, height = specs['length'], specs['width'], specs['ceiling_height']
-        c_len, c_depth, c_height = min(2.5, width * 0.5), 0.5, 0.8
-        x, y = np.meshgrid(np.linspace(0.1, 0.1+c_depth, 2), np.linspace(width/2-c_len/2, width/2+c_len/2, 2))
+        c_len, c_depth, c_height = min(2.5,width*0.5), 0.5, 0.8
+        x, y = np.meshgrid(np.linspace(0.1,0.1+c_depth,2),np.linspace(width/2-c_len/2,width/2+c_len/2,2))
         z = np.full_like(x, c_height)
-        fig.add_trace(go.Surface(x=x, y=y, z=z, colorscale=[[0, colors['wood']], [1, colors['wood']]], showscale=False, name='Credenza'))
-    
+        fig.add_trace(go.Surface(x=x,y=y,z=z,colorscale=[[0,colors['wood']],[1,colors['wood']]],showscale=False,name='Credenza'))
+
     def _add_measurements(self, fig, specs):
         length, width = specs['length'], specs['width']
-        fig.add_trace(go.Scatter3d(x=[0, length], y=[width*1.1, width*1.1], z=[0,0], mode='lines+text', text=["", f"{length}m"], line=dict(color='black', width=2), textposition="top right", name="Length"))
-        fig.add_trace(go.Scatter3d(x=[length*1.1, length*1.1], y=[0, width], z=[0,0], mode='lines+text', text=["", f"{width}m"], line=dict(color='black', width=2), textposition="middle right", name="Width"))
+        fig.add_trace(go.Scatter3d(x=[0,length],y=[width*1.1,width*1.1],z=[0,0],mode='lines+text',text=["",f"{length}m"],line=dict(color='black',width=2),textposition="top right",name="Length"))
+        fig.add_trace(go.Scatter3d(x=[length*1.1,length*1.1],y=[0,width],z=[0,0],mode='lines+text',text=["",f"{width}m"],line=dict(color='black',width=2),textposition="middle right",name="Width"))
 
     def _add_coverage_zones(self, fig, specs):
         length, width, height = specs['length'], specs['width'], specs['ceiling_height']
-        x, y, z = [0.08, length*0.8, length*0.8], [width/2, width*0.1, width*0.9], [height*0.6, 0, 0]
-        fig.add_trace(go.Mesh3d(x=x, y=y, z=z, i=[0], j=[1], k=[2], color='blue', opacity=0.15, name='Camera Zone'))
-    
+        x, y, z = [0.08,length*0.8,length*0.8], [width/2,width*0.1,width*0.9], [height*0.6,0,0]
+        fig.add_trace(go.Mesh3d(x=x,y=y,z=z,i=[0],j=[1],k=[2],color='blue',opacity=0.15,name='Camera Zone'))
+
     def _add_cable_management(self, fig, specs, colors):
         length, width = specs['length'], specs['width']
-        table_x_center, table_y_center = length * 0.55, width * 0.5
-        fig.add_trace(go.Scatter3d(x=[0.1, table_x_center], y=[width/2, table_y_center], z=[0.1, 0.1], mode='lines', line=dict(color=colors['accent'], width=4, dash='dot'), name='Cabling'))
+        table_x_center, table_y_center = length*0.55, width*0.5
+        fig.add_trace(go.Scatter3d(x=[0.1,table_x_center],y=[width/2,table_y_center],z=[0.1,0.1],mode='lines',line=dict(color=colors['accent'],width=4,dash='dot'),name='Cabling'))
 
     def _add_network_points(self, fig, specs):
         length, width = specs['length'], specs['width']
-        fig.add_trace(go.Scatter3d(x=[0.1, length-0.1], y=[0.1, width-0.1], z=[0.2, 0.2], mode='markers', marker=dict(size=8, symbol='cross', color='green'), name='Network Point'))
+        fig.add_trace(go.Scatter3d(x=[0.1,length-0.1],y=[0.1,width-0.1],z=[0.2,0.2],mode='markers',marker=dict(size=8,symbol='cross',color='green'),name='Network Point'))
 
     def _update_camera_view(self, fig, specs, view_angle):
         length, width, height = specs['length'], specs['width'], specs['ceiling_height']
@@ -890,7 +821,7 @@ class EnhancedVisualizationEngine:
             autosize=True,
             scene=dict(
                 aspectmode='manual',
-                aspectratio=dict(x=1, y=width/length if length > 0 else 1, z=0.7),
+                aspectratio=dict(x=length/max(length,width,height), y=width/max(length,width,height), z=height/max(length,width,height)),
                 xaxis_title="Length (m)", yaxis_title="Width (m)", zaxis_title="Height (m)",
                 xaxis=dict(range=[0, length], showbackground=False),
                 yaxis=dict(range=[0, width], showbackground=False),
@@ -904,7 +835,7 @@ class EnhancedVisualizationEngine:
 
     @staticmethod
     def create_equipment_layout_2d(room_specs, recommendations):
-        """Create an enhanced 2D floor plan with more details"""
+        # This static method is preserved
         fig = go.Figure()
         
         length, width = room_specs['length'], room_specs['width']
@@ -1008,8 +939,8 @@ def main():
         col1, col2 = st.columns(2)
         length = col1.slider("Length (m)", 2.0, 20.0, float(template_info['typical_size'][0]), 0.5)
         width = col2.slider("Width (m)", 2.0, 20.0, float(template_info['typical_size'][1]), 0.5)
-        ceiling_height = st.slider("Ceiling Height (m)", 2.4, 6.0, 3.0, 0.1)
-        capacity = st.slider("Capacity", 2, 100, template_info['capacity_range'][1])
+        ceiling_height = col1.slider("Ceiling Height (m)", 2.4, 6.0, 3.0, 0.1)
+        capacity = col2.slider("Capacity", 2, 100, template_info['capacity_range'][1])
         
         st.markdown("---")
         st.subheader("🌟 Environment & Atmosphere")
@@ -1110,7 +1041,7 @@ def main():
         room_specs = st.session_state.room_specs
         recommender = MaximizedAVRecommender()
         
-        total_cost = sum(recommendations[cat]['price'] for cat in ['display', 'camera', 'audio', 'control', 'lighting'])
+        total_cost = sum(rec['price'] for rec in recommendations.values() if isinstance(rec, dict) and 'price' in rec)
         
         col1, col2, col3, col4 = st.columns(4)
         with col1: st.markdown(f'<div class="metric-card"><h3>${total_cost:,.0f}</h3><p>Total Investment</p></div>', unsafe_allow_html=True)
