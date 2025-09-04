@@ -226,15 +226,12 @@ class AdvancedAVRecommender:
 
         if capacity <= 8:
             products = ['Logitech Rally Plus']
-            # FIX: Wrapped the feature description in a list
             features = ["Auto-framing for small groups"]
         elif capacity <= 16:
             products = ['Poly Studio X70']
-            # FIX: Wrapped the feature description in a list
             features = ["Dual cameras with AI director"]
         else:
             products = ['Cisco Room Kit Pro']
-            # FIX: Wrapped the feature description in a list
             features = ["Triple camera system with speaker tracking"]
 
         selected = products[0]
@@ -365,248 +362,162 @@ class AdvancedAVRecommender:
 
 
 # --- Helper for 3D Visualization ---
-def add_premium_chair(fig, x, y, rotation=0):
-    """
-    Placeholder function to add a chair model to the 3D plot.
-    A simple marker is used here. For a realistic view, replace
-    this with a 3D model (e.g., using go.Mesh3d).
-    """
-    fig.add_trace(go.Scatter3d(
-        x=[x], y=[y], z=[0.4],  # Position at approximate seat height
-        mode='markers',
-        marker=dict(
-            symbol='square',
-            size=8,
-            color='saddlebrown'
-        ),
-        name='Chair',
-        showlegend=False
+def add_premium_chair(fig, x, y, z_offset=0, rotation_angle_deg=0):
+    """Adds a more detailed chair model to the 3D plot."""
+    
+    # Chair components dimensions
+    seat_size = 0.5
+    back_height = 0.6
+    leg_height = 0.4
+    
+    # Rotation matrix
+    angle_rad = np.deg2rad(rotation_angle_deg)
+    rotation_matrix = np.array([
+        [np.cos(angle_rad), -np.sin(angle_rad)],
+        [np.sin(angle_rad), np.cos(angle_rad)]
+    ])
+
+    # Base coordinates for the chair centered at (0,0)
+    # Seat (a cube)
+    seat_x = [-seat_size/2, seat_size/2, seat_size/2, -seat_size/2, -seat_size/2, seat_size/2, seat_size/2, -seat_size/2]
+    seat_y = [-seat_size/2, -seat_size/2, seat_size/2, seat_size/2, -seat_size/2, -seat_size/2, seat_size/2, seat_size/2]
+    seat_z = [leg_height, leg_height, leg_height, leg_height, leg_height+0.1, leg_height+0.1, leg_height+0.1, leg_height+0.1]
+    
+    # Backrest (a thin cuboid)
+    back_x = [-seat_size/2, seat_size/2, seat_size/2, -seat_size/2, -seat_size/2, seat_size/2, seat_size/2, -seat_size/2]
+    back_y = [seat_size/2-0.05, seat_size/2-0.05, seat_size/2+0.05, seat_size/2+0.05, seat_size/2-0.05, seat_size/2-0.05, seat_size/2+0.05, seat_size/2+0.05]
+    back_z = [leg_height+0.1, leg_height+0.1, leg_height+0.1, leg_height+0.1, leg_height+back_height, leg_height+back_height, leg_height+back_height, leg_height+back_height]
+
+    # Rotate and translate points
+    rotated_seat = np.dot(np.vstack([seat_x, seat_y]), rotation_matrix.T)
+    rotated_back = np.dot(np.vstack([back_x, back_y]), rotation_matrix.T)
+    
+    fig.add_trace(go.Mesh3d(
+        x=rotated_seat[0,:] + x, y=rotated_seat[1,:] + y, z=np.array(seat_z) + z_offset,
+        i=[7, 0, 0, 0, 4, 4, 6, 6, 4, 0, 3, 2],
+        j=[3, 4, 1, 2, 5, 6, 5, 2, 0, 1, 6, 3],
+        k=[0, 7, 2, 3, 6, 7, 1, 1, 5, 5, 7, 6],
+        color='saddlebrown', name='Chair Seat', showlegend=False
+    ))
+    
+    fig.add_trace(go.Mesh3d(
+        x=rotated_back[0,:] + x, y=rotated_back[1,:] + y, z=np.array(back_z) + z_offset,
+        i=[7, 0, 0, 0, 4, 4, 6, 6, 4, 0, 3, 2],
+        j=[3, 4, 1, 2, 5, 6, 5, 2, 0, 1, 6, 3],
+        k=[0, 7, 2, 3, 6, 7, 1, 1, 5, 5, 7, 6],
+        color='saddlebrown', name='Chair Back', showlegend=False
     ))
 
 
 # --- Premium 3D Visualization ---
 def create_photorealistic_3d_room(specs, recommendations):
-    """Create photorealistic 3D room with actual furniture models"""
+    """Create a more realistic 3D room visualization."""
     fig = go.Figure()
 
     room_w, room_l, room_h = specs['width'], specs['length'], specs['ceiling_height']
 
-    # Enhanced room shell with textures
-    # Floor with wood texture pattern
-    floor_x, floor_y = np.meshgrid(np.linspace(0, room_w, 20), np.linspace(0, room_l, 20))
+    # --- Walls and Floor with Textures and Lighting ---
+    wall_color = 'rgb(235, 235, 230)'
+    # Floor (using a subtle pattern)
+    floor_x, floor_y = np.meshgrid(np.linspace(0, room_w, 2), np.linspace(0, room_l, 2))
     floor_z = np.zeros_like(floor_x)
-    floor_pattern = np.sin(floor_x * 2) * np.sin(floor_y * 2) * 0.01  # Wood grain effect
+    fig.add_trace(go.Surface(x=floor_x, y=floor_y, z=floor_z, colorscale='ylorbr', surfacecolor=np.sin(floor_x)*np.cos(floor_y), cmin=-1, cmax=1, showscale=False, name='Floor'))
 
-    fig.add_trace(go.Surface(
-        x=floor_x, y=floor_y, z=floor_z + floor_pattern,
-        colorscale='ylorbr', showscale=False, name='Wood Floor',
-        lighting=dict(ambient=0.6, diffuse=0.8, specular=0.2, roughness=0.8)
-    ))
+    # Walls
+    wall_x, wall_z = np.meshgrid(np.linspace(0, room_w, 2), np.linspace(0, room_h, 2))
+    fig.add_trace(go.Surface(x=wall_x, y=np.zeros_like(wall_x), z=wall_z, colorscale=[[0, wall_color], [1, wall_color]], showscale=False)) # Front
+    fig.add_trace(go.Surface(x=wall_x, y=np.full_like(wall_x, room_l), z=wall_z, colorscale=[[0, wall_color], [1, wall_color]], showscale=False)) # Back
 
-    # Walls with gradient lighting
-    wall_color = 'rgb(245, 245, 245)'
-
-    # Back wall with display
-    wall_x = np.linspace(0, room_w, 10)
-    wall_z = np.linspace(0, room_h, 10)
-    wall_xx, wall_zz = np.meshgrid(wall_x, wall_z)
-    wall_yy = np.ones_like(wall_xx) * room_l
-
-    fig.add_trace(go.Surface(
-        x=wall_xx, y=wall_yy, z=wall_zz,
-        colorscale=[[0, wall_color], [1, wall_color]],
-        showscale=False, name='Back Wall',
-        lighting=dict(ambient=0.7, diffuse=0.8)
-    ))
-
-    # Add premium conference table (realistic shape)
-    table_l = room_l * 0.5
-    table_w = room_w * 0.35
+    wall_y, wall_z = np.meshgrid(np.linspace(0, room_l, 2), np.linspace(0, room_h, 2))
+    fig.add_trace(go.Surface(x=np.zeros_like(wall_y), y=wall_y, z=wall_z, colorscale=[[0, wall_color], [1, wall_color]], showscale=False)) # Left
+    fig.add_trace(go.Surface(x=np.full_like(wall_y, room_w), y=wall_y, z=wall_z, colorscale=[[0, wall_color], [1, wall_color]], showscale=False)) # Right
+    
+    # --- Realistic Conference Table ---
+    table_l = max(2.0, room_l * 0.6)
+    table_w = max(1.2, table_l * 0.4)
     table_h = 0.75
-    table_x = room_w / 2
-    table_y = room_l * 0.4
+    table_x_center = room_w / 2
+    table_y_center = room_l / 2
 
-    # Table top with rounded corners
-    theta = np.linspace(0, 2 * np.pi, 50)
-    corner_radius = 0.3
+    # Tabletop (boat shape)
+    t = np.linspace(-table_l/2, table_l/2, 20)
+    w = table_w/2 * (1 - 0.2 * (2*t/table_l)**2) # Parabolic curve for boat shape
+    
+    table_x = np.concatenate([w+table_x_center, -w[::-1]+table_x_center, [w[0]+table_x_center]])
+    table_y = np.concatenate([t+table_y_center, t[::-1]+table_y_center, [t[0]+table_y_center]])
+    table_z = np.full_like(table_x, table_h)
 
-    # Create rounded rectangle for table
-    table_points_x = []
-    table_points_y = []
+    fig.add_trace(go.Scatter3d(x=table_x, y=table_y, z=table_z, mode='lines', line=dict(color='rgb(80,50,30)', width=10), showlegend=False)) # Table Edge
+    fig.add_trace(go.Mesh3d(x=table_x, y=table_y, z=table_z, color='rgb(139, 69, 19)', opacity=0.9, name='Table Surface')) # Table Surface
 
-    # Generate rounded rectangle path
-    for t in theta:
-        if t < np.pi / 2:
-            x = table_x - table_w / 2 + corner_radius - corner_radius * np.cos(t)
-            y = table_y - table_l / 2 + corner_radius - corner_radius * np.sin(t)
-        elif t < np.pi:
-            x = table_x + table_w / 2 - corner_radius + corner_radius * np.cos(np.pi - t)
-            y = table_y - table_l / 2 + corner_radius - corner_radius * np.sin(np.pi - t)
-        elif t < 3 * np.pi / 2:
-            x = table_x + table_w / 2 - corner_radius + corner_radius * np.cos(t - np.pi)
-            y = table_y + table_l / 2 - corner_radius + corner_radius * np.sin(t - np.pi)
-        else:
-            x = table_x - table_w / 2 + corner_radius - corner_radius * np.cos(2 * np.pi - t)
-            y = table_y + table_l / 2 - corner_radius + corner_radius * np.sin(2 * np.pi - t)
+    # Table Base (solid block)
+    base_l, base_w, base_h = table_l * 0.5, table_w * 0.4, table_h - 0.1
+    bx = [table_x_center-base_w/2, table_x_center+base_w/2, table_x_center+base_w/2, table_x_center-base_w/2]
+    by = [table_y_center-base_l/2, table_y_center-base_l/2, table_y_center+base_l/2, table_y_center+base_l/2]
+    bz = [0, 0, 0, 0]
+    fig.add_trace(go.Mesh3d(x=np.concatenate([bx,bx]), y=np.concatenate([by,by]), z=np.concatenate([bz, np.full_like(bz, base_h)]), 
+                           i=[7,0,0,0,4,4,6,6,4,0,3,2], j=[3,4,1,2,5,6,5,2,0,1,6,3], k=[0,7,2,3,6,7,1,1,5,5,7,6],
+                           color='rgb(50,50,50)'))
 
-        table_points_x.append(x)
-        table_points_y.append(y)
+    # --- Place Chairs ---
+    num_chairs = specs['capacity']
+    side_chairs = (num_chairs - 2) // 2 if num_chairs >= 2 else 0
+    
+    # Left side
+    for i in range(side_chairs):
+        y_pos = table_y_center - table_l/2 + (i + 1) * (table_l / (side_chairs + 1))
+        add_premium_chair(fig, table_x_center - table_w/2 - 0.6, y_pos, rotation_angle_deg=90)
+    
+    # Right side
+    for i in range(side_chairs):
+        y_pos = table_y_center - table_l/2 + (i + 1) * (table_l / (side_chairs + 1))
+        add_premium_chair(fig, table_x_center + table_w/2 + 0.6, y_pos, rotation_angle_deg=-90)
+        
+    # Head chairs
+    if num_chairs >= 1:
+        add_premium_chair(fig, table_x_center, table_y_center - table_l/2 - 0.8, rotation_angle_deg=180)
+    if num_chairs >= 2:
+        add_premium_chair(fig, table_x_center, table_y_center + table_l/2 + 0.8, rotation_angle_deg=0)
 
-    # Table surface using go.Mesh3d to create a solid shape
-    fig.add_trace(go.Mesh3d(
-        x=table_points_x,
-        y=table_points_y,
-        z=[table_h] * len(table_points_x),
-        # Use i, j, k to define the triangles that form the tabletop surface
-        i=list(range(len(table_points_x) - 2)),
-        j=list(range(1, len(table_points_x) - 1)),
-        k=list(range(2, len(table_points_x))),
-        color='rgb(139, 69, 19)',
-        opacity=0.8,
-        name='Conference Table'
-    ))
+    # --- Add Equipment ---
+    # Display
+    display_w = room_w * 0.6
+    display_h = display_w * 9/16
+    display_z = room_h/2
+    fig.add_trace(go.Mesh3d(x=[room_w*0.2, room_w*0.8, room_w*0.8, room_w*0.2], y=[room_l-0.05]*4, z=[display_z-display_h/2, display_z-display_h/2, display_z+display_h/2, display_z+display_h/2],
+                           i=[0,0], j=[1,2], k=[2,3], color='black', name='Display'))
+    fig.add_trace(go.Mesh3d(x=[room_w*0.22, room_w*0.78, room_w*0.78, room_w*0.22], y=[room_l-0.04]*4, z=[display_z-display_h/2+0.05, display_z-display_h/2+0.05, display_z+display_h/2-0.05, display_z+display_h/2-0.05],
+                           i=[0,0], j=[1,2], k=[2,3], color='deepskyblue', name='Screen'))
+    
+    # Camera
+    fig.add_trace(go.Scatter3d(x=[room_w/2], y=[room_l-0.2], z=[display_z + display_h/2 + 0.1], mode='markers', marker=dict(symbol='square', size=8, color='darkgray'), name='Camera'))
 
-    # Table legs (cylindrical)
-    leg_positions = [
-        (table_x - table_w / 3, table_y - table_l / 3),
-        (table_x + table_w / 3, table_y - table_l / 3),
-        (table_x - table_w / 3, table_y + table_l / 3),
-        (table_x + table_w / 3, table_y + table_l / 3)
-    ]
-
-    for leg_x, leg_y in leg_positions:
-        fig.add_trace(go.Scatter3d(
-            x=[leg_x, leg_x],
-            y=[leg_y, leg_y],
-            z=[0, table_h],
-            mode='lines',
-            line=dict(color='rgb(105, 105, 105)', width=15),
-            showlegend=False
-        ))
-
-    # Add realistic chairs
-    chairs_per_side = specs['capacity'] // 2
-    chair_spacing = table_l / (chairs_per_side + 1)
-
-    for i in range(chairs_per_side):
-        y_pos = table_y - table_l / 2 + (i + 1) * chair_spacing
-        # Left side chairs
-        add_premium_chair(fig, table_x - table_w / 2 - 0.6, y_pos, rotation=90)
-        # Right side chairs
-        add_premium_chair(fig, table_x + table_w / 2 + 0.6, y_pos, rotation=-90)
-
-    # Add head chairs
-    if specs['capacity'] % 2 == 1:
-        add_premium_chair(fig, table_x, table_y - table_l / 2 - 0.6, rotation=0)
-    if specs['capacity'] > 8:
-        add_premium_chair(fig, table_x, table_y + table_l / 2 + 0.6, rotation=180)
-
-    # Add premium display
-    display_w = room_w * 0.7
-    display_h = display_w * 0.5625
-    display_x = room_w / 2
-    display_y = room_l - 0.05
-    display_z = 1.5
-
-    # Display frame
-    fig.add_trace(go.Mesh3d(
-        x=[display_x - display_w / 2, display_x + display_w / 2, display_x + display_w / 2, display_x - display_w / 2],
-        y=[display_y, display_y, display_y, display_y],
-        z=[display_z, display_z, display_z + display_h, display_z + display_h],
-        i=[0, 0], j=[1, 2], k=[2, 3],
-        color='black', opacity=0.95, name='Display Frame'
-    ))
-
-    # Display screen (with slight glow effect)
-    screen_margin = 0.05
-    fig.add_trace(go.Mesh3d(
-        x=[display_x - display_w / 2 + screen_margin, display_x + display_w / 2 - screen_margin,
-           display_x + display_w / 2 - screen_margin, display_x - display_w / 2 + screen_margin],
-        y=[display_y + 0.01, display_y + 0.01, display_y + 0.01, display_y + 0.01],
-        z=[display_z + screen_margin, display_z + screen_margin,
-           display_z + display_h - screen_margin, display_z + display_h - screen_margin],
-        i=[0, 0], j=[1, 2], k=[2, 3],
-        color='rgb(50, 150, 250)', opacity=0.3, name='Display Screen'
-    ))
-
-    # Add PTZ camera (realistic model)
-    cam_x, cam_y, cam_z = room_w / 2, room_l - 0.3, room_h - 0.3
-
-    # Camera body
-    fig.add_trace(go.Scatter3d(
-        x=[cam_x], y=[cam_y], z=[cam_z],
-        mode='markers',
-        marker=dict(size=15, color='rgb(60, 60, 60)', symbol='square'),
-        name='PTZ Camera Body', showlegend=False
-    ))
-
-    # Camera lens
-    fig.add_trace(go.Scatter3d(
-        x=[cam_x], y=[cam_y - 0.1], z=[cam_z],
-        mode='markers',
-        marker=dict(size=8, color='rgb(30, 30, 30)', symbol='circle'),
-        name='Camera Lens', showlegend=False
-    ))
-
-    # Add ceiling microphones if needed
-    if specs['capacity'] > 8:
-        mic_positions = [
-            (room_w * 0.3, room_l * 0.4, room_h - 0.1),
-            (room_w * 0.7, room_l * 0.4, room_h - 0.1)
-        ]
-
-        for mic_x, mic_y, mic_z in mic_positions:
-            # Microphone array (hexagonal shape)
-            hex_points_x = []
-            hex_points_y = []
-            for angle in np.linspace(0, 2 * np.pi, 7):
-                hex_points_x.append(mic_x + 0.2 * np.cos(angle))
-                hex_points_y.append(mic_y + 0.2 * np.sin(angle))
-
-            fig.add_trace(go.Scatter3d(
-                x=hex_points_x, y=hex_points_y, z=[mic_z] * 7,
-                mode='lines',
-                line=dict(color='white', width=3),
-                showlegend=False
-            ))
-
-    # Add speakers
-    speaker_positions = [
-        (room_w * 0.2, room_l - 0.2, room_h - 0.5),
-        (room_w * 0.8, room_l - 0.2, room_h - 0.5)
-    ]
-
-    for spk_x, spk_y, spk_z in speaker_positions:
-        fig.add_trace(go.Scatter3d(
-            x=[spk_x], y=[spk_y], z=[spk_z],
-            mode='markers',
-            marker=dict(size=10, color='rgb(40, 40, 40)', symbol='square'),
-            name='Speaker', showlegend=False
-        ))
-
-    # Configure camera and lighting
-    camera_eye = dict(x=1.8, y=-1.8, z=1.5)
-    camera_center = dict(x=0, y=0, z=0.5)
-
+    # Ceiling Mics
+    if 'array' in recommendations['audio']['configuration']:
+        mic_positions = [(room_w*0.35, table_y_center), (room_w*0.65, table_y_center)]
+        for mx, my in mic_positions:
+             fig.add_trace(go.Scatter3d(x=[mx], y=[my], z=[room_h-0.1], mode='markers', marker=dict(symbol='square-open', size=12, color='white'), name='Ceiling Mic'))
+    
     fig.update_layout(
         title={
             'text': "Photorealistic 3D Room Configuration",
-            'x': 0.5,
-            'xanchor': 'center',
+            'y':0.95, 'x':0.5, 'xanchor': 'center', 'yanchor': 'top',
             'font': {'size': 24, 'color': '#1e3c72'}
         },
         scene=dict(
-            xaxis=dict(title="Width (m)", gridcolor='lightgray', showbackground=False),
-            yaxis=dict(title="Length (m)", gridcolor='lightgray', showbackground=False),
-            zaxis=dict(title="Height (m)", gridcolor='lightgray', showbackground=False),
-            camera=dict(eye=camera_eye, center=camera_center),
+            xaxis=dict(title="Width (m)", range=[0, room_w], showbackground=False),
+            yaxis=dict(title="Length (m)", range=[0, room_l], showbackground=False),
+            zaxis=dict(title="Height (m)", range=[0, room_h], showbackground=False),
+            camera=dict(
+                eye=dict(x=-1.5, y=-1.5, z=1.2)
+            ),
             aspectmode='manual',
-            aspectratio=dict(x=1, y=room_l / room_w, z=0.5),
+            aspectratio=dict(x=1, y=room_l/room_w, z=room_h/room_w),
             bgcolor='rgb(240, 240, 245)'
         ),
-        showlegend=False,
+        scene_lighting=dict(ambient=0.7, diffuse=0.8, specular=0.3),
         height=700,
-        margin=dict(l=0, r=0, t=50, b=0)
+        margin=dict(l=0, r=0, t=40, b=0)
     )
 
     return fig
@@ -860,7 +771,7 @@ def create_acoustic_analysis_chart(analysis):
 
     fig.add_trace(
         go.Scatterpolar(r=coverage, theta=angles, mode='lines',
-                        name="Microphone Pattern", fill='toself'),
+                         name="Microphone Pattern", fill='toself'),
         row=2, col=1
     )
 
@@ -997,7 +908,7 @@ def main():
         # Room characteristics
         st.markdown("### 🏗️ Room Characteristics")
         room_type = st.selectbox("Room Type",
-                                     ['Conference Room', 'Boardroom', 'Training Room', 'Auditorium', 'Huddle Room'])
+                                      ['Conference Room', 'Boardroom', 'Training Room', 'Auditorium', 'Huddle Room'])
 
         windows = st.slider("Window Area (%)", 0, 50, 20)
 
