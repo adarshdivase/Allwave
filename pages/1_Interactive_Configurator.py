@@ -241,6 +241,7 @@ def get_rotation_matrix(angle_deg):
     angle_rad = np.deg2rad(angle_deg)
     return np.array([[np.cos(angle_rad), -np.sin(angle_rad)], [np.sin(angle_rad), np.cos(angle_rad)]])
 
+
 def create_cuboid(center, size, rotation_y_deg=0):
     dx, dy, dz = size
     cx, cy, cz = center
@@ -250,6 +251,7 @@ def create_cuboid(center, size, rotation_y_deg=0):
     rotated_coords = rot_mat @ np.vstack([x, y])
     return go.Mesh3d(x=rotated_coords[0, :] + cx, y=rotated_coords[1, :] + cy, z=np.array([-dz, -dz, -dz, -dz, dz, dz, dz, dz]) / 2 + cz,
                      i=[7, 0, 0, 0, 4, 4, 6, 6, 4, 0, 3, 2], j=[3, 4, 1, 2, 5, 6, 5, 2, 0, 1, 6, 3], k=[0, 7, 2, 3, 6, 7, 1, 1, 5, 5, 7, 6])
+
 
 def add_detailed_chair(fig, position, rotation_y_deg=0):
     base_color, cushion_color = 'rgb(50, 50, 50)', 'rgb(80, 80, 80)'
@@ -267,7 +269,6 @@ def add_detailed_chair(fig, position, rotation_y_deg=0):
         rotated_coords = rot_mat @ original_coords
         trace.x = rotated_coords[0, :] + position[0]
         trace.y = rotated_coords[1, :] + position[1]
-        # --- THIS IS THE FIX ---
         trace.z = np.array(trace.z) + position[2]
         fig.add_trace(trace)
 
@@ -317,103 +318,108 @@ def create_photorealistic_3d_room(specs, recommendations):
     return fig
 
 
-# --- Main Application Interface ---
+# --- Main Application Interface (with Real-Time Updates) ---
 def main():
     col1, col2, _ = st.columns([1, 2, 1])
     with col2:
         st.markdown("<h1 style='text-align: center;'>🏢 AI Room Configurator Pro</h1>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center;'>Enterprise-Grade AV Solutions Powered by AI</p>", unsafe_allow_html=True)
 
-    if 'recommendations' not in st.session_state:
-        st.session_state.recommendations = None
-
+    # --- Sidebar for Real-Time Input ---
     with st.sidebar:
         st.markdown("### 📏 Room Specifications")
         length = st.slider("Room Length (m)", 3.0, 20.0, 8.0, 0.5)
         width = st.slider("Room Width (m)", 3.0, 15.0, 6.0, 0.5)
         ceiling_height = st.slider("Ceiling Height (m)", 2.5, 5.0, 3.0, 0.1)
         capacity = st.slider("Seating Capacity", 2, 50, 10, 2)
+        
         st.markdown("### 🏗️ Room Characteristics")
         windows = st.slider("Window Area (%)", 0, 50, 20)
+        
         st.markdown("### ⚙️ Special Requirements")
         special_req = st.multiselect("Additional Features", ['Wireless Presentation', 'Room Scheduling'])
+
+    # --- Main Content Area (Updates in Real-Time) ---
+    # The script re-runs from here every time a widget in the sidebar is changed.
+    
+    # 1. Collect current specs from sidebar widgets
+    current_specs = {
+        'length': length, 
+        'width': width, 
+        'ceiling_height': ceiling_height, 
+        'capacity': capacity, 
+        'windows': windows, 
+        'special_requirements': special_req
+    }
+    
+    # 2. Generate recommendations and all calculations based on current specs
+    recommender = AdvancedAVRecommender()
+    recs = recommender.get_ai_recommendations(current_specs)
+    
+    calculator = CostCalculator()
+    cost_breakdown = calculator.calculate_total_cost(recs, current_specs)
+    roi_analysis = calculator.calculate_roi(cost_breakdown, current_specs)
+    env_analysis = analyze_room_environment(current_specs)
+
+    # 3. Display the results in tabs
+    tabs = st.tabs(["🎯 AI Recommendations", "📐 3D Visualization", "💰 Cost Analysis", "🔊 Environmental Analysis", "📋 Project Summary"])
+    
+    with tabs[0]:
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            for category, rec in recs.items():
+                if isinstance(rec, dict) and 'price' in rec:
+                    st.markdown(f"""<div class="recommendation-card">
+                                    <h3>{category.title()} Recommendation: 🏆 {rec.get('primary', list(rec.keys())[0])}</h3>
+                                    <p><strong>Price:</strong> ${rec['price']:,}</p>
+                                    <p><strong>Specs:</strong> {rec.get('specs', 'N/A')}</p>
+                                    <p><strong>Rating:</strong> {'⭐' * int(rec.get('rating', 0))} ({rec.get('rating', 0)}/5.0)</p>
+                                    </div>""", unsafe_allow_html=True)
+                    if 'reviews' in rec:
+                        for review in rec['reviews']:
+                            st.markdown(f"""<div class="review-card"><strong>{review['user']}</strong> - {'⭐' * int(review['rating'])}<br>"{review['text']}"</div>""", unsafe_allow_html=True)
+        with col2:
+            st.metric("AI Confidence Score", f"{recs['confidence_score']}%", "High Confidence" if recs['confidence_score'] > 90 else "Good Match")
+            st.markdown(f"""<div class="metric-card"><h4>Quick Stats</h4>
+                            <p><strong>Total Equipment:</strong> ${cost_breakdown['equipment']:,}</p>
+                            <p><strong>Technology Grade:</strong> Enterprise</p></div>""", unsafe_allow_html=True)
+    
+    with tabs[1]:
+        st.markdown("### 🏗️ 3D Room Visualization")
+        with st.spinner("Rendering 3D model..."):
+            fig_3d = create_photorealistic_3d_room(current_specs, recs)
+            st.plotly_chart(fig_3d, use_container_width=True)
+
+    with tabs[2]:
+        st.markdown("### 💰 Comprehensive Cost Analysis")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Total Investment", f"${cost_breakdown['total']:,}")
+        col2.metric("Payback Period", f"{roi_analysis['payback_months']:.1f} months")
+        col3.metric("3-Year ROI", f"{roi_analysis['roi_3_years']:.0f}%")
+        st.plotly_chart(create_cost_breakdown_chart(cost_breakdown, roi_analysis), use_container_width=True)
         
-        if st.button("🚀 Generate AI Recommendations", type="primary"):
-            st.session_state.room_specs = {'length': length, 'width': width, 'ceiling_height': ceiling_height, 'capacity': capacity, 'windows': windows, 'special_requirements': special_req}
-            recommender = AdvancedAVRecommender()
-            st.session_state.recommendations = recommender.get_ai_recommendations(st.session_state.room_specs)
-
-    if st.session_state.recommendations:
-        recs = st.session_state.recommendations
-        specs = st.session_state.room_specs
-        calculator = CostCalculator()
-        cost_breakdown = calculator.calculate_total_cost(recs, specs)
-        roi_analysis = calculator.calculate_roi(cost_breakdown, specs)
-        env_analysis = analyze_room_environment(specs)
-
-        tabs = st.tabs(["🎯 AI Recommendations", "📐 3D Visualization", "💰 Cost Analysis", "🔊 Environmental Analysis", "📋 Project Summary"])
-        
-        with tabs[0]:
-            col1, col2 = st.columns([2, 1])
-            with col1:
-                for category, rec in recs.items():
-                    if isinstance(rec, dict) and 'price' in rec:
-                        st.markdown(f"""<div class="recommendation-card">
-                                        <h3>{category.title()} Recommendation: 🏆 {rec.get('primary', list(rec.keys())[0])}</h3>
-                                        <p><strong>Price:</strong> ${rec['price']:,}</p>
-                                        <p><strong>Specs:</strong> {rec.get('specs', 'N/A')}</p>
-                                        <p><strong>Rating:</strong> {'⭐' * int(rec.get('rating', 0))} ({rec.get('rating', 0)}/5.0)</p>
-                                        </div>""", unsafe_allow_html=True)
-                        if 'reviews' in rec:
-                            for review in rec['reviews']:
-                                st.markdown(f"""<div class="review-card"><strong>{review['user']}</strong> - {'⭐' * int(review['rating'])}<br>"{review['text']}"</div>""", unsafe_allow_html=True)
-
-            with col2:
-                st.metric("AI Confidence Score", f"{recs['confidence_score']}%", "High Confidence" if recs['confidence_score'] > 90 else "Good Match")
-                st.markdown(f"""<div class="metric-card"><h4>Quick Stats</h4>
-                                <p><strong>Total Equipment:</strong> ${cost_breakdown['equipment']:,}</p>
-                                <p><strong>Technology Grade:</strong> Enterprise</p></div>""", unsafe_allow_html=True)
-        
-        with tabs[1]:
-            st.markdown("### 🏗️ 3D Room Visualization")
-            with st.spinner("Rendering 3D model..."):
-                fig_3d = create_photorealistic_3d_room(specs, recs)
-                st.plotly_chart(fig_3d, use_container_width=True)
-
-        with tabs[2]:
-            st.markdown("### 💰 Comprehensive Cost Analysis")
-            col1, col2, col3 = st.columns(3)
-            col1.metric("Total Investment", f"${cost_breakdown['total']:,}")
-            col2.metric("Payback Period", f"{roi_analysis['payback_months']:.1f} months")
-            col3.metric("3-Year ROI", f"{roi_analysis['roi_3_years']:.0f}%")
-            st.plotly_chart(create_cost_breakdown_chart(cost_breakdown, roi_analysis), use_container_width=True)
-            
-        with tabs[3]:
-            st.markdown("### 🔊 Environmental & Performance Analysis")
-            col1, col2 = st.columns(2)
-            with col1:
-                st.info(f"**Lighting Challenge:** {env_analysis['lighting']['challenge']}")
-                st.markdown("**Recommendations:**")
-                for rec_item in env_analysis['lighting']['recs']: st.write(f"• {rec_item}")
-            with col2:
-                st.info(f"**Estimated RT60 (Reverb):** {env_analysis['acoustics']['rt60']}")
-                st.markdown("**Recommendations:**")
-                for rec_item in env_analysis['acoustics']['recs']: st.write(f"• {rec_item}")
-        
-        with tabs[4]:
-            st.markdown("### 📋 Executive Project Summary")
-            st.success("This AI-generated solution is optimized for your room's dimensions and requirements, providing a reliable, enterprise-grade AV experience.")
-            st.markdown(f"""#### 📊 Project Metrics
-                        - **Total Investment:** ${cost_breakdown['total']:,}
-                        - **Expected ROI (3-Years):** {roi_analysis['roi_3_years']:.0f}%
-                        - **Payback Period:** {roi_analysis['payback_months']:.1f} months""")
-            st.markdown("#### 🗓️ Implementation Timeline")
-            timeline_df = pd.DataFrame({'Phase': ['Design', 'Procurement', 'Installation', 'Training'], 'Duration': ['2 weeks', '3-4 weeks', '1 week', '1 week']})
-            st.dataframe(timeline_df, use_container_width=True)
-
-    else:
-        st.info("Get started by configuring your room specifications in the sidebar and clicking 'Generate AI Recommendations'.")
-
+    with tabs[3]:
+        st.markdown("### 🔊 Environmental & Performance Analysis")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.info(f"**Lighting Challenge:** {env_analysis['lighting']['challenge']}")
+            st.markdown("**Recommendations:**")
+            for rec_item in env_analysis['lighting']['recs']: st.write(f"• {rec_item}")
+        with col2:
+            st.info(f"**Estimated RT60 (Reverb):** {env_analysis['acoustics']['rt60']}")
+            st.markdown("**Recommendations:**")
+            for rec_item in env_analysis['acoustics']['recs']: st.write(f"• {rec_item}")
+    
+    with tabs[4]:
+        st.markdown("### 📋 Executive Project Summary")
+        st.success("This AI-generated solution is optimized for your room's dimensions and requirements, providing a reliable, enterprise-grade AV experience.")
+        st.markdown(f"""#### 📊 Project Metrics
+                    - **Total Investment:** ${cost_breakdown['total']:,}
+                    - **Expected ROI (3-Years):** {roi_analysis['roi_3_years']:.0f}%
+                    - **Payback Period:** {roi_analysis['payback_months']:.1f} months""")
+        st.markdown("#### 🗓️ Implementation Timeline")
+        timeline_df = pd.DataFrame({'Phase': ['Design', 'Procurement', 'Installation', 'Training'], 'Duration': ['2 weeks', '3-4 weeks', '1 week', '1 week']})
+        st.dataframe(timeline_df, use_container_width=True)
 
 if __name__ == "__main__":
     main()
