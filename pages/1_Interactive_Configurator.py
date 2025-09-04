@@ -60,7 +60,7 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] {
         background: rgba(255,255,255,0.08);
         border-radius: 10px;
-        color: #fff !important;
+        color: #fff !important; /* Changed tab text color */
         font-weight: 600;
         padding: 12px 22px;
         transition: all 0.2s ease;
@@ -70,11 +70,11 @@ st.markdown("""
     .stTabs [data-baseweb="tab"]:hover {
         background: rgba(255,255,255,0.18);
         transform: translateY(-2px);
-        color: #fff !important;
+        color: #fff !important; /* Changed tab text color */
     }
     .stTabs [aria-selected="true"] {
         background: var(--primary-color) !important;
-        color: #fff !important;
+        color: #fff !important; /* Changed tab text color */
         box-shadow: 0 4px 18px rgba(37,99,235,0.18);
     }
     .premium-card {
@@ -613,7 +613,9 @@ class EnhancedVisualizationEngine:
             'accent': '#4A90E2',      # Brand blue
             'wood': '#8B5E3C',      # Rich wood tone
             'screen': '#1A1A1A',      # Deep black for display
-            'metal': '#B8B8B8'       # Metallic finish
+            'metal': '#B8B8B8',      # Metallic finish
+            'ambient_light': 'rgb(255, 255, 0)', # Changed to yellow for visibility
+            'led_lighting': 'rgb(0, 255, 255)'   # Changed to cyan for visibility
         }
 
         # Add floor with modern finish
@@ -676,7 +678,7 @@ class EnhancedVisualizationEngine:
             name='Display'
         ))
 
-        # Add LED backlight effect
+        # Add LED backlight effect (Ambient Light)
         backlight_points = []
         for i in np.linspace(-screen_width/2, screen_width/2, 20):
             backlight_points.append([0.12, screen_y + i, screen_z])
@@ -687,8 +689,8 @@ class EnhancedVisualizationEngine:
             mode='markers',
             marker=dict(
                 size=3,
-                color='rgb(100, 149, 237)',
-                opacity=0.6
+                color=colors['ambient_light'], # Changed color
+                opacity=0.8
             ),
             name='Ambient Light'
         ))
@@ -744,7 +746,7 @@ class EnhancedVisualizationEngine:
                     lighting=dict(ambient=0.6, diffuse=0.5, fresnel=0.2, specular=0.1)
                 ))
 
-        # Add modern lighting system
+        # Add modern lighting system (LED Lighting)
         light_positions = []
         for i in range(2):
             for j in range(3):
@@ -762,9 +764,9 @@ class EnhancedVisualizationEngine:
             mode='markers',
             marker=dict(
                 size=8,
-                color='rgb(255, 255, 200)',
+                color=colors['led_lighting'], # Changed color
                 symbol='circle',
-                line=dict(color='rgb(255, 255, 150)', width=2),
+                line=dict(color='rgb(0, 200, 200)', width=2), # Adjusted line color for contrast
                 opacity=0.8
             ),
             name='LED Lighting'
@@ -796,18 +798,19 @@ class EnhancedVisualizationEngine:
                 xaxis_title="Length (m)",
                 yaxis_title="Width (m)",
                 zaxis_title="Height (m)",
-                xaxis=dict(range=[0, length], showbackground=False),
-                yaxis=dict(range=[0, width], showbackground=False),
-                zaxis=dict(range=[0, height], showbackground=False)
+                xaxis=dict(range=[0, length], showbackground=False, backgroundcolor="rgba(0,0,0,0)", gridcolor="rgba(200,200,200,0.2)"), # Grid color
+                yaxis=dict(range=[0, width], showbackground=False, backgroundcolor="rgba(0,0,0,0)", gridcolor="rgba(200,200,200,0.2)"), # Grid color
+                zaxis=dict(range=[0, height], showbackground=False, backgroundcolor="rgba(0,0,0,0)", gridcolor="rgba(200,200,200,0.2)")  # Grid color
             ),
-            title="Interactive Conference Room Design",
+            title=dict(text="Interactive Conference Room Design", font=dict(color='black')), # Changed title color
             showlegend=True,
             legend=dict(
                 yanchor="top",
                 y=0.99,
                 xanchor="left",
                 x=0.01,
-                bgcolor='rgba(255, 255, 255, 0.9)'
+                bgcolor='rgba(255, 255, 255, 0.9)',
+                font=dict(color='black') # Changed legend text color
             ),
             margin=dict(l=0, r=0, t=30, b=0)
         )
@@ -825,7 +828,7 @@ class EnhancedVisualizationEngine:
             type="rect",
             x0=0, y0=0, x1=length, y1=width,
             line=dict(color="rgb(100, 100, 100)", width=3),
-            fillcolor="rgba(245, 245, 245, 0.3)"
+            fillcolor="black"  # Changed floor plan background to black
         )
         
         # Display wall
@@ -858,7 +861,8 @@ class EnhancedVisualizationEngine:
             showarrow=True,
             arrowcolor="red",
             bgcolor="white",
-            bordercolor="red"
+            bordercolor="red",
+            font=dict(color='black') # Changed text color to black for visibility
         )
         
         fig.add_annotation(
@@ -867,24 +871,29 @@ class EnhancedVisualizationEngine:
             showarrow=True,
             arrowcolor="gray",
             bgcolor="white",
-            bordercolor="gray"
+            bordercolor="gray",
+            font=dict(color='black') # Changed text color to black for visibility
         )
         
         fig.update_layout(
-            title="Equipment Layout - Floor Plan View",
+            title=dict(text="Equipment Layout - Floor Plan View", font=dict(color='white')), # Changed title color
             xaxis=dict(
                 title=f"Length ({length:.1f}m)", 
                 scaleanchor="y", 
                 scaleratio=1,
-                range=[0, length + 0.5]
+                range=[0, length + 0.5],
+                tickfont=dict(color='white'),  # Changed tick label color
+                title_font=dict(color='white') # Changed axis title color
             ),
             yaxis=dict(
                 title=f"Width ({width:.1f}m)",
-                range=[0, width + 0.5]
+                range=[0, width + 0.5],
+                tickfont=dict(color='white'),  # Changed tick label color
+                title_font=dict(color='white') # Changed axis title color
             ),
             height=400,
-            plot_bgcolor='white',
-            paper_bgcolor='white'
+            plot_bgcolor='black', # Changed plot background to black
+            paper_bgcolor='black' # Changed paper background to black
         )
         
         return fig
