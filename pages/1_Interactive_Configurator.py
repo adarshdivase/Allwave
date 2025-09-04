@@ -388,7 +388,6 @@ def add_premium_chair(fig, x, y, z_offset=0, rotation_angle_deg=0):
     back_y = [seat_size/2-0.05, seat_size/2-0.05, seat_size/2+0.05, seat_size/2+0.05, seat_size/2-0.05, seat_size/2-0.05, seat_size/2+0.05, seat_size/2+0.05]
     back_z = [leg_height+0.1, leg_height+0.1, leg_height+0.1, leg_height+0.1, leg_height+back_height, leg_height+back_height, leg_height+back_height, leg_height+back_height]
 
-    # --- CORRECTED CODE ---
     # Correctly rotate the points by putting the rotation_matrix first
     rotated_seat_coords = np.dot(rotation_matrix, np.vstack([seat_x, seat_y]))
     rotated_back_coords = np.dot(rotation_matrix, np.vstack([back_x, back_y]))
@@ -516,7 +515,6 @@ def create_photorealistic_3d_room(specs, recommendations):
             aspectratio=dict(x=1, y=room_l/room_w, z=room_h/room_w),
             bgcolor='rgb(240, 240, 245)'
         ),
-        scene_lighting=dict(ambient=0.7, diffuse=0.8, specular=0.3),
         height=700,
         margin=dict(l=0, r=0, t=40, b=0)
     )
