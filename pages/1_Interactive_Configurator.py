@@ -1118,17 +1118,55 @@ class EnhancedVisualizationEngine:
 
     def _add_seating(self, fig, specs, colors, chair_style):
         length, width, capacity = specs['length'], specs['width'], specs['capacity']
-        table_length, table_width = min(length*0.6,5), min(width*0.4,2)
-        table_x_center, table_y_center = length*0.55, width*0.5
-        chairs_per_side = min(6, capacity//2)
+        table_length, table_width = min(length * 0.6, 5), min(width * 0.4, 2)
+        table_x_center, table_y_center = length * 0.55, width * 0.5
+        chairs_per_side = min(8, (capacity + 1) // 2)
+        
+        if chairs_per_side == 0:
+            return
+
+        chair_spacing = table_length / chairs_per_side
+
         for i in range(chairs_per_side):
-            x_pos = table_x_center - table_length/2 + ((i+0.5)*table_length/chairs_per_side)
-            for offset in [-1,1]:
-                y_pos = table_y_center+offset*(table_width/2+0.5)
-                if chair_style in ['modern','casual']:
-                    fig.add_trace(go.Scatter3d(x=[x_pos],y=[y_pos],z=[0.4],mode='markers',marker=dict(size=10,symbol='square',color=colors['accent']),name='Chair'))
-                elif chair_style in ['executive','training']:
-                    fig.add_trace(go.Mesh3d(x=[x_pos-0.2,x_pos+0.2,x_pos+0.2,x_pos-0.2],y=[y_pos,y_pos,y_pos,y_pos],z=[0.4,0.4,1.0,1.0],i=[0,0],j=[1,2],k=[2,3],color=colors['metal'],name='Chair'))
+            x_pos = (table_x_center - table_length / 2) + (i + 0.5) * chair_spacing
+            
+            for side_multiplier in [-1, 1]:
+                current_chair_index = i * 2 + (1 if side_multiplier == 1 else 0)
+                if current_chair_index >= capacity:
+                    continue
+
+                y_pos = table_y_center + side_multiplier * (table_width / 2 + 0.5)
+                show_legend = (current_chair_index == 0)
+
+                if chair_style == 'modern':
+                    fig.add_trace(go.Scatter3d(x=[x_pos], y=[y_pos], z=[0.4], mode='markers',
+                                              marker=dict(size=10, symbol='square', color=colors['accent']),
+                                              name='Modern Chair', showlegend=show_legend))
+                
+                elif chair_style == 'executive':
+                    seat_x = [x_pos - 0.25, x_pos + 0.25, x_pos + 0.25, x_pos - 0.25]
+                    seat_y = [y_pos - 0.2, y_pos - 0.2, y_pos + 0.2, y_pos + 0.2]
+                    fig.add_trace(go.Mesh3d(x=seat_x, y=seat_y, z=[0.45] * 4,
+                                          i=[0, 0], j=[1, 2], k=[2, 3],
+                                          color=colors['metal'], name='Executive Chair',
+                                          showlegend=show_legend))
+                    back_y_pos = y_pos + side_multiplier * 0.2
+                    fig.add_trace(go.Mesh3d(x=seat_x, y=[back_y_pos] * 4, z=[0.45, 0.45, 1.1, 1.1],
+                                          i=[0, 0], j=[1, 2], k=[2, 3],
+                                          color=colors['metal'], showlegend=False))
+
+                elif chair_style == 'training':
+                    fig.add_trace(go.Mesh3d(x=[x_pos - 0.2, x_pos + 0.2, x_pos + 0.2, x_pos - 0.2],
+                                          y=[y_pos, y_pos, y_pos, y_pos],
+                                          z=[0.4, 0.4, 1.0, 1.0],
+                                          i=[0, 0], j=[1, 2], k=[2, 3],
+                                          color=colors['accent'], name='Training Chair',
+                                          showlegend=show_legend))
+
+                elif chair_style == 'casual':
+                    fig.add_trace(go.Scatter3d(x=[x_pos], y=[y_pos], z=[0.4], mode='markers',
+                                              marker=dict(size=10, symbol='circle', color=colors['accent']),
+                                              name='Casual Chair', showlegend=show_legend))
 
     def _add_display_system(self, fig, specs, colors, recommendations):
         width, height = specs['width'], specs['ceiling_height']
