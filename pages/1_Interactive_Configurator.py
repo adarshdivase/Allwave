@@ -6,7 +6,7 @@ from typing import Dict, List
 
 st.set_page_config(page_title="AI Room Configurator Pro Max", page_icon="🏢", layout="wide")
 
-# --- NEW High-Contrast & User-Friendly CSS ---
+# --- CSS Updated for High Visibility ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -16,12 +16,14 @@ st.markdown("""
         --success-color: #28A745;      /* Clear success green */
         --background-color: #F8F9FA;  /* Very light grey for a clean canvas */
         --dark-background: #212529;   /* Deep charcoal for high contrast */
-        --text-color: #343A40;        /* Darker text for readability */
-        --card-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Softer, more modern shadow */
+        --text-color: #212529;        /* Darkest text for headings */
+        --body-text-color: #495057;   /* Softer dark grey for body text */
+        --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
         --border-radius-lg: 16px;
         --border-radius-md: 10px;
     }
 
+    /* --- General App Styling --- */
     .stApp {
         font-family: 'Inter', sans-serif;
         background-color: var(--background-color);
@@ -36,6 +38,17 @@ st.markdown("""
         box-shadow: var(--card-shadow);
     }
     
+    /* --- Visibility Fix for Main Content --- */
+    .main h1, .main h2, .main h3, .main h4, .main h5, .main h6 {
+        color: var(--text-color) !important;
+        font-weight: 600;
+    }
+
+    .main p, .main li, .main div {
+        color: var(--body-text-color) !important;
+    }
+    
+    /* --- Component Styling --- */
     .stTabs [data-baseweb="tab-list"] {
         gap: 12px;
         background-color: var(--dark-background);
@@ -76,7 +89,6 @@ st.markdown("""
         border: 1px solid #dee2e6;
         padding: 20px;
         border-radius: var(--border-radius-md);
-        color: var(--text-color) !important;
         text-align: center;
         margin: 10px 0;
     }
@@ -102,15 +114,19 @@ st.markdown("""
         margin: 10px 0;
         border-left: 5px solid var(--primary-color);
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        color: var(--text-color);
     }
     
     .alert-success {
         background-color: var(--success-color);
-        color: white;
+        color: white !important;
         padding: 15px;
         border-radius: var(--border-radius-md);
         margin: 10px 0;
+    }
+    
+    /* Ensure text inside alert-success is white */
+    .alert-success h5, .alert-success p {
+        color: white !important;
     }
     
     .stButton > button {
@@ -127,7 +143,7 @@ st.markdown("""
     .stButton > button:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
-        background-color: #0069d9; /* Darker blue on hover */
+        background-color: #0069d9;
     }
     
     .css-1d391kg {
