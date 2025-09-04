@@ -108,7 +108,6 @@ class ProductDatabase:
             }
         }
 
-
 # --- Advanced AI Recommendation Engine ---
 class AdvancedAVRecommender:
     def get_ai_recommendations(self, room_specs: Dict) -> Dict:
@@ -125,51 +124,57 @@ class AdvancedAVRecommender:
 
     def _recommend_display(self, specs, db):
         room_area = specs['length'] * specs['width']
+        rec = {}
         if room_area < 25:
-            product_name = 'Sharp/NEC 100" 4K Display'
+            rec = db.products['displays']['Sharp/NEC 100" 4K Display']
         elif room_area < 60:
-            product_name = 'LG MAGNIT 136"'
+            rec = db.products['displays']['LG MAGNIT 136"']
         else:
-            product_name = 'Samsung "The Wall" 146"'
-        return db.products['displays'][product_name]
+            rec = db.products['displays']['Samsung "The Wall" 146"']
+        rec['primary'] = list(db.products['displays'].keys())[list(db.products['displays'].values()).index(rec)]
+        return rec
 
     def _recommend_camera(self, specs, db):
+        rec = {}
         if specs['capacity'] <= 8:
-            product_name = 'Logitech Rally Bar'
+            rec = db.products['cameras']['Logitech Rally Bar']
         elif specs['capacity'] <= 16:
-            product_name = 'Poly Studio E70'
+            rec = db.products['cameras']['Poly Studio E70']
         else:
-            product_name = 'Cisco Room Kit EQ'
-        return db.products['cameras'][product_name]
+            rec = db.products['cameras']['Cisco Room Kit EQ']
+        rec['primary'] = list(db.products['cameras'].keys())[list(db.products['cameras'].values()).index(rec)]
+        return rec
 
     def _recommend_audio(self, specs, db):
         room_volume = specs['length'] * specs['width'] * specs['ceiling_height']
+        rec = {}
         if room_volume < 75:
-            product_name = 'QSC Core Nano'
-            config = "In-Ceiling Speakers + Table Mics"
+            rec = db.products['audio']['QSC Core Nano']
+            rec['configuration'] = "In-Ceiling Speakers + Table Mics"
         elif room_volume < 150:
-            product_name = 'Biamp TesiraFORTE X 400'
-            config = "Distributed Audio + Beamforming Mics"
+            rec = db.products['audio']['Biamp TesiraFORTE X 400']
+            rec['configuration'] = "Distributed Audio + Beamforming Mics"
         else:
-            product_name = 'Shure MXA920 Ceiling Array'
-            config = "Steerable Ceiling Microphone Array"
-        
-        rec = db.products['audio'][product_name].copy()
-        rec['configuration'] = config
+            rec = db.products['audio']['Shure MXA920 Ceiling Array']
+            rec['configuration'] = "Steerable Ceiling Microphone Array"
+        rec['primary'] = list(db.products['audio'].keys())[list(db.products['audio'].values()).index(rec)]
         return rec
 
     def _recommend_control(self, specs):
-        if len(specs.get('special_requirements', [])) < 2 and specs['capacity'] <= 12:
-            return {'primary': 'Crestron Flex UC', 'type': 'Tabletop Touchpanel', 'price': 3999, 'rating': 4.6}
+        complexity = len(specs.get('special_requirements', [])) + (1 if specs['capacity'] > 16 else 0)
+        if complexity < 2:
+            return {'primary': 'Crestron Flex UC', 'type': 'Tabletop Touchpanel', 'price': 3999, 'rating': 4.6, 'specs': 'One-touch join, room scheduling, preset scenes'}
         else:
-            return {'primary': 'Crestron NVX System', 'type': 'Enterprise Control Platform', 'price': 15999, 'rating': 4.9}
+            return {'primary': 'Crestron NVX System', 'type': 'Enterprise Control Platform', 'price': 15999, 'rating': 4.9, 'specs': 'Full automation, Network AV, API integration, Analytics'}
 
     def _recommend_accessories(self, specs):
         accessories = []
         if 'Wireless Presentation' in specs.get('special_requirements', []):
-            accessories.append({'item': 'Wireless Presentation', 'model': 'Barco ClickShare CX-50', 'price': 1999})
+            accessories.append({'item': 'Wireless Presentation System', 'model': 'Barco ClickShare CX-50', 'price': 1999})
         if 'Room Scheduling' in specs.get('special_requirements', []):
             accessories.append({'item': 'Room Scheduling Panel', 'model': 'Crestron TSS-770', 'price': 1500})
+        if 'Digital Signage' in specs.get('special_requirements', []):
+            accessories.append({'item': 'Digital Signage Player', 'model': 'BrightSign HD224', 'price': 450})
         accessories.append({'item': 'Cable Management', 'model': 'FSR Floor/Table Boxes', 'price': 999})
         return accessories
 
@@ -180,7 +185,6 @@ class AdvancedAVRecommender:
         if 2.0 <= area_per_person <= 4.0: score += 10
         return min(100, score)
 
-
 # --- Cost, ROI, and Environmental Analysis ---
 class CostCalculator:
     def calculate_total_cost(self, recommendations, specs):
@@ -188,13 +192,13 @@ class CostCalculator:
         equipment_cost += sum(item['price'] for item in recommendations.get('accessories', []))
         
         complexity = len(specs.get('special_requirements', [])) + (1 if specs['capacity'] > 16 else 0)
-        installation_cost = (8 + complexity * 4) * (300 if equipment_cost > 50000 else 200)
-        infrastructure_cost = int(5000 * max(1.0, (specs['length'] * specs['width']) / 50))
-        training_cost = 2000 if specs['capacity'] > 12 else 1000
-        support_cost = equipment_cost * 0.1
+        installation_cost = (8 + complexity * 5) * (300 if equipment_cost > 50000 else 225) # Adjusted rates
+        infrastructure_cost = int(5000 * max(1.0, (specs['length'] * specs['width']) / 40)) # Adjusted scale
+        training_cost = 2500 if specs['capacity'] > 12 else 1200
+        support_cost = equipment_cost * 0.12 # Adjusted rate
         
         total = equipment_cost + installation_cost + infrastructure_cost + training_cost + support_cost
-        return {'equipment': equipment_cost, 'installation': installation_cost, 'infrastructure': infrastructure_cost, 'training': training_cost, 'support_year1': support_cost, 'total': total}
+        return {'Equipment': equipment_cost, 'Installation': installation_cost, 'Infrastructure': infrastructure_cost, 'Training': training_cost, 'Support (Year 1)': support_cost, 'total': total}
 
     def calculate_roi(self, cost_breakdown, specs):
         total_investment = cost_breakdown['total']
@@ -203,23 +207,25 @@ class CostCalculator:
         roi_3_years = ((annual_savings * 3 - total_investment) / total_investment * 100) if total_investment > 0 else float('inf')
         return {'annual_savings': annual_savings, 'payback_months': payback_months, 'roi_3_years': roi_3_years}
 
-
 def analyze_room_environment(specs):
+    # Lighting
     room_area = specs['length'] * specs['width']
     window_area = room_area * (specs.get('windows', 0) / 100)
-    if window_area > room_area * 0.2:
-        lighting = {'challenge': "High", 'recs': ["Motorized blinds", "High-brightness display (>700 nits)"]}
+    if window_area > room_area * 0.25:
+        lighting = {'challenge': "High", 'recs': ["Install motorized blinds with light sensors", "Use high-brightness display (>700 nits)"]}
     else:
-        lighting = {'challenge': "Low", 'recs': ["Standard LED lighting with scene control"]}
+        lighting = {'challenge': "Low", 'recs': ["Standard LED lighting with scene control is sufficient"]}
     
+    # Acoustics
     rt60 = (specs['length'] * specs['width'] * specs['ceiling_height']) / (2 * (room_area + specs['length'] * specs['ceiling_height'] + specs['width'] * specs['ceiling_height']) * 0.15)
     if rt60 > 0.8:
-        acoustics = {'rt60': f"{rt60:.2f}s", 'recs': ["Acoustic ceiling tiles", "Wall absorption panels"]}
+        acoustics = {'rt60': f"{rt60:.2f}s (High Reverb)", 'recs': ["Acoustic ceiling tiles (NRC > 0.85)", "Wall absorption panels on at least two adjacent walls"]}
+    elif rt60 > 0.5:
+        acoustics = {'rt60': f"{rt60:.2f}s (Moderate Reverb)", 'recs': ["Partial acoustic treatment", "Consider heavy curtains and carpeting"]}
     else:
-        acoustics = {'rt60': f"{rt60:.2f}s", 'recs': ["Minimal treatment needed"]}
+        acoustics = {'rt60': f"{rt60:.2f}s (Good)", 'recs': ["Minimal acoustic treatment needed"]}
         
     return {'lighting': lighting, 'acoustics': acoustics}
-
 
 # --- Advanced Charting Functions ---
 def create_cost_breakdown_chart(cost_data, roi_analysis):
@@ -232,39 +238,56 @@ def create_cost_breakdown_chart(cost_data, roi_analysis):
     payback = [roi_analysis['payback_months'] * 1.2, roi_analysis['payback_months'], roi_analysis['payback_months'] * 0.8]
     fig.add_trace(go.Bar(x=scenarios, y=payback, marker_color=['#FF6B6B', '#4ECDC4', '#45B7D1']), row=1, col=2)
     fig.update_yaxes(title_text="Months to Payback", row=1, col=2)
-    fig.update_layout(height=400, showlegend=False, title_text="Comprehensive Financial Analysis")
+    fig.update_layout(height=400, showlegend=True, title_text="Comprehensive Financial Analysis")
     return fig
 
+def create_acoustic_analysis_chart(analysis):
+    rt60_val = float(analysis['rt60'].split('s')[0])
+    fig = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = rt60_val,
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        title = {'text': "Estimated RT60 (Reverberation Time)"},
+        gauge = {
+            'axis': {'range': [0, 1.2], 'tickwidth': 1, 'tickcolor': "darkblue"},
+            'bar': {'color': "darkblue"},
+            'bgcolor': "white",
+            'borderwidth': 2,
+            'bordercolor': "gray",
+            'steps' : [
+                {'range': [0, 0.6], 'color': 'green'},
+                {'range': [0.6, 0.9], 'color': 'orange'},
+                {'range': [0.9, 1.2], 'color': 'red'}],
+            'threshold' : {
+                'line': {'color': "black", 'width': 4},
+                'thickness': 0.75,
+                'value': 0.6}}))
+    fig.update_layout(height=300, margin=dict(l=20, r=20, b=20, t=50))
+    return fig
 
-# --- Helper functions for 3D Visualization ---
+# --- 3D Visualization Functions ---
 def get_rotation_matrix(angle_deg):
     angle_rad = np.deg2rad(angle_deg)
     return np.array([[np.cos(angle_rad), -np.sin(angle_rad)], [np.sin(angle_rad), np.cos(angle_rad)]])
 
-
-def create_cuboid(center, size, rotation_y_deg=0):
+def create_cuboid(center, size):
     dx, dy, dz = size
     cx, cy, cz = center
-    x = np.array([-dx, dx, dx, -dx, -dx, dx, dx, -dx]) / 2
-    y = np.array([-dy, -dy, dy, dy, -dy, -dy, dy, dy]) / 2
-    rot_mat = get_rotation_matrix(rotation_y_deg)
-    rotated_coords = rot_mat @ np.vstack([x, y])
-    return go.Mesh3d(x=rotated_coords[0, :] + cx, y=rotated_coords[1, :] + cy, z=np.array([-dz, -dz, -dz, -dz, dz, dz, dz, dz]) / 2 + cz,
+    return go.Mesh3d(x=[cx-dx, cx+dx, cx+dx, cx-dx, cx-dx, cx+dx, cx+dx, cx-dx],
+                     y=[cy-dy, cy-dy, cy+dy, cy+dy, cy-dy, cy-dy, cy+dy, cy+dy],
+                     z=[cz-dz, cz-dz, cz-dz, cz-dz, cz+dz, cz+dz, cz+dz, cz+dz],
                      i=[7, 0, 0, 0, 4, 4, 6, 6, 4, 0, 3, 2], j=[3, 4, 1, 2, 5, 6, 5, 2, 0, 1, 6, 3], k=[0, 7, 2, 3, 6, 7, 1, 1, 5, 5, 7, 6])
-
 
 def add_detailed_chair(fig, position, rotation_y_deg=0):
     base_color, cushion_color = 'rgb(50, 50, 50)', 'rgb(80, 80, 80)'
     traces = []
-    leg_positions = [(-0.2, -0.2), (0.2, -0.2), (0.2, 0.2), (-0.2, 0.2)]
-    for lx, ly in leg_positions:
-        traces.append(create_cuboid((lx, ly, 0.2), (0.05, 0.05, 0.4)))
-    traces.append(create_cuboid((0, 0, 0.45), (0.5, 0.5, 0.1)))
-    traces.append(create_cuboid((0, 0.2, 0.8), (0.5, 0.1, 0.6)))
+    # Simplified creation logic
+    traces.append(create_cuboid((0, 0, 0.225), (0.5, 0.5, 0.45))) # Base
+    traces.append(create_cuboid((0, 0.2, 0.7), (0.5, 0.1, 0.5)))  # Back
     
     rot_mat = get_rotation_matrix(rotation_y_deg)
     for i, trace in enumerate(traces):
-        trace.update(color=base_color if i < 4 else cushion_color, lighting=dict(diffuse=0.8), showlegend=False)
+        trace.update(color=cushion_color, lighting=dict(diffuse=0.8), showlegend=False)
         original_coords = np.vstack([trace.x, trace.y])
         rotated_coords = rot_mat @ original_coords
         trace.x = rotated_coords[0, :] + position[0]
@@ -272,49 +295,39 @@ def add_detailed_chair(fig, position, rotation_y_deg=0):
         trace.z = np.array(trace.z) + position[2]
         fig.add_trace(trace)
 
-
-# --- Maxed-Out Plotly 3D Visualization ---
 def create_photorealistic_3d_room(specs, recommendations):
     fig = go.Figure()
     room_w, room_l, room_h = specs['width'], specs['length'], specs['ceiling_height']
     center_x, center_y = room_w / 2, room_l / 2
 
-    # Floor with wood plank texture
-    x_grid, y_grid = np.meshgrid(np.linspace(0, room_w, 10), np.linspace(0, room_l, 20))
-    floor_texture = (np.sin(y_grid * np.pi * 2) > 0).astype(int) * 0.5 + 0.2
-    fig.add_trace(go.Surface(x=x_grid, y=y_grid, z=np.zeros_like(x_grid), surfacecolor=floor_texture, colorscale='YlOrBr', showscale=False, lighting=dict(ambient=0.7, diffuse=0.5)))
-    
-    # Walls
+    # Floor and Walls
+    fig.add_trace(go.Surface(x=[0, room_w, room_w, 0], y=[0, 0, room_l, room_l], z=[[0,0,0,0]], colorscale='YlOrBr', showscale=False))
     wall_color = 'rgb(220, 220, 215)'
-    x_wall, z_wall = np.meshgrid(np.linspace(0, room_w, 2), np.linspace(0, room_h, 2))
-    fig.add_trace(go.Surface(x=x_wall, y=np.full_like(x_wall, room_l), z=z_wall, colorscale=[[0, wall_color], [1, wall_color]], showscale=False, lighting=dict(ambient=0.8, diffuse=1.0)))
-    y_wall, z_wall = np.meshgrid(np.linspace(0, room_l, 2), np.linspace(0, room_h, 2))
-    fig.add_trace(go.Surface(x=np.zeros_like(y_wall), y=y_wall, z=z_wall, colorscale=[[0, wall_color], [1, wall_color]], showscale=False, lighting=dict(ambient=0.8, diffuse=1.0)))
-    fig.add_trace(go.Surface(x=np.full_like(y_wall, room_w), y=y_wall, z=z_wall, colorscale=[[0, wall_color], [1, wall_color]], showscale=False, lighting=dict(ambient=0.8, diffuse=1.0)))
+    fig.add_trace(go.Surface(x=[[0, room_w],[0, room_w]], y=[[room_l, room_l],[room_l, room_l]], z=[[0,0],[room_h,room_h]], colorscale=[[0, wall_color], [1, wall_color]], showscale=False))
+    fig.add_trace(go.Surface(x=[[0,0],[0,0]], y=[[0,room_l],[0,room_l]], z=[[0,0],[room_h,room_h]], colorscale=[[0, wall_color], [1, wall_color]], showscale=False))
+    fig.add_trace(go.Surface(x=[[room_w,room_w],[room_w,room_w]], y=[[0,room_l],[0,room_l]], z=[[0,0],[room_h,room_h]], colorscale=[[0, wall_color], [1, wall_color]], showscale=False))
 
     # Conference Table
     table_l, table_w, table_h = max(2.5, room_l * 0.5), max(1.4, room_w * 0.4), 0.75
-    fig.add_trace(create_cuboid((center_x, center_y, table_h - 0.05), (table_w, table_l, 0.1)).update(color='rgb(139, 69, 19)', lighting=dict(ambient=0.2, diffuse=0.8, specular=0.9, roughness=0.3)))
-    fig.add_trace(create_cuboid((center_x, center_y, (table_h - 0.1)/2), (table_w * 0.5, table_l * 0.5, table_h - 0.1)).update(color='rgb(60, 60, 60)', lighting=dict(ambient=0.4, diffuse=0.5)))
-    
+    fig.add_trace(create_cuboid((center_x, center_y, table_h - 0.05), (table_w/2, table_l/2, 0.05)).update(color='rgb(139, 69, 19)', lighting=dict(ambient=0.2, diffuse=0.8, specular=0.9)))
+    fig.add_trace(create_cuboid((center_x, center_y, (table_h - 0.1)/2), (table_w/4, table_l/4, (table_h-0.1)/2)).update(color='rgb(60, 60, 60)'))
+
     # Place Chairs
     chairs_per_side = (specs['capacity'] // 2)
-    y_positions = np.linspace(-table_l/2 * 0.8, table_l/2 * 0.8, chairs_per_side)
+    y_positions = np.linspace(-table_l/2 * 0.8, table_l/2 * 0.8, chairs_per_side) if chairs_per_side > 0 else []
     for y_pos in y_positions:
         add_detailed_chair(fig, (center_x - table_w/2 - 0.6, center_y + y_pos, 0), 90)
         add_detailed_chair(fig, (center_x + table_w/2 + 0.6, center_y + y_pos, 0), -90)
-
+    
     # Display and Camera
     display_w, display_h = room_w * 0.6, room_w * 0.6 * (9/16)
-    fig.add_trace(create_cuboid((center_x, room_l-0.1, 1.4), (display_w, 0.05, display_h)).update(color='black'))
-    fig.add_trace(create_cuboid((center_x, room_l-0.09, 1.4), (display_w*0.95, 0.02, display_h*0.9)).update(color='rgb(10,10,40)'))
-    fig.add_trace(create_cuboid((center_x, room_l-0.1, 1.4 + display_h/2 + 0.05), (0.3, 0.15, 0.1)).update(color='rgb(80,80,80)'))
-
+    fig.add_trace(create_cuboid((center_x, room_l-0.1, 1.4), (display_w/2, 0.025, display_h/2)).update(color='black'))
+    
     # Ceiling Mics
     if 'array' in recommendations['audio'].get('configuration', ''):
-        fig.add_trace(create_cuboid((center_x, center_y, room_h - 0.05), (0.6, 0.6, 0.05)).update(color='white'))
+        fig.add_trace(create_cuboid((center_x, center_y, room_h - 0.05), (0.3, 0.3, 0.05)).update(color='white'))
 
-    fig.update_layout(title={'text': "Enhanced 3D Room Visualization", 'x': 0.5}, scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), camera=dict(eye=dict(x=0.1, y=-2.5, z=1.5), up=dict(x=0, y=0, z=1)), aspectmode='data', bgcolor='rgb(240, 240, 245)'), height=600, margin=dict(l=0, r=0, b=0, t=40), showlegend=False)
+    fig.update_layout(scene=dict(camera=dict(eye=dict(x=0.1, y=-2.5, z=1.5)), aspectmode='data', bgcolor='rgb(240, 240, 245)'), height=600, margin=dict(l=0, r=0, b=0, t=0), showlegend=False)
     return fig
 
 
@@ -325,7 +338,6 @@ def main():
         st.markdown("<h1 style='text-align: center;'>🏢 AI Room Configurator Pro</h1>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center;'>Enterprise-Grade AV Solutions Powered by AI</p>", unsafe_allow_html=True)
 
-    # --- Sidebar for Real-Time Input ---
     with st.sidebar:
         st.markdown("### 📏 Room Specifications")
         length = st.slider("Room Length (m)", 3.0, 20.0, 8.0, 0.5)
@@ -337,22 +349,10 @@ def main():
         windows = st.slider("Window Area (%)", 0, 50, 20)
         
         st.markdown("### ⚙️ Special Requirements")
-        special_req = st.multiselect("Additional Features", ['Wireless Presentation', 'Room Scheduling'])
+        special_req = st.multiselect("Additional Features", ['Wireless Presentation', 'Room Scheduling', 'Digital Signage'])
 
-    # --- Main Content Area (Updates in Real-Time) ---
-    # The script re-runs from here every time a widget in the sidebar is changed.
+    current_specs = {'length': length, 'width': width, 'ceiling_height': ceiling_height, 'capacity': capacity, 'windows': windows, 'special_requirements': special_req}
     
-    # 1. Collect current specs from sidebar widgets
-    current_specs = {
-        'length': length, 
-        'width': width, 
-        'ceiling_height': ceiling_height, 
-        'capacity': capacity, 
-        'windows': windows, 
-        'special_requirements': special_req
-    }
-    
-    # 2. Generate recommendations and all calculations based on current specs
     recommender = AdvancedAVRecommender()
     recs = recommender.get_ai_recommendations(current_specs)
     
@@ -361,7 +361,6 @@ def main():
     roi_analysis = calculator.calculate_roi(cost_breakdown, current_specs)
     env_analysis = analyze_room_environment(current_specs)
 
-    # 3. Display the results in tabs
     tabs = st.tabs(["🎯 AI Recommendations", "📐 3D Visualization", "💰 Cost Analysis", "🔊 Environmental Analysis", "📋 Project Summary"])
     
     with tabs[0]:
@@ -370,7 +369,7 @@ def main():
             for category, rec in recs.items():
                 if isinstance(rec, dict) and 'price' in rec:
                     st.markdown(f"""<div class="recommendation-card">
-                                    <h3>{category.title()} Recommendation: 🏆 {rec.get('primary', list(rec.keys())[0])}</h3>
+                                    <h3>{category.title()} Recommendation: 🏆 {rec.get('primary', 'N/A')}</h3>
                                     <p><strong>Price:</strong> ${rec['price']:,}</p>
                                     <p><strong>Specs:</strong> {rec.get('specs', 'N/A')}</p>
                                     <p><strong>Rating:</strong> {'⭐' * int(rec.get('rating', 0))} ({rec.get('rating', 0)}/5.0)</p>
@@ -381,7 +380,7 @@ def main():
         with col2:
             st.metric("AI Confidence Score", f"{recs['confidence_score']}%", "High Confidence" if recs['confidence_score'] > 90 else "Good Match")
             st.markdown(f"""<div class="metric-card"><h4>Quick Stats</h4>
-                            <p><strong>Total Equipment:</strong> ${cost_breakdown['equipment']:,}</p>
+                            <p><strong>Total Equipment:</strong> ${cost_breakdown['Equipment']:,}</p>
                             <p><strong>Technology Grade:</strong> Enterprise</p></div>""", unsafe_allow_html=True)
     
     with tabs[1]:
@@ -392,22 +391,23 @@ def main():
 
     with tabs[2]:
         st.markdown("### 💰 Comprehensive Cost Analysis")
+        st.plotly_chart(create_cost_breakdown_chart(cost_breakdown, roi_analysis), use_container_width=True)
+        st.markdown("---")
         col1, col2, col3 = st.columns(3)
         col1.metric("Total Investment", f"${cost_breakdown['total']:,}")
         col2.metric("Payback Period", f"{roi_analysis['payback_months']:.1f} months")
         col3.metric("3-Year ROI", f"{roi_analysis['roi_3_years']:.0f}%")
-        st.plotly_chart(create_cost_breakdown_chart(cost_breakdown, roi_analysis), use_container_width=True)
-        
+
     with tabs[3]:
         st.markdown("### 🔊 Environmental & Performance Analysis")
         col1, col2 = st.columns(2)
         with col1:
-            st.info(f"**Lighting Challenge:** {env_analysis['lighting']['challenge']}")
-            st.markdown("**Recommendations:**")
+            st.markdown("#### 💡 Lighting Conditions")
+            st.info(f"**Challenge Level:** {env_analysis['lighting']['challenge']}")
             for rec_item in env_analysis['lighting']['recs']: st.write(f"• {rec_item}")
         with col2:
-            st.info(f"**Estimated RT60 (Reverb):** {env_analysis['acoustics']['rt60']}")
-            st.markdown("**Recommendations:**")
+            st.markdown("#### 🎵 Acoustic Properties")
+            st.plotly_chart(create_acoustic_analysis_chart(env_analysis['acoustics']), use_container_width=True)
             for rec_item in env_analysis['acoustics']['recs']: st.write(f"• {rec_item}")
     
     with tabs[4]:
@@ -418,8 +418,9 @@ def main():
                     - **Expected ROI (3-Years):** {roi_analysis['roi_3_years']:.0f}%
                     - **Payback Period:** {roi_analysis['payback_months']:.1f} months""")
         st.markdown("#### 🗓️ Implementation Timeline")
-        timeline_df = pd.DataFrame({'Phase': ['Design', 'Procurement', 'Installation', 'Training'], 'Duration': ['2 weeks', '3-4 weeks', '1 week', '1 week']})
+        timeline_df = pd.DataFrame({'Phase': ['Design & Planning', 'Procurement', 'Installation & Commissioning', 'Training & Handover'], 'Duration (Weeks)': [2, 4, 1, 1]})
         st.dataframe(timeline_df, use_container_width=True)
+
 
 if __name__ == "__main__":
     main()
