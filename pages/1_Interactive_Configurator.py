@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from typing import Dict, List, Any
-import colorsys
 
 st.set_page_config(page_title="AI Room Configurator Pro Max", page_icon="🏢", layout="wide")
 
@@ -665,99 +664,43 @@ class MaximizedAVRecommender:
         base_costs = {'Budget': 15000, 'Professional': 45000, 'Premium': 120000}
         return int(base_costs[tier] * (1 + (specs['capacity'] / 50)))
 
-# --- NEW Visualization Engine with Material/Lighting Sim ---
+# --- NEW: Advanced Visualization Classes ---
 class EnhancedMaterials:
-    """Material definitions for realistic rendering"""
     @staticmethod
     def get_material_presets():
         return {
-            'wood': {'base_color': '#8B4513', 'roughness': 0.7, 'metallic': 0.0, 'normal_strength': 1.0, 'ambient_occlusion': 0.8, 'grain_scale': 0.5},
-            'metal': {'base_color': '#B8B8B8', 'roughness': 0.2, 'metallic': 0.9, 'normal_strength': 0.5, 'ambient_occlusion': 0.3},
-            'glass': {'base_color': '#FFFFFF', 'roughness': 0.05, 'metallic': 0.9, 'normal_strength': 0.1, 'ambient_occlusion': 0.1, 'opacity': 0.3},
-            'fabric': {'base_color': '#303030', 'roughness': 0.9, 'metallic': 0.0, 'normal_strength': 0.8, 'ambient_occlusion': 0.7},
-            'display': {'base_color': '#000000', 'roughness': 0.1, 'metallic': 0.5, 'normal_strength': 0.2, 'ambient_occlusion': 0.2, 'emission': 0.2}
+            'wood': {'base_color': '#8B4513','roughness': 0.7,'metallic': 0.0,'normal_strength': 1.0,'ambient_occlusion': 0.8,'grain_scale': 0.5},
+            'metal': {'base_color': '#B8B8B8','roughness': 0.2,'metallic': 0.9,'normal_strength': 0.5,'ambient_occlusion': 0.3},
+            'glass': {'base_color': '#FFFFFF','roughness': 0.05,'metallic': 0.9,'normal_strength': 0.1,'ambient_occlusion': 0.1,'opacity': 0.3},
+            'fabric': {'base_color': '#303030','roughness': 0.9,'metallic': 0.0,'normal_strength': 0.8,'ambient_occlusion': 0.7},
+            'display': {'base_color': '#000000','roughness': 0.1,'metallic': 0.5,'normal_strength': 0.2,'ambient_occlusion': 0.2,'emission': 0.2}
         }
 
 class EnhancedLighting:
-    """Advanced lighting calculations"""
     def __init__(self, room_specs: Dict[str, Any]):
         self.room_specs = room_specs
         self.ambient_intensity = 0.3
         self.direct_intensity = 0.7
         self.shadow_softness = 0.5
 
-    def calculate_lighting(self, position: np.ndarray, normal: np.ndarray) -> float:
-        """Calculate lighting at a point"""
-        ambient = self.ambient_intensity
-        diffuse = self.calculate_diffuse(position, normal)
-        specular = self.calculate_specular(position, normal)
-        shadow = self.calculate_shadow(position)
-        return (ambient + diffuse * shadow) * (1 + specular)
-
-    def calculate_diffuse(self, position: np.ndarray, normal: np.ndarray) -> float:
-        """Calculate diffuse lighting"""
-        light_positions = self.get_light_positions()
-        total_diffuse = 0.0
-        for light_pos in light_positions:
-            light_dir = light_pos - position
-            light_dir = light_dir / np.linalg.norm(light_dir)
-            diffuse = max(0, np.dot(normal, light_dir))
-            distance = np.linalg.norm(light_pos - position)
-            attenuation = 1.0 / (1.0 + 0.1 * distance + 0.01 * distance * distance)
-            total_diffuse += diffuse * attenuation
-        return min(1.0, total_diffuse * self.direct_intensity)
-
-    def calculate_specular(self, position: np.ndarray, normal: np.ndarray) -> float:
-        """Calculate specular highlights"""
-        camera_pos = np.array([self.room_specs['length'] * 1.5, self.room_specs['width'] * 1.5, self.room_specs['ceiling_height'] * 1.2])
-        view_dir = camera_pos - position
-        view_dir = view_dir / np.linalg.norm(view_dir)
-        total_specular = 0.0
-        for light_pos in self.get_light_positions():
-            light_dir = light_pos - position
-            light_dir = light_dir / np.linalg.norm(light_dir)
-            reflect_dir = 2 * np.dot(normal, light_dir) * normal - light_dir
-            spec = max(0, np.dot(view_dir, reflect_dir)) ** 32
-            total_specular += spec
-        return min(1.0, total_specular * 0.3)
-
-    def calculate_shadow(self, position: np.ndarray) -> float:
-        """Calculate soft shadows"""
-        shadow = 1.0
-        for light_pos in self.get_light_positions():
-            shadow_ray = light_pos - position
-            distance = np.linalg.norm(shadow_ray)
-            shadow *= 1.0 - self.shadow_softness / (1.0 + distance)
-        return max(0.2, shadow)
-
     def get_light_positions(self) -> List[np.ndarray]:
-        """Get light positions in the room"""
-        length, width, height = self.room_specs['length'], self.room_specs['width'], self.room_specs['ceiling_height']
+        length, width, height = (self.room_specs['length'], self.room_specs['width'], self.room_specs['ceiling_height'])
         return [
-            np.array([length * 0.25, width * 0.25, height - 0.1]),
-            np.array([length * 0.75, width * 0.25, height - 0.1]),
-            np.array([length * 0.25, width * 0.75, height - 0.1]),
-            np.array([length * 0.75, width * 0.75, height - 0.1])
+            np.array([length * 0.25, width * 0.25, height - 0.1]), np.array([length * 0.75, width * 0.25, height - 0.1]),
+            np.array([length * 0.25, width * 0.75, height - 0.1]), np.array([length * 0.75, width * 0.75, height - 0.1])
         ]
 
 class TextureGenerator:
-    """Generate realistic textures for materials"""
     @staticmethod
     def create_wood_texture(size: tuple, grain_scale: float = 0.5) -> np.ndarray:
-        x, y = np.linspace(0, size[0] * grain_scale, size[0]), np.linspace(0, size[1] * grain_scale, size[1])
+        x = np.linspace(0, size[0] * grain_scale, size[0])
+        y = np.linspace(0, size[1] * grain_scale, size[1])
         X, Y = np.meshgrid(x, y)
         noise = np.random.normal(0, 1, size) * 0.1
         grain = np.sin(X * 10) * 0.5 + 0.5 + np.sin(X * 20 + Y * 5) * 0.2 + noise
         return np.clip(grain, 0, 1)
 
-    @staticmethod
-    def create_fabric_texture(size: tuple, scale: float = 1.0) -> np.ndarray:
-        x, y = np.linspace(0, size[0] * scale, size[0]), np.linspace(0, size[1] * scale, size[1])
-        X, Y = np.meshgrid(x, y)
-        weave_x, weave_y = np.sin(X * 20) * 0.5 + 0.5, np.sin(Y * 20) * 0.5 + 0.5
-        texture = weave_x * weave_y + np.random.normal(0, 1, size) * 0.1
-        return np.clip(texture, 0, 1)
-
+# --- Main Visualization Engine ---
 class EnhancedVisualizationEngine:
     def __init__(self):
         self.color_schemes = {
@@ -785,46 +728,31 @@ class EnhancedVisualizationEngine:
         # Add core elements based on configuration
         if viz_config['room_elements']['show_table']:
             self._add_table(fig, room_specs, colors, viz_config['style_options']['table_style'])
-        
         if viz_config['room_elements']['show_chairs']:
             self._add_seating(fig, room_specs, colors, viz_config['style_options']['chair_style'])
-        
         if viz_config['room_elements']['show_displays']:
             self._add_display_system(fig, room_specs, colors, recommendations)
-        
         if viz_config['room_elements']['show_cameras']:
             self._add_camera_system(fig, room_specs, colors, recommendations)
-        
         if viz_config['room_elements']['show_lighting']:
             self._add_lighting_system(fig, room_specs, colors, lighting)
-        
         if viz_config['room_elements']['show_speakers']:
             self._add_audio_system(fig, room_specs, colors, recommendations)
-
         if viz_config['room_elements']['show_control']:
             self._add_control_system(fig, room_specs, colors)
-        
-        # Add additional elements
         if viz_config['room_elements']['show_whiteboard']:
             self._add_whiteboard(fig, room_specs, colors)
-        
         if viz_config['room_elements']['show_credenza']:
             self._add_credenza(fig, room_specs, colors)
-        
-        # Add advanced features
         if viz_config['advanced_features']['show_measurements']:
             self._add_measurements(fig, room_specs)
-        
         if viz_config['advanced_features']['show_zones']:
             self._add_coverage_zones(fig, room_specs)
-        
         if viz_config['advanced_features']['show_cable_paths']:
             self._add_cable_management(fig, room_specs, colors)
-        
         if viz_config['advanced_features']['show_network']:
             self._add_network_points(fig, room_specs)
         
-        # Update camera view and layout
         self._update_camera_view(fig, room_specs, viz_config['style_options']['view_angle'])
         self._update_layout(fig, room_specs)
         
@@ -973,24 +901,22 @@ class EnhancedVisualizationEngine:
         # Add windows if specified
         if room_specs.get('environment', {}).get('windows', 0) > 0:
             window_sections = int(room_specs['environment']['windows'] / 20)
-            window_width_section = width / (window_sections * 2) 
+            window_width_section = width / (window_sections * 2) if window_sections > 0 else 0
             for i in range(window_sections):
                 y_start = (width / 2) - (window_sections * window_width_section / 2) + (i * window_width_section * 2)
                 fig.add_shape(type="rect", x0=length-0.1, y0=y_start, x1=length, y1=y_start + window_width_section, line=dict(color="rgb(150,200,255)", width=2), fillcolor="rgba(200,230,255,0.7)")
 
         # Display wall with screen
-        screen_width = min(width * 0.6, 3.5)
-        screen_start = (width - screen_width) / 2
-        fig.add_shape(type="rect", x0=0, y0=screen_start, x1=0.15, y1=screen_start + screen_width, line=dict(color="rgb(50,50,50)", width=2), fillcolor="rgb(80,80,80)")
+        screen_width_2d = min(width * 0.6, 3.5)
+        screen_start = (width - screen_width_2d) / 2
+        fig.add_shape(type="rect", x0=0, y0=screen_start, x1=0.15, y1=screen_start + screen_width_2d, line=dict(color="rgb(50,50,50)", width=2), fillcolor="rgb(80,80,80)")
         
         # Conference table with realistic shape
         table_length, table_width = min(length * 0.7, 4.5), min(width * 0.4, 1.5)
         table_x, table_y = length * 0.6, width * 0.5
         
-        # Table shadow
+        # Table shadow and main table
         fig.add_shape(type="rect", x0=table_x - table_length/2 + 0.1, y0=table_y - table_width/2 + 0.1, x1=table_x + table_length/2 + 0.1, y1=table_y + table_width/2 + 0.1, line=dict(color="rgba(0,0,0,0)"), fillcolor="rgba(0,0,0,0.1)")
-        
-        # Main table
         fig.add_shape(type="rect", x0=table_x - table_length/2, y0=table_y - table_width/2, x1=table_x + table_length/2, y1=table_y + table_width/2, line=dict(color="rgb(120,85,60)", width=2), fillcolor="rgb(139,115,85)")
         
         # Add chairs based on capacity
@@ -1016,9 +942,9 @@ class EnhancedVisualizationEngine:
             fig.add_shape(type="circle", x0=x-0.15, y0=y-0.15, x1=x+0.15, y1=y+0.15, line=dict(color="rgba(100,100,255,0.3)"), fillcolor="rgba(100,100,255,0.1)")
             fig.add_shape(type="circle", x0=x-1.5, y0=y-1.5, x1=x+1.5, y1=y+1.5, line=dict(color="rgba(100,100,255,0.1)"), fillcolor="rgba(100,100,255,0.05)")
         
-        # Add measurements and annotations
         fig.add_annotation(x=length/2, y=-0.5, text=f"{length:.1f}m", showarrow=False, font=dict(size=10))
         fig.add_annotation(x=-0.5, y=width/2, text=f"{width:.1f}m", textangle=-90, showarrow=False, font=dict(size=10))
+        
         annotations = [
             dict(x=0.1, y=width*0.5, text="Display System", showarrow=True, arrowcolor="rgb(255,100,100)", bgcolor="white", bordercolor="rgb(255,100,100)", borderwidth=2),
             dict(x=length-0.3, y=width*0.85, text="Control Panel", showarrow=True, arrowcolor="rgb(100,100,100)", bgcolor="white", bordercolor="rgb(100,100,100)", borderwidth=2),
@@ -1110,12 +1036,10 @@ def main():
         st.subheader("✨ Special Features")
         special_features = st.multiselect("Required Features", ['Wireless Presentation', 'Digital Whiteboard', 'Room Scheduling', 'Noise Reduction', 'Circadian Lighting', 'AI Analytics'])
 
-        # --- Visualization Options in Sidebar ---
-        st.sidebar.markdown("---")
+        st.markdown("---")
         st.sidebar.markdown("### 🎨 Visualization Options")
         
-        expander_room = st.sidebar.expander("Room Elements", expanded=True)
-        with expander_room:
+        with st.sidebar.expander("Room Elements", expanded=True):
             room_elements_config = {
                 'show_chairs': st.checkbox("Show Chairs", value=True),
                 'show_displays': st.checkbox("Show Displays", value=True),
@@ -1128,8 +1052,7 @@ def main():
                 'show_credenza': st.checkbox("Credenza/Storage", value=False)
             }
         
-        expander_style = st.sidebar.expander("Style Options", expanded=False)
-        with expander_style:
+        with st.sidebar.expander("Style Options", expanded=False):
             style_config = {
                 'chair_style': st.selectbox("Chair Style", ['modern', 'executive', 'training', 'casual']),
                 'table_style': st.selectbox("Table Style", ['rectangular', 'oval', 'boat-shaped', 'modular']),
@@ -1138,8 +1061,7 @@ def main():
                 'view_angle': st.selectbox("View Angle", ['perspective', 'top', 'front', 'side', 'corner'])
             }
 
-        expander_advanced = st.sidebar.expander("Advanced Features", expanded=False)
-        with expander_advanced:
+        with st.sidebar.expander("Advanced Features", expanded=False):
             advanced_config = {
                 'show_measurements': st.checkbox("Show Measurements", value=False),
                 'show_zones': st.checkbox("Show Audio/Video Zones", value=False),
@@ -1158,7 +1080,7 @@ def main():
             
             room_specs = {
                 'template': template, 'length': length, 'width': width, 'ceiling_height': ceiling_height,
-                'capacity': capacity, 'environment': environment_config, 'special_requirements': []
+                'capacity': capacity, 'environment': environment_config, 'special_requirements': [] 
             }
             user_preferences = {
                 'budget_tier': budget_tier, 'preferred_brands': preferred_brands, 'special_features': special_features,
@@ -1248,7 +1170,7 @@ def main():
             if recommendations.get('upgrade_path'):
                 upgrade = recommendations['upgrade_path'][0] 
                 smart_plan = recommender._generate_smart_upgrade_plan(room_specs, st.session_state.budget_tier, upgrade['estimated_cost'])
-                st.markdown("""<div class="premium-card"> ... </div>""", unsafe_allow_html=True) # Content omitted for brevity
+                # ... Smart Plan display logic from previous turn ...
 
         with tab5:
             st.subheader("Professional Report Summary")
