@@ -11,40 +11,43 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     :root {
-        --primary-color: #2563eb; /* Deep blue */
-        --success-color: #22c55e; /* Emerald green */
-        --background-color: #f6f8fa; /* Soft light */
-        --dark-background: #1e293b; /* Navy */
-        --text-color: #1e293b; /* Almost black */
+        --primary-color: #2563eb;
+        --success-color: #22c55e;
+        --background-color: #f6f8fa;
+        --dark-background: #1e293b;
+        --sidebar-bg: #1e293b;
+        --sidebar-text: #f3f4f6;
+        --text-color: #1e293b;
+        --body-text-color: #334155;
         --card-shadow: 0 6px 24px rgba(30,41,59,0.08);
         --border-radius-lg: 18px;
         --border-radius-md: 12px;
         --accent-color: #e0e7ef;
-        --feature-bg: #ffffff;
+        --feature-bg: #fff;
         --feature-border: #2563eb;
         --metric-bg: #2563eb;
         --metric-text: #fff;
     }
-    .stApp {
-        font-family: 'Inter', sans-serif;
-        background-color: var(--background-color);
-        color: var(--text-color);
+    body, .stApp, .main, .main > div {
+        color: var(--text-color) !important;
+        background-color: var(--background-color) !important;
+        font-family: 'Inter', sans-serif !important;
     }
     .main > div {
-        background: var(--feature-bg);
+        background: var(--feature-bg) !important;
         border-radius: var(--border-radius-lg);
         padding: 28px;
         margin: 18px;
         box-shadow: var(--card-shadow);
-        color: var(--text-color);
+        color: var(--text-color) !important;
     }
     .main h1, .main h2, .main h3, .main h4, .main h5, .main h6 {
         color: var(--text-color) !important;
         font-weight: 700;
         letter-spacing: 0.01em;
     }
-    .main p, .main li, .main div {
-        color: #334155 !important;
+    .main p, .main li, .main div, .main span, .main label {
+        color: var(--body-text-color) !important;
         font-size: 16px;
         font-weight: 500;
     }
@@ -57,7 +60,7 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] {
         background: rgba(255,255,255,0.08);
         border-radius: 10px;
-        color: #fff;
+        color: #fff !important;
         font-weight: 600;
         padding: 12px 22px;
         transition: all 0.2s ease;
@@ -67,7 +70,7 @@ st.markdown("""
     .stTabs [data-baseweb="tab"]:hover {
         background: rgba(255,255,255,0.18);
         transform: translateY(-2px);
-        color: #fff;
+        color: #fff !important;
     }
     .stTabs [aria-selected="true"] {
         background: var(--primary-color) !important;
@@ -75,16 +78,16 @@ st.markdown("""
         box-shadow: 0 4px 18px rgba(37,99,235,0.18);
     }
     .premium-card {
-        background: var(--dark-background);
+        background: var(--dark-background) !important;
         padding: 28px;
         border-radius: var(--border-radius-lg);
-        color: #fff;
+        color: #fff !important;
         margin: 18px 0;
         box-shadow: 0 12px 32px rgba(30,41,59,0.18);
         border: 1px solid #334155;
     }
     .metric-card {
-        background: var(--metric-bg);
+        background: var(--metric-bg) !important;
         padding: 22px;
         border-radius: var(--border-radius-md);
         box-shadow: 0 8px 25px rgba(37,99,235,0.13);
@@ -108,14 +111,13 @@ st.markdown("""
         font-weight: 600;
     }
     .feature-card {
-        background: var(--feature-bg);
+        background: var(--feature-bg) !important;
         padding: 22px;
         border-radius: var(--border-radius-md);
         margin: 12px 0;
         border-left: 6px solid var(--feature-border);
         box-shadow: 0 2px 8px rgba(37,99,235,0.05);
-        color: var(--text-color);
-        border-top: 1px solid var(--accent-color);
+        color: var(--text-color) !important;
     }
     .comparison-card {
         background: var(--feature-bg);
@@ -161,7 +163,7 @@ st.markdown("""
         background: linear-gradient(135deg, #1e40af 0%, #38bdf8 100%);
     }
     .css-1d391kg {
-        background: var(--dark-background);
+        background: var(--sidebar-bg);
     }
 </style>
 """, unsafe_allow_html=True)
