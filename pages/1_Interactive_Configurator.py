@@ -49,13 +49,13 @@ st.markdown("""
         border-radius: 10px;
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         border-left: 4px solid #667eea;
-        color: black !important; 
+        color: black !important;
     }
     .metric-card h4 {
-        color: black !important; 
+        color: black !important;
     }
     .metric-card p {
-        color: black !important; 
+        color: black !important;
     }
     .product-image {
         border-radius: 10px;
@@ -364,12 +364,12 @@ class AdvancedAVRecommender:
 # --- Helper for 3D Visualization ---
 def add_premium_chair(fig, x, y, z_offset=0, rotation_angle_deg=0):
     """Adds a more detailed chair model to the 3D plot."""
-    
+
     # Chair components dimensions
     seat_size = 0.5
     back_height = 0.6
     leg_height = 0.4
-    
+
     # Rotation matrix
     angle_rad = np.deg2rad(rotation_angle_deg)
     rotation_matrix = np.array([
@@ -382,26 +382,27 @@ def add_premium_chair(fig, x, y, z_offset=0, rotation_angle_deg=0):
     seat_x = [-seat_size/2, seat_size/2, seat_size/2, -seat_size/2, -seat_size/2, seat_size/2, seat_size/2, -seat_size/2]
     seat_y = [-seat_size/2, -seat_size/2, seat_size/2, seat_size/2, -seat_size/2, -seat_size/2, seat_size/2, seat_size/2]
     seat_z = [leg_height, leg_height, leg_height, leg_height, leg_height+0.1, leg_height+0.1, leg_height+0.1, leg_height+0.1]
-    
+
     # Backrest (a thin cuboid)
     back_x = [-seat_size/2, seat_size/2, seat_size/2, -seat_size/2, -seat_size/2, seat_size/2, seat_size/2, -seat_size/2]
     back_y = [seat_size/2-0.05, seat_size/2-0.05, seat_size/2+0.05, seat_size/2+0.05, seat_size/2-0.05, seat_size/2-0.05, seat_size/2+0.05, seat_size/2+0.05]
     back_z = [leg_height+0.1, leg_height+0.1, leg_height+0.1, leg_height+0.1, leg_height+back_height, leg_height+back_height, leg_height+back_height, leg_height+back_height]
 
-    # Rotate and translate points
-    rotated_seat = np.dot(np.vstack([seat_x, seat_y]), rotation_matrix.T)
-    rotated_back = np.dot(np.vstack([back_x, back_y]), rotation_matrix.T)
-    
+    # --- CORRECTED CODE ---
+    # Correctly rotate the points by putting the rotation_matrix first
+    rotated_seat_coords = np.dot(rotation_matrix, np.vstack([seat_x, seat_y]))
+    rotated_back_coords = np.dot(rotation_matrix, np.vstack([back_x, back_y]))
+
     fig.add_trace(go.Mesh3d(
-        x=rotated_seat[0,:] + x, y=rotated_seat[1,:] + y, z=np.array(seat_z) + z_offset,
+        x=rotated_seat_coords[0,:] + x, y=rotated_seat_coords[1,:] + y, z=np.array(seat_z) + z_offset,
         i=[7, 0, 0, 0, 4, 4, 6, 6, 4, 0, 3, 2],
         j=[3, 4, 1, 2, 5, 6, 5, 2, 0, 1, 6, 3],
         k=[0, 7, 2, 3, 6, 7, 1, 1, 5, 5, 7, 6],
         color='saddlebrown', name='Chair Seat', showlegend=False
     ))
-    
+
     fig.add_trace(go.Mesh3d(
-        x=rotated_back[0,:] + x, y=rotated_back[1,:] + y, z=np.array(back_z) + z_offset,
+        x=rotated_back_coords[0,:] + x, y=rotated_back_coords[1,:] + y, z=np.array(back_z) + z_offset,
         i=[7, 0, 0, 0, 4, 4, 6, 6, 4, 0, 3, 2],
         j=[3, 4, 1, 2, 5, 6, 5, 2, 0, 1, 6, 3],
         k=[0, 7, 2, 3, 6, 7, 1, 1, 5, 5, 7, 6],
@@ -431,7 +432,7 @@ def create_photorealistic_3d_room(specs, recommendations):
     wall_y, wall_z = np.meshgrid(np.linspace(0, room_l, 2), np.linspace(0, room_h, 2))
     fig.add_trace(go.Surface(x=np.zeros_like(wall_y), y=wall_y, z=wall_z, colorscale=[[0, wall_color], [1, wall_color]], showscale=False)) # Left
     fig.add_trace(go.Surface(x=np.full_like(wall_y, room_w), y=wall_y, z=wall_z, colorscale=[[0, wall_color], [1, wall_color]], showscale=False)) # Right
-    
+
     # --- Realistic Conference Table ---
     table_l = max(2.0, room_l * 0.6)
     table_w = max(1.2, table_l * 0.4)
@@ -442,7 +443,7 @@ def create_photorealistic_3d_room(specs, recommendations):
     # Tabletop (boat shape)
     t = np.linspace(-table_l/2, table_l/2, 20)
     w = table_w/2 * (1 - 0.2 * (2*t/table_l)**2) # Parabolic curve for boat shape
-    
+
     table_x = np.concatenate([w+table_x_center, -w[::-1]+table_x_center, [w[0]+table_x_center]])
     table_y = np.concatenate([t+table_y_center, t[::-1]+table_y_center, [t[0]+table_y_center]])
     table_z = np.full_like(table_x, table_h)
@@ -455,24 +456,24 @@ def create_photorealistic_3d_room(specs, recommendations):
     bx = [table_x_center-base_w/2, table_x_center+base_w/2, table_x_center+base_w/2, table_x_center-base_w/2]
     by = [table_y_center-base_l/2, table_y_center-base_l/2, table_y_center+base_l/2, table_y_center+base_l/2]
     bz = [0, 0, 0, 0]
-    fig.add_trace(go.Mesh3d(x=np.concatenate([bx,bx]), y=np.concatenate([by,by]), z=np.concatenate([bz, np.full_like(bz, base_h)]), 
+    fig.add_trace(go.Mesh3d(x=np.concatenate([bx,bx]), y=np.concatenate([by,by]), z=np.concatenate([bz, np.full_like(bz, base_h)]),
                            i=[7,0,0,0,4,4,6,6,4,0,3,2], j=[3,4,1,2,5,6,5,2,0,1,6,3], k=[0,7,2,3,6,7,1,1,5,5,7,6],
                            color='rgb(50,50,50)'))
 
     # --- Place Chairs ---
     num_chairs = specs['capacity']
     side_chairs = (num_chairs - 2) // 2 if num_chairs >= 2 else 0
-    
+
     # Left side
     for i in range(side_chairs):
         y_pos = table_y_center - table_l/2 + (i + 1) * (table_l / (side_chairs + 1))
         add_premium_chair(fig, table_x_center - table_w/2 - 0.6, y_pos, rotation_angle_deg=90)
-    
+
     # Right side
     for i in range(side_chairs):
         y_pos = table_y_center - table_l/2 + (i + 1) * (table_l / (side_chairs + 1))
         add_premium_chair(fig, table_x_center + table_w/2 + 0.6, y_pos, rotation_angle_deg=-90)
-        
+
     # Head chairs
     if num_chairs >= 1:
         add_premium_chair(fig, table_x_center, table_y_center - table_l/2 - 0.8, rotation_angle_deg=180)
@@ -488,7 +489,7 @@ def create_photorealistic_3d_room(specs, recommendations):
                            i=[0,0], j=[1,2], k=[2,3], color='black', name='Display'))
     fig.add_trace(go.Mesh3d(x=[room_w*0.22, room_w*0.78, room_w*0.78, room_w*0.22], y=[room_l-0.04]*4, z=[display_z-display_h/2+0.05, display_z-display_h/2+0.05, display_z+display_h/2-0.05, display_z+display_h/2-0.05],
                            i=[0,0], j=[1,2], k=[2,3], color='deepskyblue', name='Screen'))
-    
+
     # Camera
     fig.add_trace(go.Scatter3d(x=[room_w/2], y=[room_l-0.2], z=[display_z + display_h/2 + 0.1], mode='markers', marker=dict(symbol='square', size=8, color='darkgray'), name='Camera'))
 
@@ -497,7 +498,7 @@ def create_photorealistic_3d_room(specs, recommendations):
         mic_positions = [(room_w*0.35, table_y_center), (room_w*0.65, table_y_center)]
         for mx, my in mic_positions:
              fig.add_trace(go.Scatter3d(x=[mx], y=[my], z=[room_h-0.1], mode='markers', marker=dict(symbol='square-open', size=12, color='white'), name='Ceiling Mic'))
-    
+
     fig.update_layout(
         title={
             'text': "Photorealistic 3D Room Configuration",
@@ -1142,8 +1143,8 @@ def main():
             # Executive summary
             st.markdown("""
             #### Executive Summary
-            This comprehensive AV solution has been designed specifically for your meeting space requirements 
-            using advanced AI algorithms that consider room acoustics, lighting conditions, user capacity, 
+            This comprehensive AV solution has been designed specifically for your meeting space requirements
+            using advanced AI algorithms that consider room acoustics, lighting conditions, user capacity,
             and budget constraints.
             """)
 
@@ -1192,7 +1193,7 @@ def main():
             #### 🚀 Next Steps
             1. **Review Recommendations:** Evaluate the proposed solution with your team
             2. **Schedule Consultation:** Book a detailed technical discussion with our experts
-            3. **Site Survey:** Arrange for precise measurements and environmental assessment  
+            3. **Site Survey:** Arrange for precise measurements and environmental assessment
             4. **Proposal Refinement:** Customize the solution based on your feedback
             5. **Project Kickoff:** Begin implementation once approved
             """)
@@ -1212,7 +1213,7 @@ def main():
         <div style="text-align: center; padding: 50px;">
             <h2>🎯 Welcome to AI Room Configurator Pro</h2>
             <p style="font-size: 1.2em; color: #666;">
-                Get started by configuring your room specifications in the sidebar, 
+                Get started by configuring your room specifications in the sidebar,
                 then click "Generate AI Recommendations" to see your custom AV solution.
             </p>
             <div style="margin: 30px 0;">
