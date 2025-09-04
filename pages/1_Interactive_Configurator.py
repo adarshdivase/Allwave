@@ -60,7 +60,7 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] {
         background: rgba(255,255,255,0.08);
         border-radius: 10px;
-        color: #fff !important; /* Changed tab text color */
+        color: #fff !important;
         font-weight: 600;
         padding: 12px 22px;
         transition: all 0.2s ease;
@@ -70,11 +70,11 @@ st.markdown("""
     .stTabs [data-baseweb="tab"]:hover {
         background: rgba(255,255,255,0.18);
         transform: translateY(-2px);
-        color: #fff !important; /* Changed tab text color */
+        color: #fff !important;
     }
     .stTabs [aria-selected="true"] {
         background: var(--primary-color) !important;
-        color: #fff !important; /* Changed tab text color */
+        color: #fff !important;
         box-shadow: 0 4px 18px rgba(37,99,235,0.18);
     }
     .premium-card {
@@ -508,6 +508,66 @@ class MaximizedAVRecommender:
             })
         
         return upgrade_path
+
+    def _generate_smart_upgrade_plan(self, specs, current_tier, estimated_cost):
+        """Generate a detailed phased upgrade plan"""
+        phases = {
+            'Immediate (0-3 months)': {
+                'priorities': [
+                    'Essential software upgrades and licensing',
+                    'Control system programming optimization',
+                    'Staff training on current systems'
+                ],
+                'cost_percentage': 0.15,
+                'focus': 'Maximizing current infrastructure'
+            },
+            'Phase 1 (3-6 months)': {
+                'priorities': [
+                    'Display system upgrade',
+                    'Camera system enhancement',
+                    'Basic audio improvements'
+                ],
+                'cost_percentage': 0.35,
+                'focus': 'Core AV capabilities'
+            },
+            'Phase 2 (6-9 months)': {
+                'priorities': [
+                    'Advanced audio processing implementation',
+                    'Lighting control system upgrade',
+                    'Room automation integration'
+                ],
+                'cost_percentage': 0.30,
+                'focus': 'Enhanced functionality'
+            },
+            'Final Phase (9-12 months)': {
+                'priorities': [
+                    'Premium features activation',
+                    'AI analytics integration',
+                    'Complete system optimization'
+                ],
+                'cost_percentage': 0.20,
+                'focus': 'Premium capabilities'
+            }
+        }
+
+        # Calculate phase-wise budgets
+        for phase in phases.values():
+            phase['budget'] = estimated_cost * phase['cost_percentage']
+            
+        # Add ROI metrics
+        roi_metrics = {
+            'Productivity Gain': '15-20%',
+            'Energy Savings': '10-15%',
+            'Maintenance Cost Reduction': '25-30%',
+            'System Downtime Reduction': '40-50%'
+        }
+
+        return {
+            'phases': phases,
+            'roi_metrics': roi_metrics,
+            'total_investment': estimated_cost,
+            'monthly_investment': estimated_cost / 12
+        }
     
     def _calculate_brightness_needs(self, specs):
         window_factor = specs.get('windows', 0) / 100
@@ -613,9 +673,7 @@ class EnhancedVisualizationEngine:
             'accent': '#4A90E2',      # Brand blue
             'wood': '#8B5E3C',      # Rich wood tone
             'screen': '#1A1A1A',      # Deep black for display
-            'metal': '#B8B8B8',      # Metallic finish
-            'ambient_light': 'rgb(255, 255, 0)', # Changed to yellow for visibility
-            'led_lighting': 'rgb(0, 255, 255)'   # Changed to cyan for visibility
+            'metal': '#B8B8B8'       # Metallic finish
         }
 
         # Add floor with modern finish
@@ -678,7 +736,7 @@ class EnhancedVisualizationEngine:
             name='Display'
         ))
 
-        # Add LED backlight effect (Ambient Light)
+        # Add LED backlight effect
         backlight_points = []
         for i in np.linspace(-screen_width/2, screen_width/2, 20):
             backlight_points.append([0.12, screen_y + i, screen_z])
@@ -689,8 +747,8 @@ class EnhancedVisualizationEngine:
             mode='markers',
             marker=dict(
                 size=3,
-                color=colors['ambient_light'], # Changed color
-                opacity=0.8
+                color='rgb(100, 149, 237)',
+                opacity=0.6
             ),
             name='Ambient Light'
         ))
@@ -746,7 +804,7 @@ class EnhancedVisualizationEngine:
                     lighting=dict(ambient=0.6, diffuse=0.5, fresnel=0.2, specular=0.1)
                 ))
 
-        # Add modern lighting system (LED Lighting)
+        # Add modern lighting system
         light_positions = []
         for i in range(2):
             for j in range(3):
@@ -764,9 +822,9 @@ class EnhancedVisualizationEngine:
             mode='markers',
             marker=dict(
                 size=8,
-                color=colors['led_lighting'], # Changed color
+                color='rgb(255, 255, 200)',
                 symbol='circle',
-                line=dict(color='rgb(0, 200, 200)', width=2), # Adjusted line color for contrast
+                line=dict(color='rgb(255, 255, 150)', width=2),
                 opacity=0.8
             ),
             name='LED Lighting'
@@ -798,19 +856,18 @@ class EnhancedVisualizationEngine:
                 xaxis_title="Length (m)",
                 yaxis_title="Width (m)",
                 zaxis_title="Height (m)",
-                xaxis=dict(range=[0, length], showbackground=False, backgroundcolor="rgba(0,0,0,0)", gridcolor="rgba(200,200,200,0.2)"), # Grid color
-                yaxis=dict(range=[0, width], showbackground=False, backgroundcolor="rgba(0,0,0,0)", gridcolor="rgba(200,200,200,0.2)"), # Grid color
-                zaxis=dict(range=[0, height], showbackground=False, backgroundcolor="rgba(0,0,0,0)", gridcolor="rgba(200,200,200,0.2)")  # Grid color
+                xaxis=dict(range=[0, length], showbackground=False),
+                yaxis=dict(range=[0, width], showbackground=False),
+                zaxis=dict(range=[0, height], showbackground=False)
             ),
-            title=dict(text="Interactive Conference Room Design", font=dict(color='black')), # Changed title color
+            title="Interactive Conference Room Design",
             showlegend=True,
             legend=dict(
                 yanchor="top",
                 y=0.99,
                 xanchor="left",
                 x=0.01,
-                bgcolor='rgba(255, 255, 255, 0.9)',
-                font=dict(color='black') # Changed legend text color
+                bgcolor='rgba(255, 255, 255, 0.9)'
             ),
             margin=dict(l=0, r=0, t=30, b=0)
         )
@@ -828,7 +885,7 @@ class EnhancedVisualizationEngine:
             type="rect",
             x0=0, y0=0, x1=length, y1=width,
             line=dict(color="rgb(100, 100, 100)", width=3),
-            fillcolor="black"  # Changed floor plan background to black
+            fillcolor="rgba(245, 245, 245, 0.3)"
         )
         
         # Display wall
@@ -861,8 +918,7 @@ class EnhancedVisualizationEngine:
             showarrow=True,
             arrowcolor="red",
             bgcolor="white",
-            bordercolor="red",
-            font=dict(color='black') # Changed text color to black for visibility
+            bordercolor="red"
         )
         
         fig.add_annotation(
@@ -871,29 +927,24 @@ class EnhancedVisualizationEngine:
             showarrow=True,
             arrowcolor="gray",
             bgcolor="white",
-            bordercolor="gray",
-            font=dict(color='black') # Changed text color to black for visibility
+            bordercolor="gray"
         )
         
         fig.update_layout(
-            title=dict(text="Equipment Layout - Floor Plan View", font=dict(color='white')), # Changed title color
+            title="Equipment Layout - Floor Plan View",
             xaxis=dict(
                 title=f"Length ({length:.1f}m)", 
                 scaleanchor="y", 
                 scaleratio=1,
-                range=[0, length + 0.5],
-                tickfont=dict(color='white'),  # Changed tick label color
-                title_font=dict(color='white') # Changed axis title color
+                range=[0, length + 0.5]
             ),
             yaxis=dict(
                 title=f"Width ({width:.1f}m)",
-                range=[0, width + 0.5],
-                tickfont=dict(color='white'),  # Changed tick label color
-                title_font=dict(color='white') # Changed axis title color
+                range=[0, width + 0.5]
             ),
             height=400,
-            plot_bgcolor='black', # Changed plot background to black
-            paper_bgcolor='black' # Changed paper background to black
+            plot_bgcolor='white',
+            paper_bgcolor='white'
         )
         
         return fig
@@ -1027,6 +1078,7 @@ def main():
     if st.session_state.recommendations:
         recommendations = st.session_state.recommendations
         room_specs = st.session_state.room_specs
+        recommender = MaximizedAVRecommender() # Re-instantiate to access methods
         
         total_cost = sum(recommendations[cat]['price'] for cat in ['display', 'camera', 'audio', 'control', 'lighting'])
         
@@ -1087,29 +1139,106 @@ def main():
             st.plotly_chart(EnhancedVisualizationEngine.create_equipment_layout_2d(room_specs, recommendations), use_container_width=True)
 
         with tab4:
-            st.subheader("Alternative Configurations & Upgrade Path")
-            col1, col2 = st.columns(2)
-            with col1:
-                if recommendations.get('alternatives'):
-                    for tier_name, alt_config in recommendations['alternatives'].items():
-                        st.markdown(f"#### {tier_name} Alternative")
-                        for cat in ['displays', 'cameras', 'audio']:
-                            if cat in alt_config:
+            st.subheader("Alternative Configurations & Smart Upgrade Planner")
+            
+            # Display Alternative Configurations
+            if recommendations.get('alternatives'):
+                st.markdown("#### Alternative Configurations")
+                for tier_name, alt_config in recommendations['alternatives'].items():
+                    st.markdown(f"##### {tier_name} Tier")
+                    col1, col2, col3 = st.columns(3)
+                    cols = [col1, col2, col3]
+                    for i, cat in enumerate(['displays', 'cameras', 'audio']):
+                        if cat in alt_config:
+                            with cols[i]:
                                 name, info = alt_config[cat]
                                 st.markdown(f"""<div class="comparison-card" style="border: 1px solid #dee2e6;">
                                     <strong>{cat.title()}:</strong> {name}<br>
                                     ${info['price']:,} | ⭐ {info['rating']}/5.0
                                 </div>""", unsafe_allow_html=True)
-            with col2:
-                 if recommendations.get('upgrade_path'):
-                    st.markdown("#### 🚀 Upgrade Roadmap")
-                    for upgrade in recommendations['upgrade_path']:
-                        st.markdown(f"""<div class="alert-success">
-                            <h5>{upgrade['phase']} to {upgrade['tier']}</h5>
-                            <p><strong>Focus:</strong> {upgrade['focus']}</p>
-                            <p><strong>Add. Investment:</strong> ${upgrade['estimated_cost']:,}</p>
-                        </div>""", unsafe_allow_html=True)
-        
+            
+            st.markdown("<hr>", unsafe_allow_html=True)
+
+            # Display Smart Upgrade Planner
+            if recommendations.get('upgrade_path'):
+                upgrade = recommendations['upgrade_path'][0] # Use the first available upgrade path
+                smart_plan = recommender._generate_smart_upgrade_plan(
+                    room_specs, 
+                    st.session_state.budget_tier,
+                    upgrade['estimated_cost']
+                )
+                
+                # Display Executive Summary
+                st.markdown("""
+                <div class="premium-card">
+                    <h3>💡 Upgrade Strategy Overview to {up_tier} Tier</h3>
+                    <p>A structured approach to achieving premium AV capabilities while maintaining operational continuity.</p>
+                    <p><strong>Total Add. Investment:</strong> ${total:,.0f} | <strong>Est. Monthly:</strong> ${monthly:,.0f}</p>
+                </div>
+                """.format(
+                    up_tier=upgrade['tier'],
+                    total=smart_plan['total_investment'], 
+                    monthly=smart_plan['monthly_investment']
+                ), unsafe_allow_html=True)
+
+                # Display Phased Approach
+                st.markdown("#### 📈 Phased Implementation Plan")
+                cols = st.columns(4)
+                for i, (phase_name, phase_info) in enumerate(smart_plan['phases'].items()):
+                    with cols[i]:
+                        st.markdown(f"""
+                        <div class="feature-card">
+                            <h4>{phase_name}</h4>
+                            <p><strong>Budget:</strong> ${phase_info['budget']:,.0f}</p>
+                            <p><strong>Focus:</strong> {phase_info['focus']}</p>
+                            <ul style="font-size: 0.9em; padding-left: 15px;">
+                                {''.join([f'<li>{p}</li>' for p in phase_info['priorities']])}
+                            </ul>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                # Display ROI Metrics
+                st.markdown("#### 📊 Expected ROI Metrics")
+                roi_cols = st.columns(4)
+                for i, (metric, value) in enumerate(smart_plan['roi_metrics'].items()):
+                    with roi_cols[i]:
+                        st.markdown(f"""
+                        <div class="metric-card" style="background: var(--dark-background) !important;">
+                            <h3>{value}</h3>
+                            <p>{metric}</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                # Add Implementation Guidelines & Risk Mitigation
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown("#### 🎯 Implementation Guidelines")
+                    st.markdown("""
+                    <div class="comparison-card" style="border: 1px solid #dee2e6;">
+                        <strong>Key Success Factors:</strong>
+                        <ul>
+                            <li>Maintain operational continuity during upgrades</li>
+                            <li>Schedule installations during off-peak hours</li>
+                            <li>Provide comprehensive staff training for each phase</li>
+                            <li>Regular system testing and optimization</li>
+                        </ul>
+                    </div>
+                    """, unsafe_allow_html=True)
+                with col2:
+                    st.markdown("#### 🛡️ Risk Mitigation Strategy")
+                    risks = [
+                        ("Operational", "Minimize disruption through phased implementation"),
+                        ("Technical", "Ensure compatibility across all systems"),
+                        ("Financial", "Fixed cost agreement with flexible payment terms")
+                    ]
+                    for risk_type, strategy in risks:
+                        st.markdown(f"""
+                        <div class="feature-card" style="border-left-color: #f39c12;">
+                            <strong>{risk_type} Risk</strong>
+                            <p>{strategy}</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+
         with tab5:
             st.subheader("Professional Report Summary")
             st.markdown(f"""<div class="premium-card">
