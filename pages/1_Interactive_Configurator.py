@@ -6,164 +6,369 @@ from typing import Dict, List, Any
 
 st.set_page_config(page_title="AI Room Configurator Pro Max", page_icon="🏢", layout="wide")
 
-# --- CSS Styling ---
+# --- Improved CSS Styling ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
     :root {
         --primary-color: #2563eb;
+        --primary-hover: #1d4ed8;
         --success-color: #22c55e;
-        --background-color: #f6f8fa;
+        --background-color: #f8fafc;
         --dark-background: #1e293b;
         --sidebar-bg: #1e293b;
         --sidebar-text: #f3f4f6;
         --text-color: #1e293b;
+        --text-light: #64748b;
         --body-text-color: #334155;
+        --card-bg: #ffffff;
         --card-shadow: 0 6px 24px rgba(30,41,59,0.08);
         --border-radius-lg: 18px;
         --border-radius-md: 12px;
-        --accent-color: #e0e7ef;
-        --feature-bg: #fff;
+        --accent-color: #e2e8f0;
+        --feature-bg: #ffffff;
         --feature-border: #2563eb;
         --metric-bg: #2563eb;
-        --metric-text: #fff;
+        --metric-text: #ffffff;
+        --border-color: #e2e8f0;
     }
-    body, .stApp, .main, .main > div {
-        color: var(--text-color) !important;
+
+    /* Base App Styling */
+    .stApp {
         background-color: var(--background-color) !important;
         font-family: 'Inter', sans-serif !important;
     }
-    .main > div {
-        background: var(--feature-bg) !important;
-        border-radius: var(--border-radius-lg);
-        padding: 28px;
-        margin: 18px;
-        box-shadow: var(--card-shadow);
-        color: var(--text-color) !important;
+
+    /* Main Content Area */
+    .main .block-container {
+        padding: 2rem 1rem !important;
+        max-width: 1200px !important;
     }
-    .main h1, .main h2, .main h3, .main h4, .main h5, .main h6 {
-        color: var(--text-color) !important;
-        font-weight: 700;
-        letter-spacing: 0.01em;
+
+    /* Content Cards */
+    .main > div > div {
+        background: var(--card-bg) !important;
+        border-radius: var(--border-radius-lg) !important;
+        padding: 2rem !important;
+        margin: 1rem 0 !important;
+        box-shadow: var(--card-shadow) !important;
+        border: 1px solid var(--border-color) !important;
     }
-    .main p, .main li, .main div, .main span, .main label {
+
+    /* Typography */
+    .main h1 {
+        color: var(--text-color) !important;
+        font-weight: 700 !important;
+        font-size: 2.5rem !important;
+        margin-bottom: 1rem !important;
+        letter-spacing: -0.02em !important;
+    }
+
+    .main h2 {
+        color: var(--text-color) !important;
+        font-weight: 600 !important;
+        font-size: 2rem !important;
+        margin: 1.5rem 0 1rem 0 !important;
+        letter-spacing: -0.01em !important;
+    }
+
+    .main h3 {
+        color: var(--text-color) !important;
+        font-weight: 600 !important;
+        font-size: 1.5rem !important;
+        margin: 1.25rem 0 0.75rem 0 !important;
+    }
+
+    .main h4, .main h5, .main h6 {
+        color: var(--text-color) !important;
+        font-weight: 600 !important;
+        margin: 1rem 0 0.5rem 0 !important;
+    }
+
+    /* Body Text */
+    .main p, .main div[data-testid="stMarkdownContainer"] p {
         color: var(--body-text-color) !important;
-        font-size: 16px;
-        font-weight: 500;
+        font-size: 16px !important;
+        font-weight: 400 !important;
+        line-height: 1.6 !important;
+        margin-bottom: 1rem !important;
     }
+
+    .main li {
+        color: var(--body-text-color) !important;
+        font-size: 16px !important;
+        font-weight: 400 !important;
+        line-height: 1.6 !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* Labels and Small Text */
+    .main label, .main .stSelectbox label, .main .stTextInput label {
+        color: var(--text-color) !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* Tabs Styling */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 14px;
-        background: linear-gradient(90deg, var(--dark-background) 0%, #334155 100%);
-        padding: 12px;
-        border-radius: var(--border-radius-md);
+        gap: 8px !important;
+        background: var(--dark-background) !important;
+        padding: 8px !important;
+        border-radius: var(--border-radius-md) !important;
+        margin-bottom: 1.5rem !important;
     }
+
     .stTabs [data-baseweb="tab"] {
-        background: rgba(255,255,255,0.08);
-        border-radius: 10px;
-        color: #fff !important;
-        font-weight: 600;
-        padding: 12px 22px;
-        transition: all 0.2s ease;
-        font-size: 16px;
-        letter-spacing: 0.01em;
+        background: rgba(255,255,255,0.1) !important;
+        border-radius: 8px !important;
+        color: rgba(255,255,255,0.8) !important;
+        font-weight: 500 !important;
+        padding: 12px 20px !important;
+        transition: all 0.2s ease !important;
+        font-size: 14px !important;
+        border: none !important;
     }
+
     .stTabs [data-baseweb="tab"]:hover {
-        background: rgba(255,255,255,0.18);
-        transform: translateY(-2px);
-        color: #fff !important;
+        background: rgba(255,255,255,0.2) !important;
+        color: #ffffff !important;
+        transform: translateY(-1px) !important;
     }
+
     .stTabs [aria-selected="true"] {
         background: var(--primary-color) !important;
-        color: #fff !important;
-        box-shadow: 0 4px 18px rgba(37,99,235,0.18);
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(37,99,235,0.3) !important;
+        font-weight: 600 !important;
     }
+
+    /* Tab Content */
+    .stTabs > div > div > div > div {
+        background: transparent !important;
+        padding: 0 !important;
+    }
+
+    /* Metric Cards */
+    div[data-testid="metric-container"] {
+        background: var(--metric-bg) !important;
+        padding: 1.5rem !important;
+        border-radius: var(--border-radius-md) !important;
+        box-shadow: 0 8px 25px rgba(37,99,235,0.15) !important;
+        border: none !important;
+        margin: 0.75rem 0 !important;
+    }
+
+    div[data-testid="metric-container"] > div {
+        color: var(--metric-text) !important;
+    }
+
+    div[data-testid="metric-container"] label {
+        color: rgba(255,255,255,0.9) !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+    }
+
+    div[data-testid="metric-container"] [data-testid="metric-value"] {
+        color: var(--metric-text) !important;
+        font-size: 2rem !important;
+        font-weight: 700 !important;
+    }
+
+    /* Custom CSS Classes */
     .premium-card {
         background: var(--dark-background) !important;
-        padding: 28px;
-        border-radius: var(--border-radius-lg);
-        color: #fff !important;
-        margin: 18px 0;
-        box-shadow: 0 12px 32px rgba(30,41,59,0.18);
-        border: 1px solid #334155;
+        padding: 2rem !important;
+        border-radius: var(--border-radius-lg) !important;
+        color: #ffffff !important;
+        margin: 1rem 0 !important;
+        box-shadow: 0 12px 32px rgba(30,41,59,0.2) !important;
+        border: 1px solid #374151 !important;
     }
-    .metric-card {
-        background: var(--metric-bg) !important;
-        padding: 22px;
-        border-radius: var(--border-radius-md);
-        box-shadow: 0 8px 25px rgba(37,99,235,0.13);
-        color: var(--metric-text) !important;
-        text-align: center;
-        margin: 12px 0;
-        border: none;
+
+    .premium-card h1, .premium-card h2, .premium-card h3, 
+    .premium-card h4, .premium-card h5, .premium-card h6 {
+        color: #ffffff !important;
     }
-    .metric-card h3 {
-        color: var(--metric-text) !important;
-        margin: 0;
-        font-size: 30px;
-        font-weight: 800;
-        letter-spacing: 0.02em;
+
+    .premium-card p, .premium-card div, .premium-card span {
+        color: rgba(255,255,255,0.9) !important;
     }
-    .metric-card p {
-        color: var(--metric-text) !important;
-        margin: 7px 0 0 0;
-        font-size: 15px;
-        opacity: 0.92;
-        font-weight: 600;
-    }
+
     .feature-card {
         background: var(--feature-bg) !important;
-        padding: 22px;
-        border-radius: var(--border-radius-md);
-        margin: 12px 0;
-        border-left: 6px solid var(--feature-border);
-        box-shadow: 0 2px 8px rgba(37,99,235,0.05);
+        padding: 1.5rem !important;
+        border-radius: var(--border-radius-md) !important;
+        margin: 1rem 0 !important;
+        border-left: 4px solid var(--feature-border) !important;
+        box-shadow: 0 2px 8px rgba(37,99,235,0.08) !important;
         color: var(--text-color) !important;
     }
+
+    .feature-card h3, .feature-card h4 {
+        color: var(--text-color) !important;
+        margin-top: 0 !important;
+    }
+
+    .feature-card p {
+        color: var(--body-text-color) !important;
+    }
+
     .comparison-card {
-        background: var(--feature-bg);
-        padding: 22px;
-        border-radius: var(--border-radius-md);
-        margin: 12px 0;
-        border: 1px solid var(--accent-color);
-        color: var(--text-color);
-        transition: all 0.2s ease;
+        background: var(--feature-bg) !important;
+        padding: 1.5rem !important;
+        border-radius: var(--border-radius-md) !important;
+        margin: 1rem 0 !important;
+        border: 2px solid var(--accent-color) !important;
+        transition: all 0.2s ease !important;
     }
+
     .comparison-card:hover {
-        border-color: var(--primary-color);
-        box-shadow: 0 8px 24px rgba(37,99,235,0.09);
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 8px 24px rgba(37,99,235,0.1) !important;
+        transform: translateY(-2px) !important;
     }
+
+    .comparison-card h3, .comparison-card h4 {
+        color: var(--text-color) !important;
+    }
+
+    .comparison-card p {
+        color: var(--body-text-color) !important;
+    }
+
     .alert-success {
-        background: var(--success-color);
-        color: #fff !important;
-        padding: 16px;
-        border-radius: var(--border-radius-md);
-        margin: 12px 0;
-        font-weight: 600;
-        box-shadow: 0 4px 16px rgba(34,197,94,0.12);
+        background: var(--success-color) !important;
+        color: #ffffff !important;
+        padding: 1rem 1.5rem !important;
+        border-radius: var(--border-radius-md) !important;
+        margin: 1rem 0 !important;
+        font-weight: 500 !important;
+        box-shadow: 0 4px 16px rgba(34,197,94,0.15) !important;
+        border: none !important;
     }
-    .alert-success h5, .alert-success p {
-        color: white !important;
+
+    .alert-success h1, .alert-success h2, .alert-success h3,
+    .alert-success h4, .alert-success h5, .alert-success h6,
+    .alert-success p, .alert-success div, .alert-success span {
+        color: #ffffff !important;
     }
+
+    /* Buttons */
     .stButton > button {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #38bdf8 100%);
-        color: #fff;
-        border: none;
-        padding: 14px 28px;
-        border-radius: 28px;
-        font-weight: 700;
-        font-size: 16px;
-        transition: all 0.2s ease;
-        width: 100%;
-        letter-spacing: 0.01em;
-        box-shadow: 0 2px 8px rgba(37,99,235,0.09);
+        background: linear-gradient(135deg, var(--primary-color) 0%, #3b82f6 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        padding: 0.75rem 2rem !important;
+        border-radius: 2rem !important;
+        font-weight: 600 !important;
+        font-size: 16px !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 12px rgba(37,99,235,0.2) !important;
+        cursor: pointer !important;
     }
+
     .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 32px rgba(37,99,235,0.18);
-        background: linear-gradient(135deg, #1e40af 0%, #38bdf8 100%);
+        background: linear-gradient(135deg, var(--primary-hover) 0%, #2563eb 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 24px rgba(37,99,235,0.3) !important;
     }
-    .css-1d391kg {
-        background: var(--sidebar-bg);
+
+    .stButton > button:focus {
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(37,99,235,0.2) !important;
+    }
+
+    /* Sidebar */
+    .css-1d391kg, [data-testid="stSidebar"] {
+        background: var(--sidebar-bg) !important;
+    }
+
+    .css-1d391kg .stMarkdown, [data-testid="stSidebar"] .stMarkdown {
+        color: var(--sidebar-text) !important;
+    }
+
+    /* Input Fields */
+    .stTextInput input, .stTextArea textarea, .stSelectbox select {
+        background: var(--card-bg) !important;
+        border: 2px solid var(--accent-color) !important;
+        border-radius: 8px !important;
+        color: var(--text-color) !important;
+        font-size: 16px !important;
+        padding: 0.75rem !important;
+        transition: border-color 0.2s ease !important;
+    }
+
+    .stTextInput input:focus, .stTextArea textarea:focus, .stSelectbox select:focus {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 3px rgba(37,99,235,0.1) !important;
+        outline: none !important;
+    }
+
+    /* DataFrames and Tables */
+    .stDataFrame {
+        border-radius: var(--border-radius-md) !important;
+        overflow: hidden !important;
+        box-shadow: var(--card-shadow) !important;
+    }
+
+    /* Charts */
+    .stPlotlyChart {
+        background: var(--card-bg) !important;
+        border-radius: var(--border-radius-md) !important;
+        padding: 1rem !important;
+        box-shadow: var(--card-shadow) !important;
+    }
+
+    /* Expander */
+    .streamlit-expanderHeader {
+        color: var(--text-color) !important;
+        font-weight: 600 !important;
+    }
+
+    .streamlit-expanderContent {
+        background: var(--card-bg) !important;
+        border-radius: var(--border-radius-md) !important;
+    }
+
+    /* Progress Bar */
+    .stProgress > div > div {
+        background: var(--primary-color) !important;
+    }
+
+    /* Fix for any remaining visibility issues */
+    .main * {
+        visibility: visible !important;
+    }
+
+    /* Ensure proper contrast for all text elements */
+    .main .stMarkdown, .main .stText {
+        color: var(--body-text-color) !important;
+    }
+
+    /* Column containers */
+    .main [data-testid="column"] > div {
+        background: transparent !important;
+        padding: 0.5rem !important;
+    }
+
+    /* Status elements */
+    .stAlert {
+        border-radius: var(--border-radius-md) !important;
+        border: none !important;
+    }
+
+    /* File uploader */
+    .stFileUploader {
+        background: var(--card-bg) !important;
+        border: 2px dashed var(--accent-color) !important;
+        border-radius: var(--border-radius-md) !important;
+        padding: 2rem !important;
+    }
+
+    .stFileUploader:hover {
+        border-color: var(--primary-color) !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -452,7 +657,7 @@ class MaximizedAVRecommender:
         if 'Room Scheduling' in features:
             accessories.append({'category': 'Room Booking', 'item': 'Smart Room Panel', 'model': 'Crestron TSS-1070-B-S', 'price': 1899, 'necessity': 'Required'})
         if 'Hearing Loop System' in accessibility_needs:
-             accessories.append({'category': 'Accessibility', 'item': 'Inductive Loop System', 'model': 'Williams AV PLR BP1', 'price': 1500, 'necessity': 'Required'})
+            accessories.append({'category': 'Accessibility', 'item': 'Inductive Loop System', 'model': 'Williams AV PLR BP1', 'price': 1500, 'necessity': 'Required'})
 
         if specs['capacity'] > 16:
             accessories.append({'category': 'Power Management', 'item': 'Intelligent Power Distribution', 'model': 'Middle Atlantic UPS-2200R', 'price': 1599, 'necessity': 'Recommended'})
@@ -1044,15 +1249,15 @@ def main():
         total_cost = sum(rec['price'] for rec in recommendations.values() if isinstance(rec, dict) and 'price' in rec)
         
         col1, col2, col3, col4 = st.columns(4)
-        with col1: st.markdown(f'<div class="metric-card"><h3>${total_cost:,.0f}</h3><p>Total Investment</p></div>', unsafe_allow_html=True)
-        with col2: st.markdown(f'<div class="metric-card"><h3>{recommendations["confidence_score"]:.0%}</h3><p>AI Confidence</p></div>', unsafe_allow_html=True)
-        with col3: st.markdown(f'<div class="metric-card"><h3>{room_specs["length"]}m × {room_specs["width"]}m</h3><p>Room Size</p></div>', unsafe_allow_html=True)
-        with col4: st.markdown(f'<div class="metric-card"><h3>{room_specs["capacity"]}</h3><p>Capacity</p></div>', unsafe_allow_html=True)
+        with col1: st.metric("Total Investment", f"${total_cost:,.0f}")
+        with col2: st.metric("AI Confidence", f"{recommendations['confidence_score']:.0%}")
+        with col3: st.metric("Room Size", f"{room_specs['length']}m × {room_specs['width']}m")
+        with col4: st.metric("Capacity", f"{room_specs['capacity']}")
         
         tab1, tab2, tab3, tab4, tab5 = st.tabs(["🎯 Recommendations", "📊 Analysis", "🎨 Visualization", "🔄 Alternatives", "📋 Report"])
         
         with tab1:
-            st.subheader("AI-Powered Equipment Recommendations")
+            st.header("AI-Powered Equipment Recommendations")
             col1, col2 = st.columns(2)
             with col1:
                 for cat, icon in [('display', '📺'), ('camera', '🎥'), ('audio', '🔊')]:
@@ -1070,12 +1275,12 @@ def main():
                         st.markdown(f"<div class='feature-card'><strong>{acc['item']}</strong> ({acc['model']})<br>Price: ${acc['price']:,} ({acc['necessity']})</div>", unsafe_allow_html=True)
 
         with tab2:
-            st.subheader("Room Analysis & Performance Metrics")
+            st.header("Room Analysis & Performance Metrics")
             col1, col2 = st.columns([1, 1])
             with col1:
                 st.markdown("#### Room Characteristics")
                 analysis = recommendations['room_analysis']
-                st.markdown(f"""<div class="comparison-card" style="border: 1px solid #dee2e6;">
+                st.markdown(f"""<div class="comparison-card">
                     <p><strong>Category:</strong> {analysis['size_category']}</p>
                     <p><strong>Shape:</strong> {analysis['shape_analysis']}</p>
                     <p><strong>Acoustics:</strong> Reverb is {analysis['acoustic_properties']['reverb_category']}, Treatment needed: {'Yes' if analysis['acoustic_properties']['treatment_needed'] else 'No'}</p>
@@ -1087,7 +1292,7 @@ def main():
                 st.plotly_chart(EnhancedVisualizationEngine.create_feature_comparison_radar(recommendations, recommendations.get('alternatives', {})), use_container_width=True)
 
         with tab3:
-            st.subheader("Interactive Room Visualization")
+            st.header("Interactive Room Visualization")
             viz_config = {'room_elements': room_elements_config, 'style_options': style_config, 'advanced_features': advanced_config}
             viz_engine = EnhancedVisualizationEngine()
             fig_3d = viz_engine.create_3d_room_visualization(room_specs, recommendations, viz_config)
@@ -1095,18 +1300,18 @@ def main():
             st.plotly_chart(EnhancedVisualizationEngine.create_equipment_layout_2d(room_specs, recommendations), use_container_width=True)
 
         with tab4:
-            st.subheader("Alternative Configurations & Smart Upgrade Planner")
+            st.header("Alternative Configurations & Smart Upgrade Planner")
             if recommendations.get('alternatives'):
                 st.markdown("#### Alternative Configurations")
                 for tier_name, alt_config in recommendations['alternatives'].items():
-                    st.markdown(f"##### {tier_name} Tier")
+                    st.markdown(f"<h5>{tier_name} Tier</h5>")
                     col1, col2, col3 = st.columns(3)
                     cols = [col1, col2, col3]
                     for i, cat in enumerate(['displays', 'cameras', 'audio']):
                         if cat in alt_config:
                             with cols[i]:
                                 name, info = alt_config[cat]
-                                st.markdown(f"""<div class="comparison-card" style="border: 1px solid #dee2e6;"><strong>{cat.title()}:</strong> {name}<br>${info['price']:,} | ⭐ {info['rating']}/5.0</div>""", unsafe_allow_html=True)
+                                st.markdown(f"""<div class="comparison-card"><strong>{cat.title()}:</strong> {name}<br>${info['price']:,} | ⭐ {info['rating']}/5.0</div>""", unsafe_allow_html=True)
             
             st.markdown("<hr>", unsafe_allow_html=True)
 
@@ -1136,7 +1341,7 @@ def main():
                         """, unsafe_allow_html=True)
 
         with tab5:
-            st.subheader("Professional Report Summary")
+            st.header("Professional Report Summary")
             st.markdown(f"""<div class="premium-card">
                 <h3>Executive Summary</h3>
                 <p>AI-generated AV solution for a <strong>{room_specs['template']}</strong> ({room_specs['length']}m × {room_specs['width']}m) for <strong>{room_specs['capacity']} people</strong>.</p>
