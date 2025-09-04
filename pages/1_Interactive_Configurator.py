@@ -2,30 +2,24 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import plotly.express as px
 from typing import Dict, List
-import json
-from datetime import datetime, timedelta
-import base64
-from io import BytesIO
 
 st.set_page_config(page_title="AI Room Configurator Pro Max", page_icon="🏢", layout="wide")
 
-# Updated & Centralized Custom CSS with high-contrast colors for readability
+# --- NEW High-Contrast & User-Friendly CSS ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
     :root {
-        --primary-color: #4A90E2; /* Professional Blue */
-        --success-color: #50C878; /* Emerald Green */
-        --background-color: #F4F7F9; /* Light Gray */
-        --dark-background: #2E3A4B;
-        --text-color: #333745; /* Charcoal */
-        --card-shadow: 0 10px 30px rgba(0,0,0,0.07);
-        --border-radius-lg: 20px;
-        --border-radius-md: 12px;
+        --primary-color: #007BFF;      /* Vibrant, accessible blue */
+        --success-color: #28A745;      /* Clear success green */
+        --background-color: #F8F9FA;  /* Very light grey for a clean canvas */
+        --dark-background: #212529;   /* Deep charcoal for high contrast */
+        --text-color: #343A40;        /* Darker text for readability */
+        --card-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Softer, more modern shadow */
+        --border-radius-lg: 16px;
+        --border-radius-md: 10px;
     }
 
     .stApp {
@@ -44,18 +38,18 @@ st.markdown("""
     
     .stTabs [data-baseweb="tab-list"] {
         gap: 12px;
-        background: linear-gradient(90deg, var(--dark-background) 0%, #4A5568 100%);
+        background-color: var(--dark-background);
         padding: 10px;
         border-radius: var(--border-radius-md);
     }
     
     .stTabs [data-baseweb="tab"] {
         background: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
+        border-radius: 8px;
         color: white;
         font-weight: 500;
         padding: 10px 18px;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
     }
     
     .stTabs [data-baseweb="tab"]:hover {
@@ -64,43 +58,41 @@ st.markdown("""
     }
     
     .stTabs [aria-selected="true"] {
-        background: var(--primary-color) !important;
+        background-color: var(--primary-color) !important;
         color: white !important;
-        box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
     }
     
-    /* Updated for better readability */
     .premium-card {
         background-color: var(--dark-background);
         padding: 25px;
         border-radius: var(--border-radius-lg);
         color: white;
         margin: 15px 0;
-        box-shadow: 0 15px 40px rgba(0,0,0,0.2);
     }
     
-    /* Updated for better readability */
     .metric-card {
-        background-color: var(--primary-color);
+        background-color: white;
+        border: 1px solid #dee2e6;
         padding: 20px;
         border-radius: var(--border-radius-md);
-        box-shadow: 0 8px 25px rgba(74, 144, 226, 0.3);
-        color: white !important;
+        color: var(--text-color) !important;
         text-align: center;
         margin: 10px 0;
     }
 
     .metric-card h3 {
-        color: white !important;
+        color: var(--primary-color) !important;
         margin: 0;
         font-size: 28px;
+        font-weight: 700;
     }
 
     .metric-card p {
-        color: white !important;
+        color: #6c757d !important;
         margin: 5px 0 0 0;
         font-size: 14px;
-        opacity: 0.9;
+        font-weight: 500;
     }
     
     .feature-card {
@@ -109,25 +101,10 @@ st.markdown("""
         border-radius: var(--border-radius-md);
         margin: 10px 0;
         border-left: 5px solid var(--primary-color);
-        box-shadow: var(--card-shadow);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         color: var(--text-color);
     }
     
-    .comparison-card {
-        background: white;
-        padding: 20px;
-        border-radius: var(--border-radius-md);
-        margin: 10px 0;
-        border: 1px solid #e1e5e9;
-        transition: all 0.3s ease;
-    }
-    
-    .comparison-card:hover {
-        border-color: var(--primary-color);
-        box-shadow: 0 10px 30px rgba(74, 144, 226, 0.1);
-    }
-    
-    /* Updated for better readability */
     .alert-success {
         background-color: var(--success-color);
         color: white;
@@ -137,22 +114,22 @@ st.markdown("""
     }
     
     .stButton > button {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #50E3C2 100%);
+        background-color: var(--primary-color);
         color: white;
         border: none;
         padding: 12px 24px;
         border-radius: 25px;
         font-weight: 600;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
         width: 100%;
     }
     
     .stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+        background-color: #0069d9; /* Darker blue on hover */
     }
     
-    /* Sidebar styling */
     .css-1d391kg {
         background: var(--dark-background);
     }
@@ -1111,7 +1088,7 @@ def main():
             with col1:
                 st.markdown("#### Room Characteristics")
                 analysis = recommendations['room_analysis']
-                st.markdown(f"""<div class="comparison-card" style="color: black;">
+                st.markdown(f"""<div class="comparison-card" style="color: black; border: 1px solid #dee2e6;">
                     <p><strong>Category:</strong> {analysis['size_category']}</p>
                     <p><strong>Shape:</strong> {analysis['shape_analysis']}</p>
                     <p><strong>Acoustics:</strong> Reverb is {analysis['acoustic_properties']['reverb_category']}, Treatment needed: {'Yes' if analysis['acoustic_properties']['treatment_needed'] else 'No'}</p>
@@ -1137,7 +1114,7 @@ def main():
                         for cat in ['displays', 'cameras', 'audio']:
                             if cat in alt_config:
                                 name, info = alt_config[cat]
-                                st.markdown(f"""<div class="comparison-card" style="color: black;">
+                                st.markdown(f"""<div class="comparison-card" style="color: black; border: 1px solid #dee2e6;">
                                     <strong>{cat.title()}:</strong> {name}<br>
                                     ${info['price']:,} | ⭐ {info['rating']}/5.0
                                 </div>""", unsafe_allow_html=True)
