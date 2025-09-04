@@ -9,7 +9,7 @@ st.set_page_config(page_title="AI Room Configurator Pro Max", page_icon="🏢", 
 # --- CSS Styling ---
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.comcom/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     :root {
         --primary-color: #2563eb;
         --success-color: #22c55e;
@@ -656,215 +656,221 @@ class MaximizedAVRecommender:
         base_costs = {'Budget': 15000, 'Professional': 45000, 'Premium': 120000}
         return int(base_costs[tier] * (1 + (specs['capacity'] / 50)))
 
-# --- Visualization Engine ---
+# --- NEW MODULAR Visualization Engine ---
 class EnhancedVisualizationEngine:
-    @staticmethod
-    def create_3d_room_visualization(room_specs, recommendations, visualization_options=None):
-        # Set default visualization options if none provided
-        if visualization_options is None:
-            visualization_options = {
-                'show_chairs': True,
-                'show_displays': True,
-                'show_cameras': True,
-                'show_speakers': True,
-                'show_lighting': True,
-                'show_control': True,
-                'show_table': True,
-                'chair_style': 'modern',  # modern, executive, training
-                'table_style': 'rectangular',  # rectangular, oval, modular
-                'color_scheme': 'professional',  # professional, modern, classic
-                'lighting_mode': 'day',  # day, evening, presentation
-                'view_angle': 'perspective'  # perspective, top, front, side
-            }
+    def __init__(self):
+        self.color_schemes = {
+            'professional': {'wall': '#F0F2F5','floor': '#E5E9F0','accent': '#4A90E2','wood': '#8B5E3C','screen': '#1A1A1A','metal': '#B8B8B8','glass': '#FFFFFF'},
+            'modern': {'wall': '#FFFFFF','floor': '#F8F9FA','accent': '#2563EB','wood': '#A0522D','screen': '#000000','metal': '#C0C0C0','glass': '#E8F0FE'},
+            'classic': {'wall': '#F5F5DC','floor': '#DEB887','accent': '#800000','wood': '#8B4513','screen': '#2F4F4F','metal': '#CD853F','glass': '#F0F8FF'},
+            'warm': {'wall': '#FEF3E0','floor': '#F3D1A3','accent': '#E53E3E','wood': '#BF5B32','screen': '#2D3748','metal': '#D69E2E','glass': '#FFF5EB'},
+            'cool': {'wall': '#E6FFFA','floor': '#B2F5EA','accent': '#38B2AC','wood': '#718096','screen': '#1A202C','metal': '#A0AEC0','glass': '#EBF8FF'}
+        }
+        self.lighting_modes = {
+            'day': {'ambient': 0.8, 'intensity': 1.0, 'color': 'rgb(255, 255, 224)'},
+            'evening': {'ambient': 0.4, 'intensity': 0.7, 'color': 'rgb(255, 228, 181)'},
+            'presentation': {'ambient': 0.3, 'intensity': 0.5, 'color': 'rgb(200, 200, 255)'},
+            'video conference': {'ambient': 0.6, 'intensity': 0.8, 'color': 'rgb(220, 220, 255)'}
+        }
 
-        # Create base figure
+    def create_3d_room_visualization(self, room_specs, recommendations, viz_config):
         fig = go.Figure()
+        colors = self.color_schemes[viz_config['style_options']['color_scheme']]
+        lighting = self.lighting_modes[viz_config['style_options']['lighting_mode']]
+        
+        # Add room structure
+        self._add_room_structure(fig, room_specs, colors, lighting)
+        
+        # Add core elements based on configuration
+        if viz_config['room_elements']['show_table']:
+            self._add_table(fig, room_specs, colors, viz_config['style_options']['table_style'])
+        
+        if viz_config['room_elements']['show_chairs']:
+            self._add_seating(fig, room_specs, colors, viz_config['style_options']['chair_style'])
+        
+        if viz_config['room_elements']['show_displays']:
+            self._add_display_system(fig, room_specs, colors, recommendations)
+        
+        if viz_config['room_elements']['show_cameras']:
+            self._add_camera_system(fig, room_specs, colors, recommendations)
+        
+        if viz_config['room_elements']['show_lighting']:
+            self._add_lighting_system(fig, room_specs, colors, lighting)
+        
+        if viz_config['room_elements']['show_speakers']:
+            self._add_audio_system(fig, room_specs, colors, recommendations)
 
-        # Room dimensions
-        length, width, height = room_specs['length'], room_specs['width'], room_specs['ceiling_height']
+        if viz_config['room_elements']['show_control']:
+            self._add_control_system(fig, room_specs, colors)
+        
+        # Add additional elements
+        if viz_config['room_elements']['show_whiteboard']:
+            self._add_whiteboard(fig, room_specs, colors)
+        
+        if viz_config['room_elements']['show_credenza']:
+            self._add_credenza(fig, room_specs, colors)
+        
+        # Add advanced features
+        if viz_config['advanced_features']['show_measurements']:
+            self._add_measurements(fig, room_specs)
+        
+        if viz_config['advanced_features']['show_zones']:
+            self._add_coverage_zones(fig, room_specs)
+        
+        if viz_config['advanced_features']['show_cable_paths']:
+            self._add_cable_management(fig, room_specs, colors)
+        
+        if viz_config['advanced_features']['show_network']:
+            self._add_network_points(fig, room_specs)
+        
+        # Update camera view and layout
+        self._update_camera_view(fig, room_specs, viz_config['style_options']['view_angle'])
+        self._update_layout(fig, room_specs)
+        
+        return fig
 
-        # Define color schemes
-        color_schemes = {
-            'professional': {
-                'wall': '#F0F2F5',
-                'floor': '#E5E9F0',
-                'accent': '#4A90E2',
-                'wood': '#8B5E3C',
-                'screen': '#1A1A1A',
-                'metal': '#B8B8B8'
-            },
-            'modern': {
-                'wall': '#FFFFFF',
-                'floor': '#F8F9FA',
-                'accent': '#2563EB',
-                'wood': '#A0522D',
-                'screen': '#000000',
-                'metal': '#C0C0C0'
-            },
-            'classic': {
-                'wall': '#F5F5DC',
-                'floor': '#DEB887',
-                'accent': '#800000',
-                'wood': '#8B4513',
-                'screen': '#2F4F4F',
-                'metal': '#CD853F'
-            }
-        }
+    def _add_room_structure(self, fig, specs, colors, lighting):
+        self._add_walls(fig, specs, colors, lighting)
+        # Floor
+        fig.add_trace(go.Surface(x=[[0, specs['length']], [0, specs['length']]], y=[[0, 0], [specs['width'], specs['width']]], z=[[0, 0], [0, 0]], colorscale=[[0, colors['floor']], [1, colors['floor']]], showscale=False, name='Floor', lighting=lighting))
 
-        colors = color_schemes[visualization_options['color_scheme']]
+    def _add_walls(self, fig, specs, colors, lighting):
+        length, width, height = specs['length'], specs['width'], specs['ceiling_height']
+        # Back wall
+        fig.add_trace(go.Surface(x=[[0, 0], [0, 0]], y=[[0, width], [0, width]], z=[[0, 0], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, opacity=0.9, lighting=lighting, name="Back Wall"))
+        # Side walls
+        fig.add_trace(go.Surface(x=[[0, length], [0, length]], y=[[0, 0], [0, 0]], z=[[0, 0], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, opacity=0.7, lighting=lighting, name="Left Wall"))
+        fig.add_trace(go.Surface(x=[[0, length], [0, length]], y=[[width, width], [width, width]], z=[[0, 0], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, opacity=0.7, lighting=lighting, name="Right Wall"))
 
-        # Add room structure with enhanced materials
-        EnhancedVisualizationEngine._add_room_structure(fig, length, width, height, colors, visualization_options['lighting_mode'])
+    def _add_table(self, fig, specs, colors, table_style):
+        length, width = specs['length'], specs['width']
+        table_height = 0.75
+        table_x_center = length * 0.55
+        table_y_center = width * 0.5
+        table_length = min(length * 0.6, 5)
+        table_width = min(width * 0.4, 2)
+        
+        if table_style in ['rectangular', 'boat-shaped', 'modular']:
+            x, y = np.meshgrid(np.linspace(table_x_center - table_length/2, table_x_center + table_length/2, 2), np.linspace(table_y_center - table_width/2, table_y_center + table_width/2, 2))
+            z = np.full_like(x, table_height)
+            fig.add_trace(go.Surface(x=x, y=y, z=z, colorscale=[[0, colors['wood']], [1, colors['wood']]], showscale=False, name='Table'))
+        elif table_style == 'oval':
+            theta = np.linspace(0, 2 * np.pi, 50)
+            x = table_x_center + (table_length / 2) * np.cos(theta)
+            y = table_y_center + (table_width / 2) * np.sin(theta)
+            z = np.full_like(x, table_height)
+            fig.add_trace(go.Scatter3d(x=np.append(x, x[0]), y=np.append(y, y[0]), z=np.append(z, z[0]), mode='lines', line=dict(color=colors['wood'], width=5), fill='toself', fillcolor=colors['wood'], name='Table'))
 
-        # Add display if enabled
-        if visualization_options['show_displays']:
-            EnhancedVisualizationEngine._add_display_system(fig, length, width, height, colors, recommendations)
+    def _add_seating(self, fig, specs, colors, chair_style):
+        length, width, capacity = specs['length'], specs['width'], specs['capacity']
+        table_length = min(length * 0.6, 5)
+        table_width = min(width * 0.4, 2)
+        table_x_center = length * 0.55
+        table_y_center = width * 0.5
+        chairs_per_side = min(6, capacity // 2)
 
-        # Add table if enabled
-        if visualization_options['show_table']:
-            EnhancedVisualizationEngine._add_conference_table(fig, length, width, height, colors, 
-                                             visualization_options['table_style'])
+        for i in range(chairs_per_side):
+            x_pos = table_x_center - table_length/2 + ((i + 0.5) * table_length / chairs_per_side)
+            for offset in [-1, 1]:
+                y_pos = table_y_center + offset * (table_width/2 + 0.5)
+                if chair_style in ['modern', 'casual']:
+                    fig.add_trace(go.Scatter3d(x=[x_pos], y=[y_pos], z=[0.4], mode='markers', marker=dict(size=10, symbol='square', color=colors['accent']), name='Chair'))
+                elif chair_style in ['executive', 'training']:
+                    fig.add_trace(go.Mesh3d(x=[x_pos-0.2, x_pos+0.2, x_pos+0.2, x_pos-0.2], y=[y_pos, y_pos, y_pos, y_pos], z=[0.4, 0.4, 1.0, 1.0], i=[0,0],j=[1,2],k=[2,3], color=colors['metal'], name='Chair'))
 
-        # Add chairs if enabled
-        if visualization_options['show_chairs']:
-            EnhancedVisualizationEngine._add_seating(fig, room_specs, length, width, colors,
-                                    visualization_options['chair_style'])
+    def _add_display_system(self, fig, specs, colors, recommendations):
+        width, height = specs['width'], specs['height']
+        screen_width = min(3.5, width * 0.6)
+        screen_height = screen_width * 9/16
+        screen_y_center = width / 2
+        screen_z_center = height * 0.5
+        fig.add_trace(go.Mesh3d(x=[0.05, 0.05, 0.05, 0.05], y=[screen_y_center - screen_width/2, screen_y_center + screen_width/2, screen_y_center + screen_width/2, screen_y_center - screen_width/2], z=[screen_z_center - screen_height/2, screen_z_center - screen_height/2, screen_z_center + screen_height/2, screen_z_center + screen_height/2], i=[0, 0], j=[1, 2], k=[2, 3], color=colors['screen'], name='Display'))
 
-        # Add camera system if enabled
-        if visualization_options['show_cameras']:
-            EnhancedVisualizationEngine._add_camera_system(fig, width, height, colors, recommendations)
+    def _add_camera_system(self, fig, specs, colors, recommendations):
+        width, height = specs['width'], specs['height']
+        screen_width = min(3.5, width * 0.6)
+        screen_height = screen_width * 9 / 16
+        camera_z = height * 0.5 + screen_height / 2 + 0.1
+        fig.add_trace(go.Scatter3d(x=[0.08], y=[width/2], z=[camera_z], mode='markers', marker=dict(size=8, symbol='diamond', color=colors['screen']), name='Camera'))
 
-        # Add lighting if enabled
-        if visualization_options['show_lighting']:
-            EnhancedVisualizationEngine._add_lighting_system(fig, length, width, height, colors,
-                                           visualization_options['lighting_mode'])
+    def _add_lighting_system(self, fig, specs, colors, lighting):
+        length, width, height = specs['length'], specs['width'], specs['ceiling_height']
+        light_color = lighting['color']
+        for i in range(2):
+            for j in range(3):
+                fig.add_trace(go.Scatter3d(x=[length * (i + 1)/3], y=[width * (j + 1)/4], z=[height-0.05], mode='markers', marker=dict(size=7, color=light_color, symbol='circle'), name='Lighting'))
 
-        # Add speakers if enabled
-        if visualization_options['show_speakers']:
-            EnhancedVisualizationEngine._add_audio_system(fig, length, width, height, colors, recommendations)
+    def _add_audio_system(self, fig, specs, colors, recommendations):
+        length, width, height = specs['length'], specs['width'], specs['ceiling_height']
+        for i in [0.25, 0.75]:
+            for j in [0.25, 0.75]:
+                fig.add_trace(go.Scatter3d(x=[length*i], y=[width*j], z=[height-0.1], mode='markers', marker=dict(size=6, color=colors['metal'], symbol='circle-open'), name='Speaker'))
+                
+    def _add_control_system(self, fig, specs, colors):
+        length, width, height = specs['length'], specs['width'], specs['ceiling_height']
+        fig.add_trace(go.Scatter3d(x=[length - 0.1], y=[width * 0.8], z=[height * 0.4], mode='markers', marker=dict(size=10, symbol='square', color=colors['accent']), name='Control Panel'))
+    
+    def _add_whiteboard(self, fig, specs, colors):
+        length, width, height = specs['length'], specs['width'], specs['ceiling_height']
+        wb_width = min(2, width * 0.4)
+        wb_height = wb_width * 3/4
+        fig.add_trace(go.Mesh3d(x=[length-0.05, length-0.05, length-0.05, length-0.05], y=[(width/2)-(wb_width/2), (width/2)+(wb_width/2), (width/2)+(wb_width/2), (width/2)-(wb_width/2)], z=[height*0.3, height*0.3, height*0.3+wb_height, height*0.3+wb_height], i=[0,0],j=[1,2],k=[2,3], color=colors['glass'], opacity=0.8, name='Whiteboard'))
+    
+    def _add_credenza(self, fig, specs, colors):
+        length, width, height = specs['length'], specs['width'], specs['ceiling_height']
+        c_len = min(2.5, width * 0.5)
+        c_depth, c_height = 0.5, 0.8
+        x, y = np.meshgrid(np.linspace(0.1, 0.1+c_depth, 2), np.linspace(width/2-c_len/2, width/2+c_len/2, 2))
+        z = np.full_like(x, c_height)
+        fig.add_trace(go.Surface(x=x, y=y, z=z, colorscale=[[0, colors['wood']], [1, colors['wood']]], showscale=False, name='Credenza'))
+    
+    def _add_measurements(self, fig, specs):
+        length, width, height = specs['length'], specs['width'], specs['ceiling_height']
+        fig.add_trace(go.Scatter3d(x=[0, length], y=[width*1.1, width*1.1], z=[0,0], mode='lines+text', text=["", f"{length}m"], line=dict(color='black', width=2), textposition="top right", name="Length"))
+        fig.add_trace(go.Scatter3d(x=[length*1.1, length*1.1], y=[0, width], z=[0,0], mode='lines+text', text=["", f"{width}m"], line=dict(color='black', width=2), textposition="middle right", name="Width"))
 
-        # Add control panel if enabled
-        if visualization_options['show_control']:
-            EnhancedVisualizationEngine._add_control_system(fig, length, width, height, colors)
+    def _add_coverage_zones(self, fig, specs):
+        length, width, height = specs['length'], specs['width'], specs['ceiling_height']
+        # Camera FOV
+        x_cam, y_cam, z_cam = [0.08, length*0.8, length*0.8], [width/2, width*0.1, width*0.9], [height*0.6, 0, 0]
+        fig.add_trace(go.Mesh3d(x=x_cam, y=y_cam, z=z_cam, i=[0], j=[1], k=[2], color='blue', opacity=0.15, name='Camera Zone'))
+    
+    def _add_cable_management(self, fig, specs, colors):
+        length, width = specs['length'], specs['width']
+        table_x_center = length * 0.55
+        table_y_center = width * 0.5
+        fig.add_trace(go.Scatter3d(x=[0.1, table_x_center], y=[width/2, table_y_center], z=[0.1, 0.1], mode='lines', line=dict(color=colors['accent'], width=4, dash='dot'), name='Cabling'))
 
-        # Set camera angle based on view_angle option
+    def _add_network_points(self, fig, specs):
+        length, width = specs['length'], specs['width']
+        fig.add_trace(go.Scatter3d(x=[0.1, length-0.1], y=[0.1, width-0.1], z=[0.2, 0.2], mode='markers', marker=dict(size=8, symbol='cross', color='green'), name='Network Point'))
+
+    def _update_camera_view(self, fig, specs, view_angle):
+        length, width, height = specs['length'], specs['width'], specs['ceiling_height']
         camera_angles = {
-            'perspective': dict(eye=dict(x=2.2, y=2.2, z=1.5)),
-            'top': dict(eye=dict(x=length/2, y=width/2, z=height+2)),
-            'front': dict(eye=dict(x=length+2, y=width/2, z=height*0.5)),
-            'side': dict(eye=dict(x=length/2, y=width+2, z=height*0.5))
+            'perspective': dict(eye=dict(x=length * -0.8, y=width * -1.2, z=height * 0.8), center=dict(x=length/2, y=width/2, z=height/3)),
+            'top': dict(eye=dict(x=length/2, y=width/2, z=height + 2), center=dict(x=length/2, y=width/2, z=0)),
+            'front': dict(eye=dict(x=length + 2, y=width/2, z=height*0.5), center=dict(x=length/2, y=width/2, z=height/2)),
+            'side': dict(eye=dict(x=length/2, y=width + 2, z=height*0.5), center=dict(x=length/2, y=width/2, z=height/2)),
+            'corner': dict(eye=dict(x=length * 1.5, y=width * 1.5, z=height * 1.2), center=dict(x=length/2, y=width/2, z=height/3))
         }
+        fig.update_layout(scene_camera=camera_angles[view_angle])
 
-        # Update layout with enhanced settings
+    def _update_layout(self, fig, specs):
+        length, width, height = specs['length'], specs['width'], specs['ceiling_height']
         fig.update_layout(
             scene=dict(
-                camera=camera_angles[visualization_options['view_angle']],
                 aspectmode='data',
-                xaxis_title="Length (m)",
-                yaxis_title="Width (m)",
-                zaxis_title="Height (m)",
+                xaxis_title="Length (m)", yaxis_title="Width (m)", zaxis_title="Height (m)",
                 xaxis=dict(range=[0, length], showbackground=False),
                 yaxis=dict(range=[0, width], showbackground=False),
                 zaxis=dict(range=[0, height], showbackground=False)
             ),
             title="Interactive Conference Room Design",
             showlegend=True,
-            legend=dict(
-                yanchor="top",
-                y=0.99,
-                xanchor="left",
-                x=0.01,
-                bgcolor='rgba(255, 255, 255, 0.9)'
-            ),
+            legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, bgcolor='rgba(255, 255, 255, 0.9)'),
             margin=dict(l=0, r=0, t=30, b=0)
         )
-
-        return fig
-
-    @staticmethod
-    def _add_room_structure(fig, length, width, height, colors, lighting_mode):
-        lighting_effects = {
-            'day': {'ambient': 0.8, 'diffuse': 0.6},
-            'evening': {'ambient': 0.4, 'diffuse': 0.5},
-            'presentation': {'ambient': 0.2, 'diffuse': 0.3}
-        }
-        light = lighting_effects[lighting_mode]
-
-        # Floor
-        fig.add_trace(go.Surface(x=[[0, length], [0, length]], y=[[0, 0], [width, width]], z=[[0, 0], [0, 0]], colorscale=[[0, colors['floor']], [1, colors['floor']]], showscale=False, name='Floor', lighting=light))
-        # Walls
-        fig.add_trace(go.Surface(x=[[0, 0], [0, 0]], y=[[0, width], [0, width]], z=[[0, 0], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, name='Back Wall', lighting=light))
-        for y_coord in [0, width]:
-            fig.add_trace(go.Surface(x=[[0, length], [0, length]], y=[[y_coord, y_coord], [y_coord, y_coord]], z=[[0, 0], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, opacity=0.7, lighting=light))
-
-    @staticmethod
-    def _add_display_system(fig, length, width, height, colors, recommendations):
-        screen_width = min(3.5, width * 0.6)
-        screen_height = screen_width * 9/16
-        screen_y = width/2
-        screen_z = height * 0.5
-        fig.add_trace(go.Mesh3d(x=[0.05, 0.05, 0.05, 0.05], y=[screen_y-screen_width/2, screen_y+screen_width/2, screen_y+screen_width/2, screen_y-screen_width/2], z=[screen_z-screen_height/2, screen_z-screen_height/2, screen_z+screen_height/2, screen_z+screen_height/2], i=[0, 0], j=[1, 2], k=[2, 3], color=colors['screen'], name='Display'))
-
-    @staticmethod
-    def _add_conference_table(fig, length, width, height, colors, table_style):
-        table_height = 0.75
-        table_x = length * 0.55
-        table_y = width * 0.5
-        table_length = min(length * 0.6, 5)
-        table_width = min(width * 0.4, 2)
-        
-        if table_style == 'rectangular':
-            x, y = np.meshgrid(np.linspace(table_x - table_length/2, table_x + table_length/2, 2), np.linspace(table_y - table_width/2, table_y + table_width/2, 2))
-            z = np.full_like(x, table_height)
-            fig.add_trace(go.Surface(x=x, y=y, z=z, colorscale=[[0, colors['wood']], [1, colors['wood']]], showscale=False, name='Table'))
-        elif table_style == 'oval':
-            theta = np.linspace(0, 2*np.pi, 50)
-            x_center, y_center = table_x, table_y
-            x = x_center + (table_length/2) * np.cos(theta)
-            y = y_center + (table_width/2) * np.sin(theta)
-            z = np.full_like(x, table_height)
-            fig.add_trace(go.Scatter3d(x=np.append(x, x[0]), y=np.append(y, y[0]), z=np.append(z, z[0]), mode='lines', line=dict(color=colors['wood'], width=5), name='Table'))
-
-    @staticmethod
-    def _add_seating(fig, room_specs, length, width, colors, chair_style):
-        table_length = min(length * 0.6, 5)
-        table_width = min(width * 0.4, 2)
-        table_x = length * 0.55
-        table_y = width * 0.5
-        chairs_per_side = min(6, room_specs['capacity'] // 2)
-
-        for i in range(chairs_per_side):
-            x_pos = table_x - table_length/2 + ((i + 0.5) * table_length / chairs_per_side)
-            for offset in [-1, 1]:
-                y_pos = table_y + offset * (table_width/2 + 0.5)
-                if chair_style == 'modern':
-                    fig.add_trace(go.Scatter3d(x=[x_pos], y=[y_pos], z=[0.4], mode='markers', marker=dict(size=10, symbol='square', color=colors['accent']), name='Chair'))
-                elif chair_style == 'executive':
-                     fig.add_trace(go.Mesh3d(x=[x_pos-0.2, x_pos+0.2, x_pos+0.2, x_pos-0.2], y=[y_pos, y_pos, y_pos, y_pos], z=[0.4, 0.4, 1.0, 1.0], i=[0,0],j=[1,2],k=[2,3], color=colors['metal'], name='Chair'))
-
-    @staticmethod
-    def _add_camera_system(fig, width, height, colors, recommendations):
-        screen_width = min(3.5, width * 0.6)
-        screen_height = screen_width * 9/16
-        camera_z = height * 0.5 + screen_height/2 + 0.1
-        fig.add_trace(go.Scatter3d(x=[0.08], y=[width/2], z=[camera_z], mode='markers', marker=dict(size=8, symbol='diamond', color=colors['screen']), name='Camera'))
-
-    @staticmethod
-    def _add_lighting_system(fig, length, width, height, colors, lighting_mode):
-        light_color = {'day': 'rgb(255, 255, 224)', 'evening': 'rgb(255, 228, 181)', 'presentation': 'rgb(200, 200, 255)'}[lighting_mode]
-        for i in range(2):
-            for j in range(3):
-                fig.add_trace(go.Scatter3d(x=[length * (i + 1)/3], y=[width * (j + 1)/4], z=[height-0.05], mode='markers', marker=dict(size=7, color=light_color, symbol='circle'), name='Lighting'))
-
-    @staticmethod
-    def _add_audio_system(fig, length, width, height, colors, recommendations):
-        for i in [0.25, 0.75]:
-            for j in [0.25, 0.75]:
-                fig.add_trace(go.Scatter3d(x=[length*i], y=[width*j], z=[height-0.1], mode='markers', marker=dict(size=6, color=colors['metal'], symbol='circle-open'), name='Speaker'))
-                
-    @staticmethod
-    def _add_control_system(fig, length, width, height, colors):
-        fig.add_trace(go.Scatter3d(x=[length - 0.1], y=[width * 0.8], z=[height * 0.4], mode='markers', marker=dict(size=10, symbol='square', color=colors['accent']), name='Control Panel'))
 
     @staticmethod
     def create_equipment_layout_2d(room_specs, recommendations):
@@ -872,21 +878,13 @@ class EnhancedVisualizationEngine:
         
         length, width = room_specs['length'], room_specs['width']
         
-        # Room outline
         fig.add_shape(type="rect", x0=0, y0=0, x1=length, y1=width, line=dict(color="rgb(100, 100, 100)", width=3), fillcolor="rgba(245, 245, 245, 0.3)")
-        
-        # Display wall
         fig.add_shape(type="line", x0=0, y0=width*0.2, x1=0, y1=width*0.8, line=dict(color="red", width=8))
         
-        # Conference table
-        table_length = min(length * 0.7, 4)
-        table_width = min(width * 0.4, 1.5)
-        table_x_center = length * 0.6
-        table_y_center = width * 0.5
-        
+        table_length, table_width = min(length * 0.7, 4), min(width * 0.4, 1.5)
+        table_x_center, table_y_center = length * 0.6, width * 0.5
         fig.add_shape(type="rect", x0=table_x_center - table_length/2, y0=table_y_center - table_width/2, x1=table_x_center + table_length/2, y1=table_y_center + table_width/2, line=dict(color="brown", width=2), fillcolor="rgba(139, 115, 85, 0.4)")
         
-        # Add text annotations for equipment
         fig.add_annotation(x=0.1, y=width*0.5, text="Display<br>System", showarrow=True, arrowcolor="red", bgcolor="white", bordercolor="red")
         fig.add_annotation(x=length-0.3, y=width*0.85, text="Control<br>Panel", showarrow=True, arrowcolor="gray", bgcolor="white", bordercolor="gray")
         
@@ -964,31 +962,43 @@ def main():
             st.session_state.budget_tier = budget_tier # Save budget tier for report tab
             st.success("✅ AI Analysis Complete!")
 
-        # --- NEW: Visualization Options in Sidebar ---
+        # --- NEW: Advanced Visualization Options in Sidebar ---
         st.sidebar.markdown("---")
         st.sidebar.markdown("### 🎨 Visualization Options")
 
-        # Use multiselect for show/hide options for a cleaner UI
-        shown_elements = st.sidebar.multiselect(
-            "Visible Elements",
-            options=['Chairs', 'Table', 'Displays', 'Cameras', 'Speakers', 'Lighting', 'Control Panel'],
-            default=['Chairs', 'Table', 'Displays', 'Cameras', 'Speakers', 'Lighting', 'Control Panel']
-        )
+        expander_room = st.sidebar.expander("Room Elements", expanded=True)
+        with expander_room:
+            room_elements_config = {
+                'show_chairs': st.checkbox("Show Chairs", value=True),
+                'show_displays': st.checkbox("Show Displays", value=True),
+                'show_cameras': st.checkbox("Show Cameras", value=True),
+                'show_speakers': st.checkbox("Show Speakers", value=True),
+                'show_lighting': st.checkbox("Show Lighting", value=True),
+                'show_control': st.checkbox("Show Control Panel", value=True),
+                'show_table': st.checkbox("Show Table", value=True),
+                'show_whiteboard': st.checkbox("Digital Whiteboard", value=False),
+                'show_credenza': st.checkbox("Credenza/Storage", value=False)
+            }
+        
+        expander_style = st.sidebar.expander("Style Options", expanded=False)
+        with expander_style:
+            style_config = {
+                'chair_style': st.selectbox("Chair Style", ['modern', 'executive', 'training', 'casual']),
+                'table_style': st.selectbox("Table Style", ['rectangular', 'oval', 'boat-shaped', 'modular']),
+                'color_scheme': st.selectbox("Color Scheme", ['professional', 'modern', 'classic', 'warm', 'cool']),
+                'lighting_mode': st.selectbox("Lighting Mode", ['day', 'evening', 'presentation', 'video conference']),
+                'view_angle': st.selectbox("View Angle", ['perspective', 'top', 'front', 'side', 'corner'])
+            }
 
-        viz_options = {
-            'show_chairs': 'Chairs' in shown_elements,
-            'show_displays': 'Displays' in shown_elements,
-            'show_cameras': 'Cameras' in shown_elements,
-            'show_speakers': 'Speakers' in shown_elements,
-            'show_lighting': 'Lighting' in shown_elements,
-            'show_control': 'Control Panel' in shown_elements,
-            'show_table': 'Table' in shown_elements,
-            'chair_style': st.sidebar.selectbox("Chair Style", ['modern', 'executive']),
-            'table_style': st.sidebar.selectbox("Table Style", ['rectangular', 'oval']),
-            'color_scheme': st.sidebar.selectbox("Color Scheme", ['professional', 'modern', 'classic']),
-            'lighting_mode': st.sidebar.selectbox("Lighting Mode", ['day', 'evening', 'presentation']),
-            'view_angle': st.sidebar.selectbox("View Angle", ['perspective', 'top', 'front', 'side'])
-        }
+        expander_advanced = st.sidebar.expander("Advanced Features", expanded=False)
+        with expander_advanced:
+            advanced_config = {
+                'show_measurements': st.checkbox("Show Measurements", value=False),
+                'show_zones': st.checkbox("Show Audio/Video Zones", value=False),
+                'show_cable_paths': st.checkbox("Show Cable Management", value=False),
+                'show_network': st.checkbox("Show Network Points", value=False),
+                'quality_level': st.slider("Rendering Quality", 1, 5, 3)
+            }
 
     
     if st.session_state.recommendations:
@@ -1051,13 +1061,25 @@ def main():
 
         with tab3:
             st.subheader("Interactive Room Visualization")
-            # --- UPDATED: Pass the options to the visualization function ---
-            st.plotly_chart(EnhancedVisualizationEngine.create_3d_room_visualization(
+            
+            # Create visualization configuration from sidebar options
+            viz_config = {
+                'room_elements': room_elements_config,
+                'style_options': style_config,
+                'advanced_features': advanced_config
+            }
+            
+            # Initialize visualization engine
+            viz_engine = EnhancedVisualizationEngine()
+            
+            # Create and display visualization
+            fig_3d = viz_engine.create_3d_room_visualization(
                 room_specs, 
                 recommendations,
-                visualization_options=viz_options
-            ), use_container_width=True)
-            st.plotly_chart(EnhancedVisualizationEngine.create_equipment_layout_2d(room_specs, recommendations), use_container_width=True)
+                viz_config
+            )
+            
+            st.plotly_chart(fig_3d, use_container_width=True)
 
         with tab4:
             st.subheader("Alternative Configurations & Smart Upgrade Planner")
