@@ -7,6 +7,7 @@ from typing import Dict, List, Any
 st.set_page_config(page_title="AI Room Configurator Pro Max", page_icon="🏢", layout="wide")
 
 # --- Improved CSS Styling ---
+# --- Fixed CSS Styling for Better Text Visibility ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -38,77 +39,81 @@ st.markdown("""
     .stApp {
         background-color: var(--background-color) !important;
         font-family: 'Inter', sans-serif !important;
+        color: var(--text-color) !important;
     }
 
-    /* Main Content Area */
+    /* Fix main content area - remove overly broad selectors */
     .main .block-container {
         padding: 2rem 1rem !important;
         max-width: 1200px !important;
+        background-color: transparent !important;
     }
 
-    /* Content Cards */
-    .main > div > div {
-        background: var(--card-bg) !important;
-        border-radius: var(--border-radius-lg) !important;
-        padding: 2rem !important;
-        margin: 1rem 0 !important;
-        box-shadow: var(--card-shadow) !important;
-        border: 1px solid var(--border-color) !important;
-    }
-
-    /* Typography */
-    .main h1 {
+    /* Typography - More specific and less aggressive */
+    h1, h2, h3, h4, h5, h6 {
         color: var(--text-color) !important;
-        font-weight: 700 !important;
+        font-weight: 600 !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    h1 {
         font-size: 2.5rem !important;
+        font-weight: 700 !important;
         margin-bottom: 1rem !important;
         letter-spacing: -0.02em !important;
     }
 
-    .main h2 {
-        color: var(--text-color) !important;
-        font-weight: 600 !important;
+    h2 {
         font-size: 2rem !important;
         margin: 1.5rem 0 1rem 0 !important;
         letter-spacing: -0.01em !important;
     }
 
-    .main h3 {
-        color: var(--text-color) !important;
-        font-weight: 600 !important;
+    h3 {
         font-size: 1.5rem !important;
         margin: 1.25rem 0 0.75rem 0 !important;
     }
 
-    .main h4, .main h5, .main h6 {
-        color: var(--text-color) !important;
-        font-weight: 600 !important;
+    h4, h5, h6 {
         margin: 1rem 0 0.5rem 0 !important;
     }
 
-    /* Body Text */
-    .main p, .main div[data-testid="stMarkdownContainer"] p {
+    /* Body Text - More specific targeting */
+    p, div, span, li {
         color: var(--body-text-color) !important;
         font-size: 16px !important;
         font-weight: 400 !important;
         line-height: 1.6 !important;
-        margin-bottom: 1rem !important;
+        font-family: 'Inter', sans-serif !important;
     }
 
-    .main li {
+    /* Streamlit specific text elements */
+    .stMarkdown p,
+    .stMarkdown div,
+    .stMarkdown span,
+    .stMarkdown li {
         color: var(--body-text-color) !important;
-        font-size: 16px !important;
-        font-weight: 400 !important;
-        line-height: 1.6 !important;
-        margin-bottom: 0.5rem !important;
     }
 
-    /* Labels and Small Text */
-    .main label, .main .stSelectbox label, .main .stTextInput label {
+    .stMarkdown h1,
+    .stMarkdown h2,
+    .stMarkdown h3,
+    .stMarkdown h4,
+    .stMarkdown h5,
+    .stMarkdown h6 {
+        color: var(--text-color) !important;
+    }
+
+    /* Labels and form elements */
+    label,
+    .stSelectbox label,
+    .stTextInput label,
+    .stSlider label,
+    .stMultiSelect label,
+    .stCheckbox label {
         color: var(--text-color) !important;
         font-weight: 600 !important;
         font-size: 14px !important;
-        margin-bottom: 0.5rem !important;
     }
 
     /* Tabs Styling */
@@ -123,7 +128,7 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] {
         background: rgba(255,255,255,0.1) !important;
         border-radius: 8px !important;
-        color: rgba(255,255,255,0.8) !important;
+        color: rgba(255,255,255,0.9) !important;
         font-weight: 500 !important;
         padding: 12px 20px !important;
         transition: all 0.2s ease !important;
@@ -144,12 +149,6 @@ st.markdown("""
         font-weight: 600 !important;
     }
 
-    /* Tab Content */
-    .stTabs > div > div > div > div {
-        background: transparent !important;
-        padding: 0 !important;
-    }
-
     /* Metric Cards */
     div[data-testid="metric-container"] {
         background: var(--metric-bg) !important;
@@ -164,13 +163,15 @@ st.markdown("""
         color: var(--metric-text) !important;
     }
 
-    div[data-testid="metric-container"] label {
+    div[data-testid="metric-container"] label,
+    div[data-testid="metric-container"] .metric-label {
         color: rgba(255,255,255,0.9) !important;
         font-weight: 600 !important;
         font-size: 14px !important;
     }
 
-    div[data-testid="metric-container"] [data-testid="metric-value"] {
+    div[data-testid="metric-container"] [data-testid="metric-value"],
+    div[data-testid="metric-container"] .metric-value {
         color: var(--metric-text) !important;
         font-size: 2rem !important;
         font-weight: 700 !important;
@@ -192,8 +193,9 @@ st.markdown("""
         color: #ffffff !important;
     }
 
-    .premium-card p, .premium-card div, .premium-card span {
-        color: rgba(255,255,255,0.9) !important;
+    .premium-card p, .premium-card div, .premium-card span,
+    .premium-card li, .premium-card strong {
+        color: rgba(255,255,255,0.95) !important;
     }
 
     .feature-card {
@@ -203,15 +205,16 @@ st.markdown("""
         margin: 1rem 0 !important;
         border-left: 4px solid var(--feature-border) !important;
         box-shadow: 0 2px 8px rgba(37,99,235,0.08) !important;
-        color: var(--text-color) !important;
+        border: 1px solid var(--border-color) !important;
     }
 
-    .feature-card h3, .feature-card h4 {
+    .feature-card h1, .feature-card h2, .feature-card h3, .feature-card h4 {
         color: var(--text-color) !important;
         margin-top: 0 !important;
     }
 
-    .feature-card p {
+    .feature-card p, .feature-card div, .feature-card span,
+    .feature-card li, .feature-card strong {
         color: var(--body-text-color) !important;
     }
 
@@ -230,11 +233,12 @@ st.markdown("""
         transform: translateY(-2px) !important;
     }
 
-    .comparison-card h3, .comparison-card h4 {
+    .comparison-card h1, .comparison-card h2, .comparison-card h3, .comparison-card h4 {
         color: var(--text-color) !important;
     }
 
-    .comparison-card p {
+    .comparison-card p, .comparison-card div, .comparison-card span,
+    .comparison-card li, .comparison-card strong {
         color: var(--body-text-color) !important;
     }
 
@@ -251,7 +255,8 @@ st.markdown("""
 
     .alert-success h1, .alert-success h2, .alert-success h3,
     .alert-success h4, .alert-success h5, .alert-success h6,
-    .alert-success p, .alert-success div, .alert-success span {
+    .alert-success p, .alert-success div, .alert-success span,
+    .alert-success li, .alert-success strong {
         color: #ffffff !important;
     }
 
@@ -285,12 +290,25 @@ st.markdown("""
         background: var(--sidebar-bg) !important;
     }
 
-    .css-1d391kg .stMarkdown, [data-testid="stSidebar"] .stMarkdown {
+    [data-testid="stSidebar"] .stMarkdown,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] li {
         color: var(--sidebar-text) !important;
     }
 
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] h4,
+    [data-testid="stSidebar"] h5,
+    [data-testid="stSidebar"] h6 {
+        color: #ffffff !important;
+    }
+
     /* Input Fields */
-    .stTextInput input, .stTextArea textarea, .stSelectbox select {
+    .stTextInput input, .stTextArea textarea {
         background: var(--card-bg) !important;
         border: 2px solid var(--accent-color) !important;
         border-radius: 8px !important;
@@ -300,10 +318,29 @@ st.markdown("""
         transition: border-color 0.2s ease !important;
     }
 
-    .stTextInput input:focus, .stTextArea textarea:focus, .stSelectbox select:focus {
+    .stTextInput input:focus, .stTextArea textarea:focus {
         border-color: var(--primary-color) !important;
         box-shadow: 0 0 0 3px rgba(37,99,235,0.1) !important;
         outline: none !important;
+    }
+
+    /* Select boxes */
+    .stSelectbox > div > div {
+        background-color: var(--card-bg) !important;
+        color: var(--text-color) !important;
+        border: 2px solid var(--accent-color) !important;
+    }
+
+    /* Multi-select */
+    .stMultiSelect > div > div {
+        background-color: var(--card-bg) !important;
+        color: var(--text-color) !important;
+        border: 2px solid var(--accent-color) !important;
+    }
+
+    /* Sliders */
+    .stSlider > div > div > div {
+        color: var(--text-color) !important;
     }
 
     /* DataFrames and Tables */
@@ -311,6 +348,19 @@ st.markdown("""
         border-radius: var(--border-radius-md) !important;
         overflow: hidden !important;
         box-shadow: var(--card-shadow) !important;
+    }
+
+    .stDataFrame table {
+        color: var(--text-color) !important;
+    }
+
+    .stDataFrame th {
+        background-color: var(--primary-color) !important;
+        color: white !important;
+    }
+
+    .stDataFrame td {
+        color: var(--body-text-color) !important;
     }
 
     /* Charts */
@@ -325,11 +375,13 @@ st.markdown("""
     .streamlit-expanderHeader {
         color: var(--text-color) !important;
         font-weight: 600 !important;
+        background-color: var(--card-bg) !important;
     }
 
     .streamlit-expanderContent {
         background: var(--card-bg) !important;
         border-radius: var(--border-radius-md) !important;
+        color: var(--body-text-color) !important;
     }
 
     /* Progress Bar */
@@ -337,26 +389,15 @@ st.markdown("""
         background: var(--primary-color) !important;
     }
 
-    /* Fix for any remaining visibility issues */
-    .main * {
-        visibility: visible !important;
-    }
-
-    /* Ensure proper contrast for all text elements */
-    .main .stMarkdown, .main .stText {
-        color: var(--body-text-color) !important;
-    }
-
-    /* Column containers */
-    .main [data-testid="column"] > div {
-        background: transparent !important;
-        padding: 0.5rem !important;
-    }
-
     /* Status elements */
     .stAlert {
         border-radius: var(--border-radius-md) !important;
         border: none !important;
+    }
+
+    .stSuccess {
+        background-color: var(--success-color) !important;
+        color: white !important;
     }
 
     /* File uploader */
@@ -369,6 +410,67 @@ st.markdown("""
 
     .stFileUploader:hover {
         border-color: var(--primary-color) !important;
+    }
+
+    /* Column containers - ensure they don't interfere with text */
+    .element-container,
+    [data-testid="column"] {
+        background: transparent !important;
+    }
+
+    /* Success messages */
+    .stSuccess > div {
+        color: white !important;
+    }
+
+    /* Info messages */
+    .stInfo > div {
+        color: var(--text-color) !important;
+    }
+
+    /* Warning messages */
+    .stWarning > div {
+        color: var(--text-color) !important;
+    }
+
+    /* Error messages */
+    .stError > div {
+        color: white !important;
+    }
+
+    /* Remove any conflicting main container styling that might hide text */
+    .main > div {
+        background: transparent !important;
+        color: var(--text-color) !important;
+    }
+
+    /* Ensure all text is visible */
+    * {
+        visibility: visible !important;
+    }
+
+    /* Fix any text that might be getting overridden */
+    .stApp * {
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    /* Ensure checkbox text is visible */
+    .stCheckbox > label {
+        color: var(--text-color) !important;
+    }
+
+    /* Ensure radio button text is visible */
+    .stRadio > label {
+        color: var(--text-color) !important;
+    }
+
+    /* Make sure all form text is visible */
+    .stForm {
+        color: var(--text-color) !important;
+    }
+
+    .stForm * {
+        color: var(--text-color) !important;
     }
 </style>
 """, unsafe_allow_html=True)
