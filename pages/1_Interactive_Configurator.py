@@ -6,151 +6,166 @@ from typing import Dict, List
 
 st.set_page_config(page_title="AI Room Configurator Pro Max", page_icon="🏢", layout="wide")
 
-# --- CSS Updated for High Visibility ---
+# --- NEW Polished CSS Styling ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    
     :root {
-        --primary-color: #007BFF;      /* Vibrant, accessible blue */
-        --success-color: #28A745;      /* Clear success green */
-        --background-color: #F8F9FA;  /* Very light grey for a clean canvas */
-        --dark-background: #212529;   /* Deep charcoal for high contrast */
-        --text-color: #212529;        /* Darkest text for headings */
-        --body-text-color: #495057;   /* Softer dark grey for body text */
-        --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        --border-radius-lg: 16px;
-        --border-radius-md: 10px;
+        --primary-color: #2563eb; /* Deep blue */
+        --success-color: #22c55e; /* Emerald green */
+        --background-color: #f6f8fa; /* Soft light */
+        --dark-background: #1e293b; /* Navy */
+        --text-color: #1e293b; /* Almost black */
+        --card-shadow: 0 6px 24px rgba(30,41,59,0.08);
+        --border-radius-lg: 18px;
+        --border-radius-md: 12px;
+        --accent-color: #e0e7ef;
+        --feature-bg: #ffffff;
+        --feature-border: #2563eb;
+        --metric-bg: #2563eb;
+        --metric-text: #fff;
     }
-
-    /* --- General App Styling --- */
     .stApp {
         font-family: 'Inter', sans-serif;
         background-color: var(--background-color);
         color: var(--text-color);
     }
-    
     .main > div {
-        background: white;
+        background: var(--feature-bg);
         border-radius: var(--border-radius-lg);
-        padding: 25px;
-        margin: 15px;
+        padding: 28px;
+        margin: 18px;
         box-shadow: var(--card-shadow);
+        color: var(--text-color);
     }
-    
-    /* --- Visibility Fix for Main Content --- */
     .main h1, .main h2, .main h3, .main h4, .main h5, .main h6 {
         color: var(--text-color) !important;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+    }
+    .main p, .main li, .main div {
+        color: #334155 !important;
+        font-size: 16px;
+        font-weight: 500;
+    }
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 14px;
+        background: linear-gradient(90deg, var(--dark-background) 0%, #334155 100%);
+        padding: 12px;
+        border-radius: var(--border-radius-md);
+    }
+    .stTabs [data-baseweb="tab"] {
+        background: rgba(255,255,255,0.08);
+        border-radius: 10px;
+        color: #fff;
+        font-weight: 600;
+        padding: 12px 22px;
+        transition: all 0.2s ease;
+        font-size: 16px;
+        letter-spacing: 0.01em;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        background: rgba(255,255,255,0.18);
+        transform: translateY(-2px);
+        color: #fff;
+    }
+    .stTabs [aria-selected="true"] {
+        background: var(--primary-color) !important;
+        color: #fff !important;
+        box-shadow: 0 4px 18px rgba(37,99,235,0.18);
+    }
+    .premium-card {
+        background: var(--dark-background);
+        padding: 28px;
+        border-radius: var(--border-radius-lg);
+        color: #fff;
+        margin: 18px 0;
+        box-shadow: 0 12px 32px rgba(30,41,59,0.18);
+        border: 1px solid #334155;
+    }
+    .metric-card {
+        background: var(--metric-bg);
+        padding: 22px;
+        border-radius: var(--border-radius-md);
+        box-shadow: 0 8px 25px rgba(37,99,235,0.13);
+        color: var(--metric-text) !important;
+        text-align: center;
+        margin: 12px 0;
+        border: none;
+    }
+    .metric-card h3 {
+        color: var(--metric-text) !important;
+        margin: 0;
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+    }
+    .metric-card p {
+        color: var(--metric-text) !important;
+        margin: 7px 0 0 0;
+        font-size: 15px;
+        opacity: 0.92;
         font-weight: 600;
     }
-
-    .main p, .main li, .main div {
-        color: var(--body-text-color) !important;
-    }
-    
-    /* --- Component Styling --- */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 12px;
-        background-color: var(--dark-background);
-        padding: 10px;
+    .feature-card {
+        background: var(--feature-bg);
+        padding: 22px;
         border-radius: var(--border-radius-md);
+        margin: 12px 0;
+        border-left: 6px solid var(--feature-border);
+        box-shadow: 0 2px 8px rgba(37,99,235,0.05);
+        color: var(--text-color);
+        border-top: 1px solid var(--accent-color);
     }
-    
-    .stTabs [data-baseweb="tab"] {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        color: white;
-        font-weight: 500;
-        padding: 10px 18px;
+    .comparison-card {
+        background: var(--feature-bg);
+        padding: 22px;
+        border-radius: var(--border-radius-md);
+        margin: 12px 0;
+        border: 1px solid var(--accent-color);
+        color: var(--text-color);
         transition: all 0.2s ease;
     }
-    
-    .stTabs [data-baseweb="tab"]:hover {
-        background: rgba(255, 255, 255, 0.2);
-        transform: translateY(-2px);
+    .comparison-card:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 8px 24px rgba(37,99,235,0.09);
     }
-    
-    .stTabs [aria-selected="true"] {
-        background-color: var(--primary-color) !important;
-        color: white !important;
-        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-    }
-    
-    .premium-card {
-        background-color: var(--dark-background);
-        padding: 25px;
-        border-radius: var(--border-radius-lg);
-        color: white;
-        margin: 15px 0;
-    }
-    
-    .metric-card {
-        background-color: white;
-        border: 1px solid #dee2e6;
-        padding: 20px;
-        border-radius: var(--border-radius-md);
-        text-align: center;
-        margin: 10px 0;
-    }
-
-    .metric-card h3 {
-        color: var(--primary-color) !important;
-        margin: 0;
-        font-size: 28px;
-        font-weight: 700;
-    }
-
-    .metric-card p {
-        color: #6c757d !important;
-        margin: 5px 0 0 0;
-        font-size: 14px;
-        font-weight: 500;
-    }
-    
-    .feature-card {
-        background: white;
-        padding: 20px;
-        border-radius: var(--border-radius-md);
-        margin: 10px 0;
-        border-left: 5px solid var(--primary-color);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    
     .alert-success {
-        background-color: var(--success-color);
-        color: white !important;
-        padding: 15px;
+        background: var(--success-color);
+        color: #fff !important;
+        padding: 16px;
         border-radius: var(--border-radius-md);
-        margin: 10px 0;
+        margin: 12px 0;
+        font-weight: 600;
+        box-shadow: 0 4px 16px rgba(34,197,94,0.12);
     }
-    
-    /* Ensure text inside alert-success is white */
     .alert-success h5, .alert-success p {
         color: white !important;
     }
-    
     .stButton > button {
-        background-color: var(--primary-color);
-        color: white;
+        background: linear-gradient(135deg, var(--primary-color) 0%, #38bdf8 100%);
+        color: #fff;
         border: none;
-        padding: 12px 24px;
-        border-radius: 25px;
-        font-weight: 600;
+        padding: 14px 28px;
+        border-radius: 28px;
+        font-weight: 700;
+        font-size: 16px;
         transition: all 0.2s ease;
         width: 100%;
+        letter-spacing: 0.01em;
+        box-shadow: 0 2px 8px rgba(37,99,235,0.09);
     }
-    
     .stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
-        background-color: #0069d9;
+        box-shadow: 0 10px 32px rgba(37,99,235,0.18);
+        background: linear-gradient(135deg, #1e40af 0%, #38bdf8 100%);
     }
-    
     .css-1d391kg {
         background: var(--dark-background);
     }
 </style>
 """, unsafe_allow_html=True)
+
 
 # --- Comprehensive Product Database ---
 class EnhancedProductDatabase:
