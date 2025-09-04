@@ -409,28 +409,26 @@ def add_premium_chair(fig, x, y, z_offset=0, rotation_angle_deg=0):
     ))
 
 
-# --- Premium 3D Visualization ---
+# --- Premium 3D Visualization (With a Minor Lighting Tweak) ---
 def create_photorealistic_3d_room(specs, recommendations):
     """Create a more realistic 3D room visualization."""
     fig = go.Figure()
 
     room_w, room_l, room_h = specs['width'], specs['length'], specs['ceiling_height']
 
-    # --- Walls and Floor with Textures and Lighting ---
+    # --- Walls and Floor ---
     wall_color = 'rgb(235, 235, 230)'
-    # Floor (using a subtle pattern)
     floor_x, floor_y = np.meshgrid(np.linspace(0, room_w, 2), np.linspace(0, room_l, 2))
     floor_z = np.zeros_like(floor_x)
     fig.add_trace(go.Surface(x=floor_x, y=floor_y, z=floor_z, colorscale='ylorbr', surfacecolor=np.sin(floor_x)*np.cos(floor_y), cmin=-1, cmax=1, showscale=False, name='Floor'))
 
-    # Walls
     wall_x, wall_z = np.meshgrid(np.linspace(0, room_w, 2), np.linspace(0, room_h, 2))
-    fig.add_trace(go.Surface(x=wall_x, y=np.zeros_like(wall_x), z=wall_z, colorscale=[[0, wall_color], [1, wall_color]], showscale=False)) # Front
-    fig.add_trace(go.Surface(x=wall_x, y=np.full_like(wall_x, room_l), z=wall_z, colorscale=[[0, wall_color], [1, wall_color]], showscale=False)) # Back
+    fig.add_trace(go.Surface(x=wall_x, y=np.zeros_like(wall_x), z=wall_z, colorscale=[[0, wall_color], [1, wall_color]], showscale=False))
+    fig.add_trace(go.Surface(x=wall_x, y=np.full_like(wall_x, room_l), z=wall_z, colorscale=[[0, wall_color], [1, wall_color]], showscale=False))
 
     wall_y, wall_z = np.meshgrid(np.linspace(0, room_l, 2), np.linspace(0, room_h, 2))
-    fig.add_trace(go.Surface(x=np.zeros_like(wall_y), y=wall_y, z=wall_z, colorscale=[[0, wall_color], [1, wall_color]], showscale=False)) # Left
-    fig.add_trace(go.Surface(x=np.full_like(wall_y, room_w), y=wall_y, z=wall_z, colorscale=[[0, wall_color], [1, wall_color]], showscale=False)) # Right
+    fig.add_trace(go.Surface(x=np.zeros_like(wall_y), y=wall_y, z=wall_z, colorscale=[[0, wall_color], [1, wall_color]], showscale=False))
+    fig.add_trace(go.Surface(x=np.full_like(wall_y, room_w), y=wall_y, z=wall_z, colorscale=[[0, wall_color], [1, wall_color]], showscale=False))
 
     # --- Realistic Conference Table ---
     table_l = max(2.0, room_l * 0.6)
@@ -439,48 +437,41 @@ def create_photorealistic_3d_room(specs, recommendations):
     table_x_center = room_w / 2
     table_y_center = room_l / 2
 
-    # Tabletop (boat shape)
     t = np.linspace(-table_l/2, table_l/2, 20)
-    w = table_w/2 * (1 - 0.2 * (2*t/table_l)**2) # Parabolic curve for boat shape
-
+    w = table_w/2 * (1 - 0.2 * (2*t/table_l)**2)
     table_x = np.concatenate([w+table_x_center, -w[::-1]+table_x_center, [w[0]+table_x_center]])
     table_y = np.concatenate([t+table_y_center, t[::-1]+table_y_center, [t[0]+table_y_center]])
     table_z = np.full_like(table_x, table_h)
 
-    fig.add_trace(go.Scatter3d(x=table_x, y=table_y, z=table_z, mode='lines', line=dict(color='rgb(80,50,30)', width=10), showlegend=False)) # Table Edge
-    fig.add_trace(go.Mesh3d(x=table_x, y=table_y, z=table_z, color='rgb(139, 69, 19)', opacity=0.9, name='Table Surface')) # Table Surface
+    fig.add_trace(go.Scatter3d(x=table_x, y=table_y, z=table_z, mode='lines', line=dict(color='rgb(80,50,30)', width=10), showlegend=False))
+    
+    # ADDED LIGHTING TO THE TABLE SURFACE
+    fig.add_trace(go.Mesh3d(x=table_x, y=table_y, z=table_z, color='rgb(139, 69, 19)', opacity=0.9, name='Table Surface',
+                           lighting=dict(ambient=0.4, diffuse=1.0, specular=0.5))) 
 
-    # Table Base (solid block)
     base_l, base_w, base_h = table_l * 0.5, table_w * 0.4, table_h - 0.1
     bx = [table_x_center-base_w/2, table_x_center+base_w/2, table_x_center+base_w/2, table_x_center-base_w/2]
     by = [table_y_center-base_l/2, table_y_center-base_l/2, table_y_center+base_l/2, table_y_center+base_l/2]
     bz = [0, 0, 0, 0]
+    
+    # ADDED LIGHTING TO THE TABLE BASE
     fig.add_trace(go.Mesh3d(x=np.concatenate([bx,bx]), y=np.concatenate([by,by]), z=np.concatenate([bz, np.full_like(bz, base_h)]),
                            i=[7,0,0,0,4,4,6,6,4,0,3,2], j=[3,4,1,2,5,6,5,2,0,1,6,3], k=[0,7,2,3,6,7,1,1,5,5,7,6],
-                           color='rgb(50,50,50)'))
+                           color='rgb(50,50,50)', lighting=dict(ambient=0.4, diffuse=0.8, specular=0.2)))
 
     # --- Place Chairs ---
     num_chairs = specs['capacity']
     side_chairs = (num_chairs - 2) // 2 if num_chairs >= 2 else 0
-
-    # Left side
     for i in range(side_chairs):
         y_pos = table_y_center - table_l/2 + (i + 1) * (table_l / (side_chairs + 1))
         add_premium_chair(fig, table_x_center - table_w/2 - 0.6, y_pos, rotation_angle_deg=90)
-
-    # Right side
-    for i in range(side_chairs):
-        y_pos = table_y_center - table_l/2 + (i + 1) * (table_l / (side_chairs + 1))
         add_premium_chair(fig, table_x_center + table_w/2 + 0.6, y_pos, rotation_angle_deg=-90)
-
-    # Head chairs
     if num_chairs >= 1:
         add_premium_chair(fig, table_x_center, table_y_center - table_l/2 - 0.8, rotation_angle_deg=180)
     if num_chairs >= 2:
         add_premium_chair(fig, table_x_center, table_y_center + table_l/2 + 0.8, rotation_angle_deg=0)
 
     # --- Add Equipment ---
-    # Display
     display_w = room_w * 0.6
     display_h = display_w * 9/16
     display_z = room_h/2
@@ -488,11 +479,7 @@ def create_photorealistic_3d_room(specs, recommendations):
                            i=[0,0], j=[1,2], k=[2,3], color='black', name='Display'))
     fig.add_trace(go.Mesh3d(x=[room_w*0.22, room_w*0.78, room_w*0.78, room_w*0.22], y=[room_l-0.04]*4, z=[display_z-display_h/2+0.05, display_z-display_h/2+0.05, display_z+display_h/2-0.05, display_z+display_h/2-0.05],
                            i=[0,0], j=[1,2], k=[2,3], color='deepskyblue', name='Screen'))
-
-    # Camera
     fig.add_trace(go.Scatter3d(x=[room_w/2], y=[room_l-0.2], z=[display_z + display_h/2 + 0.1], mode='markers', marker=dict(symbol='square', size=8, color='darkgray'), name='Camera'))
-
-    # Ceiling Mics
     if 'array' in recommendations['audio']['configuration']:
         mic_positions = [(room_w*0.35, table_y_center), (room_w*0.65, table_y_center)]
         for mx, my in mic_positions:
@@ -508,9 +495,7 @@ def create_photorealistic_3d_room(specs, recommendations):
             xaxis=dict(title="Width (m)", range=[0, room_w], showbackground=False),
             yaxis=dict(title="Length (m)", range=[0, room_l], showbackground=False),
             zaxis=dict(title="Height (m)", range=[0, room_h], showbackground=False),
-            camera=dict(
-                eye=dict(x=-1.5, y=-1.5, z=1.2)
-            ),
+            camera=dict(eye=dict(x=-1.5, y=-1.5, z=1.2)),
             aspectmode='manual',
             aspectratio=dict(x=1, y=room_l/room_w, z=room_h/room_w),
             bgcolor='rgb(240, 240, 245)'
