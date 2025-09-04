@@ -659,8 +659,7 @@ class EnhancedVisualizationEngine:
             mode='lines+markers',
             line=dict(color='black', width=8),
             marker=dict(size=6, color='black'),
-            name='Display Screen',
-            fill='tonext'
+            name='Display Screen'
         ))
         
         # Conference Table (as a rectangle)
