@@ -1021,7 +1021,7 @@ class MaximizedAVRecommender:
         base_costs = {'Budget': 15000, 'Professional': 45000, 'Premium': 120000}
         return int(base_costs[tier] * (1 + (specs['capacity'] / 50)))
 
-# --- NEW PROFESSIONAL 3D ROOM VISUALIZATION ENGINE ---
+# --- Visualization Engine ---
 class EnhancedVisualizationEngine:
     def create_3d_room_visualization(self, room_specs, recommendations, viz_config):
         # viz_config is passed from the main app but not used in this specific static version
@@ -1093,6 +1093,8 @@ class EnhancedVisualizationEngine:
         screen_height = screen_width * 9 / 16
         screen_y_start = (width - screen_width) / 2
         screen_z_start = height * 0.3
+        
+        display_customdata_str = f"{screen_width:.1f}m × {screen_height:.1f}m"
 
         fig.add_trace(go.Surface(
             x=[[0.05, 0.05], [0.05, 0.05]],
@@ -1102,7 +1104,7 @@ class EnhancedVisualizationEngine:
             showscale=False,
             name='Display Screen',
             hovertemplate='<b>Display System</b><br>Size: %{customdata}<extra></extra>',
-            customdata=f"{screen_width:.1f}m × {screen_height:.1f}m"
+            customdata=np.full((2, 2), display_customdata_str)
         ))
 
         # Display bezel/frame
@@ -1125,6 +1127,8 @@ class EnhancedVisualizationEngine:
         table_height = 0.75
         table_x_center = length * 0.6
         table_y_center = width * 0.5
+        
+        table_customdata_str = f"{table_length:.1f}m × {table_width:.1f}m"
 
         fig.add_trace(go.Surface(
             x=[[table_x_center - table_length / 2, table_x_center + table_length / 2],
@@ -1136,7 +1140,7 @@ class EnhancedVisualizationEngine:
             showscale=False,
             name='Conference Table',
             hovertemplate='<b>Conference Table</b><br>Size: %{customdata}<extra></extra>',
-            customdata=f"{table_length:.1f}m × {table_width:.1f}m"
+            customdata=np.full((2, 2), table_customdata_str)
         ))
 
         # Camera System
@@ -1148,6 +1152,8 @@ class EnhancedVisualizationEngine:
                                       camera_y_center + camera_width / 2, 20)
         camera_x = np.full_like(camera_y_coords, 0.1)
         camera_z_coords = np.full_like(camera_y_coords, camera_z)
+        camera_model = recommendations.get('camera', {}).get('model', 'Professional Camera')
+
 
         fig.add_trace(go.Scatter3d(
             x=camera_x,
@@ -1161,7 +1167,7 @@ class EnhancedVisualizationEngine:
             ),
             name='Camera System',
             hovertemplate='<b>Camera System</b><br>Model: %{customdata}<extra></extra>',
-            customdata=recommendations.get('camera', {}).get('model', 'Professional Camera')
+            customdata=[camera_model] * len(camera_x)
         ))
 
         # Chair positions
@@ -1171,7 +1177,7 @@ class EnhancedVisualizationEngine:
         chair_x_positions = []
         chair_y_positions = []
         chair_z_positions = []
-        
+
         if chairs_per_side > 0:
             for i in range(chairs_per_side):
                 chair_x = table_x_center - table_length / 2 + (i + 1) * table_length / (chairs_per_side + 1)
@@ -1303,12 +1309,12 @@ class EnhancedVisualizationEngine:
                     range=[0, height + 0.2]
                 ),
                 camera=dict(
-                    eye=dict(x=length * 1.6, y=width * 1.6, z=height * 1.2),
+                    eye=dict(x=length * -1.6, y=width * -1.6, z=height * 1.2),
                     center=dict(x=length / 2, y=width / 2, z=height / 3),
                     up=dict(x=0, y=0, z=1)
                 ),
                 bgcolor='rgb(248, 249, 250)',
-                aspectmode='data' # Changed from 'cube' to 'data' for accurate proportions
+                aspectmode='data'
             ),
             height=600,
             showlegend=True,
@@ -1326,7 +1332,7 @@ class EnhancedVisualizationEngine:
         )
 
         return fig
-    
+
     # This static method is preserved from previous versions for 2D layout
     @staticmethod
     def create_equipment_layout_2d(room_specs, recommendations):
