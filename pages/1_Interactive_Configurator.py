@@ -12,14 +12,14 @@ from io import BytesIO
 
 st.set_page_config(page_title="AI Room Configurator Pro Max", page_icon="🏢", layout="wide")
 
-# Updated & Centralized Custom CSS with a professional color palette
+# Updated & Centralized Custom CSS with high-contrast colors for readability
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
     :root {
         --primary-color: #4A90E2; /* Professional Blue */
-        --secondary-color: #50E3C2; /* Teal */
+        --success-color: #50C878; /* Emerald Green */
         --background-color: #F4F7F9; /* Light Gray */
         --dark-background: #2E3A4B;
         --text-color: #333745; /* Charcoal */
@@ -69,8 +69,9 @@ st.markdown("""
         box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
     }
     
+    /* Updated for better readability */
     .premium-card {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        background-color: var(--dark-background);
         padding: 25px;
         border-radius: var(--border-radius-lg);
         color: white;
@@ -78,11 +79,12 @@ st.markdown("""
         box-shadow: 0 15px 40px rgba(0,0,0,0.2);
     }
     
+    /* Updated for better readability */
     .metric-card {
-        background: linear-gradient(135deg, #50C878 0%, #38ef7d 100%); /* Emerald Green Gradient */
+        background-color: var(--primary-color);
         padding: 20px;
         border-radius: var(--border-radius-md);
-        box-shadow: 0 8px 25px rgba(80,200,120,0.3);
+        box-shadow: 0 8px 25px rgba(74, 144, 226, 0.3);
         color: white !important;
         text-align: center;
         margin: 10px 0;
@@ -125,8 +127,9 @@ st.markdown("""
         box-shadow: 0 10px 30px rgba(74, 144, 226, 0.1);
     }
     
+    /* Updated for better readability */
     .alert-success {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        background-color: var(--success-color);
         color: white;
         padding: 15px;
         border-radius: var(--border-radius-md);
@@ -134,7 +137,7 @@ st.markdown("""
     }
     
     .stButton > button {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, #50E3C2 100%);
         color: white;
         border: none;
         padding: 12px 24px;
@@ -1087,7 +1090,7 @@ def main():
         if st.button("🚀 Generate AI Recommendation"):
             room_specs = {
                 'template': template, 'length': length, 'width': width, 'ceiling_height': ceiling_height,
-                'capacity': capacity, 'windows': windows, 'special_requirements': [] # Added for compatibility
+                'capacity': capacity, 'windows': windows, 'special_requirements': [] 
             }
             user_preferences = {
                 'budget_tier': budget_tier, 'preferred_brands': preferred_brands, 'special_features': special_features
@@ -1095,12 +1098,12 @@ def main():
             recommender = MaximizedAVRecommender()
             st.session_state.recommendations = recommender.get_comprehensive_recommendations(room_specs, user_preferences)
             st.session_state.room_specs = room_specs
+            st.session_state.budget_tier = budget_tier # Save budget tier for report tab
             st.success("✅ AI Analysis Complete!")
     
     if st.session_state.recommendations:
         recommendations = st.session_state.recommendations
         room_specs = st.session_state.room_specs
-        budget_tier = user_preferences = { 'budget_tier': st.session_state.recommendations.get('budget_tier', 'Professional') }
         
         total_cost = sum(recommendations[cat]['price'] for cat in ['display', 'camera', 'audio', 'control', 'lighting'])
         
@@ -1189,7 +1192,7 @@ def main():
             st.markdown(f"""<div class="premium-card">
                 <h3>Executive Summary</h3>
                 <p>AI-generated AV solution for a <strong>{room_specs['template']}</strong> ({room_specs['length']}m × {room_specs['width']}m) for <strong>{room_specs['capacity']} people</strong>.</p>
-                <p><strong>Total Investment:</strong> ${total_cost:,} | <strong>Confidence:</strong> {recommendations['confidence_score']:.0%} | <strong>Recommended Tier:</strong> {budget_tier['budget_tier']}</p>
+                <p><strong>Total Investment:</strong> ${total_cost:,} | <strong>Confidence:</strong> {recommendations['confidence_score']:.0%} | <strong>Recommended Tier:</strong> {st.session_state.budget_tier}</p>
             </div>""", unsafe_allow_html=True)
             st.markdown("#### Detailed Equipment Specifications")
             specs_data = [{'Category': cat.title(), 'Model': recommendations[cat]['model'], 'Price': f"${recommendations[cat]['price']:,}", 'Rating': f"{recommendations[cat]['rating']}/5.0", 'Brand': recommendations[cat]['brand']} for cat in ['display', 'camera', 'audio', 'control', 'lighting']]
