@@ -180,6 +180,7 @@ class AdvancedAVRecommender:
         if 2.0 <= area_per_person <= 4.0: score += 10
         return min(100, score)
 
+
 # --- Cost, ROI, and Environmental Analysis ---
 class CostCalculator:
     def calculate_total_cost(self, recommendations, specs):
@@ -202,6 +203,7 @@ class CostCalculator:
         roi_3_years = ((annual_savings * 3 - total_investment) / total_investment * 100) if total_investment > 0 else float('inf')
         return {'annual_savings': annual_savings, 'payback_months': payback_months, 'roi_3_years': roi_3_years}
 
+
 def analyze_room_environment(specs):
     room_area = specs['length'] * specs['width']
     window_area = room_area * (specs.get('windows', 0) / 100)
@@ -218,6 +220,7 @@ def analyze_room_environment(specs):
         
     return {'lighting': lighting, 'acoustics': acoustics}
 
+
 # --- Advanced Charting Functions ---
 def create_cost_breakdown_chart(cost_data, roi_analysis):
     fig = make_subplots(rows=1, cols=2, specs=[[{"type": "pie"}, {"type": "bar"}]], subplot_titles=('Cost Breakdown', 'Payback Period Scenarios'))
@@ -231,6 +234,7 @@ def create_cost_breakdown_chart(cost_data, roi_analysis):
     fig.update_yaxes(title_text="Months to Payback", row=1, col=2)
     fig.update_layout(height=400, showlegend=False, title_text="Comprehensive Financial Analysis")
     return fig
+
 
 # --- Helper functions for 3D Visualization ---
 def get_rotation_matrix(angle_deg):
@@ -263,8 +267,10 @@ def add_detailed_chair(fig, position, rotation_y_deg=0):
         rotated_coords = rot_mat @ original_coords
         trace.x = rotated_coords[0, :] + position[0]
         trace.y = rotated_coords[1, :] + position[1]
-        trace.z += position[2]
+        # --- THIS IS THE FIX ---
+        trace.z = np.array(trace.z) + position[2]
         fig.add_trace(trace)
+
 
 # --- Maxed-Out Plotly 3D Visualization ---
 def create_photorealistic_3d_room(specs, recommendations):
@@ -369,7 +375,7 @@ def main():
                                 <p><strong>Technology Grade:</strong> Enterprise</p></div>""", unsafe_allow_html=True)
         
         with tabs[1]:
-            st.markdown("### 🏗️ Photorealistic 3D Room Preview")
+            st.markdown("### 🏗️ 3D Room Visualization")
             with st.spinner("Rendering 3D model..."):
                 fig_3d = create_photorealistic_3d_room(specs, recs)
                 st.plotly_chart(fig_3d, use_container_width=True)
@@ -407,6 +413,7 @@ def main():
 
     else:
         st.info("Get started by configuring your room specifications in the sidebar and clicking 'Generate AI Recommendations'.")
+
 
 if __name__ == "__main__":
     main()
