@@ -4,14 +4,7 @@ import numpy as np
 import plotly.graph_objects as go
 from typing import Dict, List, Any
 
-st.set_page_config(page_title="AI Room Configurator Pro Max", page_icon="🏢", layout="wide")
-
-import streamlit as st
-import pandas as pd
-import numpy as np
-import plotly.graph_objects as go
-from typing import Dict, List, Any
-
+# --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="AI Room Configurator Pro Max", page_icon="🏢", layout="wide")
 
 # --- IMPROVED AND CONSISTENT CSS STYLING ---
@@ -680,8 +673,8 @@ class EnhancedProductDatabase:
             }
         }
 
+# --- Recommendation Logic ---
 class MaximizedAVRecommender:
-    # This class remains unchanged, content omitted for brevity
     def __init__(self):
         self.db = EnhancedProductDatabase()
     
@@ -1028,7 +1021,7 @@ class MaximizedAVRecommender:
         base_costs = {'Budget': 15000, 'Professional': 45000, 'Premium': 120000}
         return int(base_costs[tier] * (1 + (specs['capacity'] / 50)))
 
-# --- NEW Visualization Engine with Material/Lighting Sim ---
+# --- Visualization Engine ---
 class EnhancedMaterials:
     @staticmethod
     def get_material_presets():
@@ -1228,7 +1221,6 @@ class EnhancedVisualizationEngine:
 
     @staticmethod
     def create_equipment_layout_2d(room_specs, recommendations):
-        # This static method is preserved
         fig = go.Figure()
         
         length, width = room_specs['length'], room_specs['width']
@@ -1312,7 +1304,7 @@ class EnhancedVisualizationEngine:
         
         return fig
 
-# --- Main Application ---
+# --- Main Application UI and Logic ---
 def main():
     st.title("🏢 AI Room Configurator Pro Max")
     st.markdown("### Transform Your Space with Intelligent AV Design")
