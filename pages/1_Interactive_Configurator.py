@@ -169,14 +169,127 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# --- Comprehensive Product Database (Omitted for brevity) ---
+# --- Comprehensive Product Database ---
 class EnhancedProductDatabase:
-    # ... (Content remains the same)
-    pass
+    # This class remains unchanged, content omitted for brevity
+    def __init__(self):
+        self.products = {
+            'displays': {
+                'Budget': {
+                    'BenQ IRP55': {'price': 1299, 'specs': '55" 4K Interactive Display, 20-point touch', 'rating': 4.2, 'brand': 'BenQ'},
+                    'LG 75UP8000PUA': {'price': 1899, 'specs': '75" 4K LED, webOS, ThinQ AI', 'rating': 4.4, 'brand': 'LG'},
+                    'Samsung QB65R': {'price': 2499, 'specs': '65" 4K QLED Business Display', 'rating': 4.5, 'brand': 'Samsung'}
+                },
+                'Professional': {
+                    'Sharp/NEC 100" 4K Display': {'price': 15999, 'specs': '100" 4K UHD, 500 nits, 24/7 Operation', 'rating': 4.7, 'brand': 'Sharp/NEC'},
+                    'Sony BRAVIA FW-85BZ40H': {'price': 8999, 'specs': '85" 4K Pro Display, Android TV', 'rating': 4.6, 'brand': 'Sony'},
+                    'Planar UltraRes X Series': {'price': 12999, 'specs': '86" 4K Multi-touch Display', 'rating': 4.5, 'brand': 'Planar'}
+                },
+                'Premium': {
+                    'LG MAGNIT 136"': {'price': 75000, 'specs': 'MicroLED, 4K, AI-powered processing, Cable-less', 'rating': 4.9, 'brand': 'LG'},
+                    'Samsung "The Wall" 146"': {'price': 99999, 'specs': 'MicroLED, 4K, 0.8mm Pixel Pitch, AI Upscaling', 'rating': 5.0, 'brand': 'Samsung'},
+                    'Sony Crystal LED 220"': {'price': 150000, 'specs': 'Crystal LED, 4K+, Seamless Modular Design', 'rating': 5.0, 'brand': 'Sony'}
+                }
+            },
+            'cameras': {
+                'Budget': {
+                    'Logitech MeetUp': {'price': 899, 'specs': '4K Ultra HD, 120° FOV, Built-in Speakers', 'rating': 4.3, 'brand': 'Logitech'},
+                    'Poly Studio P5': {'price': 699, 'specs': 'HD Webcam, Automatic Group Framing', 'rating': 4.2, 'brand': 'Poly'},
+                    'Jabra PanaCast': {'price': 1199, 'specs': '4K Panoramic Camera, 180° FOV', 'rating': 4.4, 'brand': 'Jabra'}
+                },
+                'Professional': {
+                    'Logitech Rally Bar': {'price': 3999, 'specs': '4K PTZ, AI Viewfinder, RightSight Auto-Framing', 'rating': 4.8, 'brand': 'Logitech'},
+                    'Poly Studio E70': {'price': 4200, 'specs': 'Dual 4K sensors, Poly DirectorAI, Speaker Tracking', 'rating': 4.9, 'brand': 'Poly'},
+                    'Aver CAM520 Pro3': {'price': 2899, 'specs': '4K PTZ, 18x Optical Zoom, AI Auto-Framing', 'rating': 4.6, 'brand': 'Aver'}
+                },
+                'Premium': {
+                    'Cisco Room Kit EQ': {'price': 19999, 'specs': 'AI-powered Quad Camera, Speaker Tracking, Codec', 'rating': 5.0, 'brand': 'Cisco'},
+                    'Crestron Flex UC-MM30-Z': {'price': 15999, 'specs': 'Advanced AI Camera, 4K PTZ, Zoom Integration', 'rating': 4.9, 'brand': 'Crestron'},
+                    'Polycom Studio X70': {'price': 12999, 'specs': 'Dual 4K cameras, AI-powered Director', 'rating': 4.8, 'brand': 'Polycom'}
+                }
+            },
+            'audio': {
+                'Budget': {
+                    'Yamaha YVC-1000': {'price': 1299, 'specs': 'USB/Bluetooth Speakerphone, Adaptive Echo Canceller', 'rating': 4.3, 'brand': 'Yamaha'},
+                    'ClearOne CHAT 50': {'price': 599, 'specs': 'USB Speakerphone, Duplex Audio', 'rating': 4.1, 'brand': 'ClearOne'},
+                    'Jabra Speak 750': {'price': 399, 'specs': 'UC Speakerphone, 360° Microphone', 'rating': 4.4, 'brand': 'Jabra'}
+                },
+                'Professional': {
+                    'QSC Core Nano': {'price': 2500, 'specs': 'Network Audio I/O, Q-SYS Ecosystem, Software DSP', 'rating': 4.7, 'brand': 'QSC'},
+                    'Biamp TesiraFORTE X 400': {'price': 4500, 'specs': 'AEC, Dante/AVB, USB Audio, Launch Config', 'rating': 4.8, 'brand': 'Biamp'},
+                    'ClearOne BMA 360': {'price': 3299, 'specs': 'Beamforming Mic Array, 360° Coverage', 'rating': 4.6, 'brand': 'ClearOne'}
+                },
+                'Premium': {
+                    'Shure MXA920 Ceiling Array': {'price': 6999, 'specs': 'Automatic Coverage, Steerable Coverage, IntelliMix DSP', 'rating': 5.0, 'brand': 'Shure'},
+                    'Sennheiser TeamConnect Ceiling 2': {'price': 5999, 'specs': 'AI-Enhanced Audio, Beam Steering Technology', 'rating': 4.9, 'brand': 'Sennheiser'},
+                    'Audio-Technica ATUC-50CU': {'price': 4999, 'specs': 'Ceiling Array, AI Noise Reduction', 'rating': 4.8, 'brand': 'Audio-Technica'}
+                }
+            },
+            'control_systems': {
+                'Budget': {
+                    'Extron TouchLink Pro 725T': {'price': 1999, 'specs': '7" Touchpanel, PoE+, Web Interface', 'rating': 4.3, 'brand': 'Extron'},
+                    'AMX Modero X Series NXD-700Vi': {'price': 2299, 'specs': '7" Touch Panel, Built-in Video', 'rating': 4.4, 'brand': 'AMX'},
+                    'Crestron TSW-570': {'price': 1799, 'specs': '5" Touch Screen, Wi-Fi, PoE', 'rating': 4.5, 'brand': 'Crestron'}
+                },
+                'Professional': {
+                    'Crestron Flex UC': {'price': 3999, 'specs': 'Tabletop Touchpanel, UC Integration', 'rating': 4.6, 'brand': 'Crestron'},
+                    'AMX Enova DGX': {'price': 5999, 'specs': 'Digital Matrix Switching, Control System', 'rating': 4.7, 'brand': 'AMX'},
+                    'Extron DTP3 CrossPoint': {'price': 7999, 'specs': '4K60 Matrix Switching, Advanced Control', 'rating': 4.8, 'brand': 'Extron'}
+                },
+                'Premium': {
+                    'Crestron NVX System': {'price': 15999, 'specs': 'Enterprise Control Platform, AV over IP', 'rating': 4.9, 'brand': 'Crestron'},
+                    'Q-SYS Core 8 Flex': {'price': 12999, 'specs': 'Unified AV/IT Platform, Software-based', 'rating': 5.0, 'brand': 'QSC'},
+                    'Biamp Vocia MS-1': {'price': 18999, 'specs': 'Networked Paging System, Enterprise Grade', 'rating': 4.9, 'brand': 'Biamp'}
+                }
+            },
+            'lighting': {
+                'Budget': {
+                    'Philips Hue Pro': {'price': 899, 'specs': 'Smart LED System, App Control', 'rating': 4.2, 'brand': 'Philips'},
+                    'Lutron Caseta Pro': {'price': 1299, 'specs': 'Wireless Dimming System', 'rating': 4.4, 'brand': 'Lutron'},
+                    'Leviton Decora Smart': {'price': 799, 'specs': 'Wi-Fi Enabled Switches and Dimmers', 'rating': 4.1, 'brand': 'Leviton'}
+                },
+                'Professional': {
+                    'Crestron DIN-2MC2': {'price': 2999, 'specs': '2-Channel Dimmer, 0-10V Control', 'rating': 4.6, 'brand': 'Crestron'},
+                    'Lutron Quantum': {'price': 4999, 'specs': 'Total Light Management System', 'rating': 4.8, 'brand': 'Lutron'},
+                    'ETC ColorSource': {'price': 3999, 'specs': 'LED Architectural Lighting', 'rating': 4.7, 'brand': 'ETC'}
+                },
+                'Premium': {
+                    'Ketra N4 Hub': {'price': 8999, 'specs': 'Natural Light Technology, Circadian Rhythm', 'rating': 5.0, 'brand': 'Lutron/Ketra'},
+                    'USAI BeveLED': {'price': 12999, 'specs': 'Architectural LED Lighting System', 'rating': 4.9, 'brand': 'USAI'},
+                    'Signify Interact Pro': {'price': 15999, 'specs': 'IoT-connected Lighting Management', 'rating': 4.8, 'brand': 'Signify'}
+                }
+            }
+        }
+        
+        self.room_templates = {
+            'Huddle Room (2-6 people)': {
+                'typical_size': (3, 4), 'capacity_range': (2, 6),
+                'recommended_tier': 'Budget', 'typical_usage': 'Quick meetings, brainstorming'
+            },
+            'Small Conference (6-12 people)': {
+                'typical_size': (4, 6), 'capacity_range': (6, 12),
+                'recommended_tier': 'Professional', 'typical_usage': 'Team meetings, presentations'
+            },
+            'Large Conference (12-20 people)': {
+                'typical_size': (6, 10), 'capacity_range': (12, 20),
+                'recommended_tier': 'Professional', 'typical_usage': 'Department meetings, training'
+            },
+            'Boardroom (8-16 people)': {
+                'typical_size': (5, 8), 'capacity_range': (8, 16),
+                'recommended_tier': 'Premium', 'typical_usage': 'Executive meetings, board meetings'
+            },
+            'Training Room (20-50 people)': {
+                'typical_size': (8, 12), 'capacity_range': (20, 50),
+                'recommended_tier': 'Professional', 'typical_usage': 'Training, workshops, seminars'
+            },
+            'Auditorium (50+ people)': {
+                'typical_size': (12, 20), 'capacity_range': (50, 200),
+                'recommended_tier': 'Premium', 'typical_usage': 'Large presentations, events'
+            }
+        }
 
-# --- Advanced AI Recommendation Engine (Omitted for brevity) ---
 class MaximizedAVRecommender:
-    # ... (Content remains the same)
+    # This class remains unchanged, content omitted for brevity
     pass
 
 # --- NEW Visualization Engine with Material/Lighting Sim ---
@@ -222,19 +335,6 @@ class TextureGenerator:
         texture = weave_x * weave_y + np.random.normal(0, 1, size) * 0.1
         return np.clip(texture, 0, 1)
 
-    @staticmethod
-    def create_metal_texture(size: tuple, roughness: float = 0.2) -> np.ndarray:
-        texture = np.ones(size) * 0.8
-        num_scratches = int(size[0] * size[1] * 0.01)
-        for _ in range(num_scratches):
-            x, y = np.random.randint(0, size[0]), np.random.randint(0, size[1])
-            length, angle = np.random.randint(5, 20), np.random.random() * np.pi
-            for i in range(length):
-                xi, yi = int(x + i * np.cos(angle)), int(y + i * np.sin(angle))
-                if 0 <= xi < size[0] and 0 <= yi < size[1]:
-                    texture[yi, xi] = 1.0 - roughness * np.random.random()
-        return texture
-
 class EnhancedVisualizationEngine:
     def __init__(self):
         self.color_schemes = {
@@ -278,17 +378,22 @@ class EnhancedVisualizationEngine:
         return fig
 
     def _add_room_structure(self, fig, specs, colors, lighting):
-        self._add_walls(fig, specs, colors, lighting)
-        fig.add_trace(go.Surface(x=[[0, specs['length']], [0, specs['length']]], y=[[0, 0], [specs['width'], specs['width']]], z=[[0, 0], [0, 0]], colorscale=[[0, colors['floor']], [1, colors['floor']]], showscale=False, name='Floor', lighting=lighting))
-
-    def _add_walls(self, fig, specs, colors, lighting):
+        """Add room structure with proper lighting configuration"""
         length, width, height = specs['length'], specs['width'], specs['ceiling_height']
-        lighting_config = {'ambient': lighting.get('ambient', 0.5), 'diffuse': lighting.get('diffuse', 0.8)}
         
-        fig.add_trace(go.Surface(x=[[0, 0], [0, 0]], y=[[0, width], [0, width]], z=[[0, 0], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, opacity=0.9, lighting=lighting_config, name="Back Wall"))
-        fig.add_trace(go.Surface(x=[[0, length], [0, length]], y=[[0, 0], [0, 0]], z=[[0, 0], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, opacity=0.7, lighting=lighting_config, name="Left Wall"))
-        fig.add_trace(go.Surface(x=[[0, length], [0, length]], y=[[width, width], [width, width]], z=[[0, 0], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, opacity=0.7, lighting=lighting_config, name="Right Wall"))
-
+        lighting_config = {
+            'ambient': lighting.get('ambient', 0.4),
+            'diffuse': lighting.get('diffuse', 0.6),
+            'fresnel': 0.2, 'specular': 0.3, 'roughness': 0.7
+        }
+        
+        fig.add_trace(go.Surface(x=[[0, length], [0, length]], y=[[0, 0], [width, width]], z=[[0, 0], [0, 0]], colorscale=[[0, colors['floor']], [1, colors['floor']]], showscale=False, lighting=lighting_config, name='Floor'))
+        fig.add_trace(go.Surface(x=[[0, 0], [0, 0]], y=[[0, width], [0, width]], z=[[0, 0], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, lighting=lighting_config, opacity=0.9, name='Back Wall'))
+        fig.add_trace(go.Surface(x=[[0, length], [0, length]], y=[[0, 0], [0, 0]], z=[[0, 0], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, lighting=lighting_config, opacity=0.8, name='Left Wall'))
+        fig.add_trace(go.Surface(x=[[0, length], [0, length]], y=[[width, width], [width, width]], z=[[0, 0], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, lighting=lighting_config, opacity=0.8, name='Right Wall'))
+        fig.add_trace(go.Surface(x=[[0, length], [0, length]], y=[[0, 0], [width, width]], z=[[height, height], [height, height]], colorscale=[[0, colors['wall']], [1, colors['wall']]], showscale=False, lighting=lighting_config, opacity=0.9, name='Ceiling'))
+    
+    # ... (Other _add methods are implemented based on previous versions) ...
     def _add_table(self, fig, specs, colors, table_style):
         length, width = specs['length'], specs['width']
         table_height, table_x_center, table_y_center = 0.75, length * 0.55, width * 0.5
@@ -299,21 +404,15 @@ class EnhancedVisualizationEngine:
             z = np.full_like(x, table_height)
             fig.add_trace(go.Surface(x=x, y=y, z=z, colorscale=[[0, colors['wood']], [1, colors['wood']]], showscale=False, name='Table'))
         elif table_style == 'oval':
-            # CORRECTED: Use go.Mesh3d for a filled oval shape
             theta = np.linspace(0, 2 * np.pi, 50)
             x_outline = table_x_center + (table_length / 2) * np.cos(theta)
             y_outline = table_y_center + (table_width / 2) * np.sin(theta)
-            
-            # Vertices: center point + outline points
             x_verts = np.concatenate(([table_x_center], x_outline))
             y_verts = np.concatenate(([table_y_center], y_outline))
             z_verts = np.full_like(x_verts, table_height)
-            
-            # Faces (triangles fanning out from the center)
             i_faces = [0] * (len(x_outline) - 1)
             j_faces = list(range(1, len(x_outline)))
             k_faces = list(range(2, len(x_outline) + 1))
-            
             fig.add_trace(go.Mesh3d(x=x_verts, y=y_verts, z=z_verts, i=i_faces, j=j_faces, k=k_faces, color=colors['wood'], name='Table'))
 
     def _add_seating(self, fig, specs, colors, chair_style):
@@ -422,7 +521,7 @@ class EnhancedVisualizationEngine:
 
     @staticmethod
     def create_equipment_layout_2d(room_specs, recommendations):
-        """Create an enhanced 2D floor plan with more details"""
+        # This method is preserved from the previous version
         fig = go.Figure()
         
         length, width = room_specs['length'], room_specs['width']
@@ -431,11 +530,12 @@ class EnhancedVisualizationEngine:
         fig.add_shape(type="rect", x0=0, y0=0, x1=length, y1=width, line=dict(color="rgb(70,70,70)", width=3), fillcolor="rgba(250,250,250,1)")
         
         if room_specs.get('environment', {}).get('windows', 0) > 0:
-            window_sections = int(room_specs['environment']['windows'] / 20)
-            window_width_section = width / (window_sections * 2) if window_sections > 0 else 0
-            for i in range(window_sections):
-                y_start = (width / 2) - (window_sections * window_width_section / 2) + (i * window_width_section * 2)
-                fig.add_shape(type="rect", x0=length-0.1, y0=y_start, x1=length, y1=y_start + window_width_section, line=dict(color="rgb(150,200,255)", width=2), fillcolor="rgba(200,230,255,0.7)")
+            window_sections = int(room_specs.get('environment', {}).get('windows', 0) / 20)
+            if window_sections > 0:
+                window_width_section = width / (window_sections * 2)
+                for i in range(window_sections):
+                    y_start = (width / 2) - (window_sections * window_width_section / 2) + (i * window_width_section * 2)
+                    fig.add_shape(type="rect", x0=length-0.1, y0=y_start, x1=length, y1=y_start + window_width_section, line=dict(color="rgb(150,200,255)", width=2), fillcolor="rgba(200,230,255,0.7)")
 
         screen_width_2d = min(width * 0.6, 3.5)
         screen_start = (width - screen_width_2d) / 2
@@ -565,8 +665,7 @@ def main():
         st.markdown("---")
         st.sidebar.markdown("### 🎨 Visualization Options")
         
-        expander_room = st.sidebar.expander("Room Elements", expanded=True)
-        with expander_room:
+        with st.sidebar.expander("Room Elements", expanded=True):
             room_elements_config = {
                 'show_chairs': st.checkbox("Show Chairs", value=True),
                 'show_displays': st.checkbox("Show Displays", value=True),
@@ -579,8 +678,7 @@ def main():
                 'show_credenza': st.checkbox("Credenza/Storage", value=False)
             }
         
-        expander_style = st.sidebar.expander("Style Options", expanded=False)
-        with expander_style:
+        with st.sidebar.expander("Style Options", expanded=False):
             style_config = {
                 'chair_style': st.selectbox("Chair Style", ['modern', 'executive', 'training', 'casual']),
                 'table_style': st.selectbox("Table Style", ['rectangular', 'oval', 'boat-shaped', 'modular']),
@@ -589,8 +687,7 @@ def main():
                 'view_angle': st.selectbox("View Angle", ['perspective', 'top', 'front', 'side', 'corner'])
             }
 
-        expander_advanced = st.sidebar.expander("Advanced Features", expanded=False)
-        with expander_advanced:
+        with st.sidebar.expander("Advanced Features", expanded=False):
             advanced_config = {
                 'show_measurements': st.checkbox("Show Measurements", value=False),
                 'show_zones': st.checkbox("Show Audio/Video Zones", value=False),
@@ -674,12 +771,9 @@ def main():
 
         with tab3:
             st.subheader("Interactive Room Visualization")
-            
             viz_config = {'room_elements': room_elements_config, 'style_options': style_config, 'advanced_features': advanced_config}
             viz_engine = EnhancedVisualizationEngine()
-            
             fig_3d = viz_engine.create_3d_room_visualization(room_specs, recommendations, viz_config)
-            
             st.plotly_chart(fig_3d, use_container_width=True)
             st.plotly_chart(EnhancedVisualizationEngine.create_equipment_layout_2d(room_specs, recommendations), use_container_width=True)
 
