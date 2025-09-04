@@ -6,276 +6,362 @@ from typing import Dict, List, Any
 
 st.set_page_config(page_title="AI Room Configurator Pro Max", page_icon="🏢", layout="wide")
 
-# --- Improved CSS Styling ---
-# --- Fixed CSS Styling for Better Text Visibility ---
+import streamlit as st
+import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
+from typing import Dict, List, Any
+
+st.set_page_config(page_title="AI Room Configurator Pro Max", page_icon="🏢", layout="wide")
+
+# --- IMPROVED AND CONSISTENT CSS STYLING ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
     :root {
-        --primary-color: #2563eb;
-        --primary-hover: #1d4ed8;
-        --success-color: #22c55e;
-        --background-color: #f8fafc;
-        --dark-background: #1e293b;
-        --sidebar-bg: #1e293b;
-        --sidebar-text: #f3f4f6;
-        --text-color: #1e293b;
-        --text-light: #64748b;
-        --body-text-color: #334155;
-        --card-bg: #ffffff;
-        --card-shadow: 0 6px 24px rgba(30,41,59,0.08);
-        --border-radius-lg: 18px;
-        --border-radius-md: 12px;
-        --accent-color: #e2e8f0;
-        --feature-bg: #ffffff;
-        --feature-border: #2563eb;
-        --metric-bg: #2563eb;
-        --metric-text: #ffffff;
-        --border-color: #e2e8f0;
+        /* Primary Brand Colors */
+        --primary-blue: #2563eb;
+        --primary-blue-hover: #1d4ed8;
+        --primary-blue-light: #3b82f6;
+        --primary-blue-dark: #1e40af;
+        
+        /* Secondary Colors */
+        --success-green: #10b981;
+        --success-green-light: #22c55e;
+        --warning-orange: #f59e0b;
+        --error-red: #ef4444;
+        --info-cyan: #06b6d4;
+        
+        /* Neutral Colors */
+        --white: #ffffff;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-400: #9ca3af;
+        --gray-500: #6b7280;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-800: #1f2937;
+        --gray-900: #111827;
+        
+        /* Background Colors */
+        --background-primary: var(--gray-50);
+        --background-secondary: var(--white);
+        --background-dark: var(--gray-800);
+        --background-sidebar: var(--gray-900);
+        
+        /* Text Colors */
+        --text-primary: var(--gray-900);
+        --text-secondary: var(--gray-600);
+        --text-light: var(--gray-400);
+        --text-white: var(--white);
+        --text-white-secondary: rgba(255,255,255,0.9);
+        
+        /* Component Colors */
+        --card-background: var(--white);
+        --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+        --card-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
+        --border-color: var(--gray-200);
+        --border-color-focus: var(--primary-blue);
+        
+        /* Radius and Spacing */
+        --radius-sm: 6px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 24px;
+        
+        /* Specific Component Colors */
+        --metric-bg: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+        --premium-card-bg: var(--background-dark);
+        --feature-card-accent: var(--primary-blue);
+        --comparison-card-border: var(--gray-300);
+        --alert-success-bg: var(--success-green);
     }
 
     /* Base App Styling */
     .stApp {
-        background-color: var(--background-color) !important;
+        background-color: var(--background-primary) !important;
         font-family: 'Inter', sans-serif !important;
-        color: var(--text-color) !important;
+        color: var(--text-primary) !important;
     }
 
-    /* Fix main content area - remove overly broad selectors */
+    /* Main Content Area */
     .main .block-container {
         padding: 2rem 1rem !important;
         max-width: 1200px !important;
-        background-color: transparent !important;
     }
 
-    /* Typography - More specific and less aggressive */
-    h1, h2, h3, h4, h5, h6 {
-        color: var(--text-color) !important;
-        font-weight: 600 !important;
-        font-family: 'Inter', sans-serif !important;
+    /* Content Cards */
+    .main > div > div {
+        background: var(--card-background) !important;
+        border-radius: var(--radius-lg) !important;
+        padding: 2rem !important;
+        margin: 1rem 0 !important;
+        box-shadow: var(--card-shadow) !important;
+        border: 1px solid var(--border-color) !important;
+        transition: box-shadow 0.2s ease !important;
     }
 
-    h1 {
-        font-size: 2.5rem !important;
+    .main > div > div:hover {
+        box-shadow: var(--card-shadow-hover) !important;
+    }
+
+    /* Typography Hierarchy */
+    .main h1 {
+        color: var(--text-primary) !important;
         font-weight: 700 !important;
+        font-size: 2.5rem !important;
         margin-bottom: 1rem !important;
-        letter-spacing: -0.02em !important;
+        letter-spacing: -0.025em !important;
+        line-height: 1.2 !important;
     }
 
-    h2 {
+    .main h2 {
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
         font-size: 2rem !important;
         margin: 1.5rem 0 1rem 0 !important;
-        letter-spacing: -0.01em !important;
+        letter-spacing: -0.015em !important;
+        line-height: 1.25 !important;
     }
 
-    h3 {
+    .main h3 {
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
         font-size: 1.5rem !important;
         margin: 1.25rem 0 0.75rem 0 !important;
+        line-height: 1.3 !important;
     }
 
-    h4, h5, h6 {
+    .main h4, .main h5, .main h6 {
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
         margin: 1rem 0 0.5rem 0 !important;
+        line-height: 1.4 !important;
     }
 
-    /* Body Text - More specific targeting */
-    p, div, span, li {
-        color: var(--body-text-color) !important;
+    /* Body Text */
+    .main p, .main div[data-testid="stMarkdownContainer"] p {
+        color: var(--text-secondary) !important;
         font-size: 16px !important;
         font-weight: 400 !important;
         line-height: 1.6 !important;
-        font-family: 'Inter', sans-serif !important;
+        margin-bottom: 1rem !important;
     }
 
-    /* Streamlit specific text elements */
-    .stMarkdown p,
-    .stMarkdown div,
-    .stMarkdown span,
-    .stMarkdown li {
-        color: var(--body-text-color) !important;
+    .main li {
+        color: var(--text-secondary) !important;
+        font-size: 16px !important;
+        font-weight: 400 !important;
+        line-height: 1.6 !important;
+        margin-bottom: 0.5rem !important;
     }
 
-    .stMarkdown h1,
-    .stMarkdown h2,
-    .stMarkdown h3,
-    .stMarkdown h4,
-    .stMarkdown h5,
-    .stMarkdown h6 {
-        color: var(--text-color) !important;
-    }
-
-    /* Labels and form elements */
-    label,
-    .stSelectbox label,
-    .stTextInput label,
-    .stSlider label,
-    .stMultiSelect label,
-    .stCheckbox label {
-        color: var(--text-color) !important;
+    /* Labels and Form Elements */
+    .main label, .main .stSelectbox label, .main .stTextInput label, 
+    .main .stSlider label, .main .stCheckbox label {
+        color: var(--text-primary) !important;
         font-weight: 600 !important;
         font-size: 14px !important;
+        margin-bottom: 0.5rem !important;
     }
 
     /* Tabs Styling */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px !important;
-        background: var(--dark-background) !important;
+        background: var(--background-dark) !important;
         padding: 8px !important;
-        border-radius: var(--border-radius-md) !important;
+        border-radius: var(--radius-md) !important;
         margin-bottom: 1.5rem !important;
+        border: none !important;
     }
 
     .stTabs [data-baseweb="tab"] {
         background: rgba(255,255,255,0.1) !important;
-        border-radius: 8px !important;
-        color: rgba(255,255,255,0.9) !important;
+        border-radius: var(--radius-sm) !important;
+        color: var(--text-white-secondary) !important;
         font-weight: 500 !important;
         padding: 12px 20px !important;
         transition: all 0.2s ease !important;
         font-size: 14px !important;
         border: none !important;
+        cursor: pointer !important;
     }
 
     .stTabs [data-baseweb="tab"]:hover {
         background: rgba(255,255,255,0.2) !important;
-        color: #ffffff !important;
+        color: var(--text-white) !important;
         transform: translateY(-1px) !important;
     }
 
     .stTabs [aria-selected="true"] {
-        background: var(--primary-color) !important;
-        color: #ffffff !important;
+        background: var(--primary-blue) !important;
+        color: var(--text-white) !important;
         box-shadow: 0 4px 12px rgba(37,99,235,0.3) !important;
         font-weight: 600 !important;
+    }
+
+    /* Tab Content */
+    .stTabs > div > div > div > div {
+        background: transparent !important;
+        padding: 0 !important;
     }
 
     /* Metric Cards */
     div[data-testid="metric-container"] {
         background: var(--metric-bg) !important;
         padding: 1.5rem !important;
-        border-radius: var(--border-radius-md) !important;
+        border-radius: var(--radius-md) !important;
         box-shadow: 0 8px 25px rgba(37,99,235,0.15) !important;
         border: none !important;
         margin: 0.75rem 0 !important;
+        transition: transform 0.2s ease !important;
+    }
+
+    div[data-testid="metric-container"]:hover {
+        transform: translateY(-2px) !important;
     }
 
     div[data-testid="metric-container"] > div {
-        color: var(--metric-text) !important;
+        color: var(--text-white) !important;
     }
 
-    div[data-testid="metric-container"] label,
-    div[data-testid="metric-container"] .metric-label {
-        color: rgba(255,255,255,0.9) !important;
+    div[data-testid="metric-container"] label {
+        color: var(--text-white-secondary) !important;
         font-weight: 600 !important;
         font-size: 14px !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
     }
 
-    div[data-testid="metric-container"] [data-testid="metric-value"],
-    div[data-testid="metric-container"] .metric-value {
-        color: var(--metric-text) !important;
+    div[data-testid="metric-container"] [data-testid="metric-value"] {
+        color: var(--text-white) !important;
         font-size: 2rem !important;
         font-weight: 700 !important;
     }
 
     /* Custom CSS Classes */
     .premium-card {
-        background: var(--dark-background) !important;
+        background: var(--premium-card-bg) !important;
         padding: 2rem !important;
-        border-radius: var(--border-radius-lg) !important;
-        color: #ffffff !important;
+        border-radius: var(--radius-lg) !important;
+        color: var(--text-white) !important;
         margin: 1rem 0 !important;
-        box-shadow: 0 12px 32px rgba(30,41,59,0.2) !important;
-        border: 1px solid #374151 !important;
+        box-shadow: 0 12px 32px rgba(0,0,0,0.15) !important;
+        border: 1px solid var(--gray-700) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    }
+
+    .premium-card:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 16px 40px rgba(0,0,0,0.2) !important;
     }
 
     .premium-card h1, .premium-card h2, .premium-card h3, 
     .premium-card h4, .premium-card h5, .premium-card h6 {
-        color: #ffffff !important;
+        color: var(--text-white) !important;
     }
 
-    .premium-card p, .premium-card div, .premium-card span,
-    .premium-card li, .premium-card strong {
-        color: rgba(255,255,255,0.95) !important;
+    .premium-card p, .premium-card div, .premium-card span, .premium-card li {
+        color: var(--text-white-secondary) !important;
     }
 
     .feature-card {
-        background: var(--feature-bg) !important;
+        background: var(--card-background) !important;
         padding: 1.5rem !important;
-        border-radius: var(--border-radius-md) !important;
+        border-radius: var(--radius-md) !important;
         margin: 1rem 0 !important;
-        border-left: 4px solid var(--feature-border) !important;
-        box-shadow: 0 2px 8px rgba(37,99,235,0.08) !important;
-        border: 1px solid var(--border-color) !important;
-    }
-
-    .feature-card h1, .feature-card h2, .feature-card h3, .feature-card h4 {
-        color: var(--text-color) !important;
-        margin-top: 0 !important;
-    }
-
-    .feature-card p, .feature-card div, .feature-card span,
-    .feature-card li, .feature-card strong {
-        color: var(--body-text-color) !important;
-    }
-
-    .comparison-card {
-        background: var(--feature-bg) !important;
-        padding: 1.5rem !important;
-        border-radius: var(--border-radius-md) !important;
-        margin: 1rem 0 !important;
-        border: 2px solid var(--accent-color) !important;
+        border-left: 4px solid var(--feature-card-accent) !important;
+        box-shadow: var(--card-shadow) !important;
+        color: var(--text-primary) !important;
         transition: all 0.2s ease !important;
     }
 
+    .feature-card:hover {
+        box-shadow: var(--card-shadow-hover) !important;
+        transform: translateY(-1px) !important;
+        border-left-color: var(--primary-blue-dark) !important;
+    }
+
+    .feature-card h3, .feature-card h4 {
+        color: var(--text-primary) !important;
+        margin-top: 0 !important;
+    }
+
+    .feature-card p, .feature-card span, .feature-card div {
+        color: var(--text-secondary) !important;
+    }
+
+    .feature-card strong {
+        color: var(--text-primary) !important;
+    }
+
+    .comparison-card {
+        background: var(--card-background) !important;
+        padding: 1.5rem !important;
+        border-radius: var(--radius-md) !important;
+        margin: 1rem 0 !important;
+        border: 2px solid var(--comparison-card-border) !important;
+        transition: all 0.2s ease !important;
+        box-shadow: var(--card-shadow) !important;
+    }
+
     .comparison-card:hover {
-        border-color: var(--primary-color) !important;
-        box-shadow: 0 8px 24px rgba(37,99,235,0.1) !important;
+        border-color: var(--primary-blue) !important;
+        box-shadow: var(--card-shadow-hover) !important;
         transform: translateY(-2px) !important;
     }
 
-    .comparison-card h1, .comparison-card h2, .comparison-card h3, .comparison-card h4 {
-        color: var(--text-color) !important;
+    .comparison-card h3, .comparison-card h4 {
+        color: var(--text-primary) !important;
+        margin-top: 0 !important;
     }
 
-    .comparison-card p, .comparison-card div, .comparison-card span,
-    .comparison-card li, .comparison-card strong {
-        color: var(--body-text-color) !important;
+    .comparison-card p, .comparison-card span, .comparison-card div {
+        color: var(--text-secondary) !important;
+    }
+
+    .comparison-card strong {
+        color: var(--text-primary) !important;
     }
 
     .alert-success {
-        background: var(--success-color) !important;
-        color: #ffffff !important;
+        background: var(--alert-success-bg) !important;
+        color: var(--text-white) !important;
         padding: 1rem 1.5rem !important;
-        border-radius: var(--border-radius-md) !important;
+        border-radius: var(--radius-md) !important;
         margin: 1rem 0 !important;
         font-weight: 500 !important;
-        box-shadow: 0 4px 16px rgba(34,197,94,0.15) !important;
+        box-shadow: 0 4px 16px rgba(16,185,129,0.15) !important;
         border: none !important;
     }
 
     .alert-success h1, .alert-success h2, .alert-success h3,
     .alert-success h4, .alert-success h5, .alert-success h6,
-    .alert-success p, .alert-success div, .alert-success span,
-    .alert-success li, .alert-success strong {
-        color: #ffffff !important;
+    .alert-success p, .alert-success div, .alert-success span {
+        color: var(--text-white) !important;
     }
 
     /* Buttons */
     .stButton > button {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #3b82f6 100%) !important;
-        color: #ffffff !important;
+        background: var(--metric-bg) !important;
+        color: var(--text-white) !important;
         border: none !important;
         padding: 0.75rem 2rem !important;
-        border-radius: 2rem !important;
+        border-radius: var(--radius-xl) !important;
         font-weight: 600 !important;
         font-size: 16px !important;
         transition: all 0.3s ease !important;
         box-shadow: 0 4px 12px rgba(37,99,235,0.2) !important;
         cursor: pointer !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
     }
 
     .stButton > button:hover {
-        background: linear-gradient(135deg, var(--primary-hover) 0%, #2563eb 100%) !important;
+        background: linear-gradient(135deg, var(--primary-blue-hover) 0%, var(--primary-blue) 100%) !important;
         transform: translateY(-2px) !important;
         box-shadow: 0 8px 24px rgba(37,99,235,0.3) !important;
     }
@@ -287,190 +373,190 @@ st.markdown("""
 
     /* Sidebar */
     .css-1d391kg, [data-testid="stSidebar"] {
-        background: var(--sidebar-bg) !important;
+        background: var(--background-sidebar) !important;
+        border-right: 1px solid var(--gray-700) !important;
     }
 
-    [data-testid="stSidebar"] .stMarkdown,
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] div,
-    [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] li {
-        color: var(--sidebar-text) !important;
+    .css-1d391kg .stMarkdown, [data-testid="stSidebar"] .stMarkdown {
+        color: var(--text-white) !important;
     }
 
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3,
-    [data-testid="stSidebar"] h4,
-    [data-testid="stSidebar"] h5,
-    [data-testid="stSidebar"] h6 {
-        color: #ffffff !important;
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, 
+    [data-testid="stSidebar"] h3, [data-testid="stSidebar"] h4 {
+        color: var(--text-white) !important;
+    }
+
+    [data-testid="stSidebar"] p, [data-testid="stSidebar"] div {
+        color: var(--text-white-secondary) !important;
+    }
+
+    [data-testid="stSidebar"] label {
+        color: var(--text-white) !important;
+        font-weight: 600 !important;
     }
 
     /* Input Fields */
-    .stTextInput input, .stTextArea textarea {
-        background: var(--card-bg) !important;
-        border: 2px solid var(--accent-color) !important;
-        border-radius: 8px !important;
-        color: var(--text-color) !important;
+    .stTextInput input, .stTextArea textarea, .stSelectbox select {
+        background: var(--card-background) !important;
+        border: 2px solid var(--border-color) !important;
+        border-radius: var(--radius-sm) !important;
+        color: var(--text-primary) !important;
         font-size: 16px !important;
         padding: 0.75rem !important;
-        transition: border-color 0.2s ease !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
     }
 
-    .stTextInput input:focus, .stTextArea textarea:focus {
-        border-color: var(--primary-color) !important;
+    .stTextInput input:focus, .stTextArea textarea:focus, .stSelectbox select:focus {
+        border-color: var(--border-color-focus) !important;
         box-shadow: 0 0 0 3px rgba(37,99,235,0.1) !important;
         outline: none !important;
     }
 
-    /* Select boxes */
-    .stSelectbox > div > div {
-        background-color: var(--card-bg) !important;
-        color: var(--text-color) !important;
-        border: 2px solid var(--accent-color) !important;
-    }
-
-    /* Multi-select */
-    .stMultiSelect > div > div {
-        background-color: var(--card-bg) !important;
-        color: var(--text-color) !important;
-        border: 2px solid var(--accent-color) !important;
-    }
-
     /* Sliders */
-    .stSlider > div > div > div {
-        color: var(--text-color) !important;
+    .stSlider > div > div > div > div {
+        color: var(--primary-blue) !important;
+    }
+
+    /* Checkboxes and Radio buttons */
+    .stCheckbox > label > div {
+        background-color: var(--card-background) !important;
+        border-color: var(--border-color) !important;
+    }
+
+    .stCheckbox > label > div[data-checked="true"] {
+        background-color: var(--primary-blue) !important;
+        border-color: var(--primary-blue) !important;
     }
 
     /* DataFrames and Tables */
     .stDataFrame {
-        border-radius: var(--border-radius-md) !important;
+        border-radius: var(--radius-md) !important;
         overflow: hidden !important;
         box-shadow: var(--card-shadow) !important;
+        border: 1px solid var(--border-color) !important;
     }
 
     .stDataFrame table {
-        color: var(--text-color) !important;
+        color: var(--text-primary) !important;
     }
 
     .stDataFrame th {
-        background-color: var(--primary-color) !important;
-        color: white !important;
+        background-color: var(--gray-100) !important;
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
     }
 
     .stDataFrame td {
-        color: var(--body-text-color) !important;
+        color: var(--text-secondary) !important;
     }
 
     /* Charts */
     .stPlotlyChart {
-        background: var(--card-bg) !important;
-        border-radius: var(--border-radius-md) !important;
+        background: var(--card-background) !important;
+        border-radius: var(--radius-md) !important;
         padding: 1rem !important;
         box-shadow: var(--card-shadow) !important;
+        border: 1px solid var(--border-color) !important;
     }
 
     /* Expander */
     .streamlit-expanderHeader {
-        color: var(--text-color) !important;
+        background-color: var(--gray-100) !important;
+        color: var(--text-primary) !important;
         font-weight: 600 !important;
-        background-color: var(--card-bg) !important;
+        border-radius: var(--radius-sm) !important;
+        border: 1px solid var(--border-color) !important;
     }
 
     .streamlit-expanderContent {
-        background: var(--card-bg) !important;
-        border-radius: var(--border-radius-md) !important;
-        color: var(--body-text-color) !important;
+        background: var(--card-background) !important;
+        border-radius: var(--radius-sm) !important;
+        border: 1px solid var(--border-color) !important;
+        border-top: none !important;
     }
 
     /* Progress Bar */
     .stProgress > div > div {
-        background: var(--primary-color) !important;
+        background: var(--primary-blue) !important;
+        border-radius: var(--radius-sm) !important;
     }
 
-    /* Status elements */
-    .stAlert {
-        border-radius: var(--border-radius-md) !important;
+    .stProgress > div {
+        background-color: var(--gray-200) !important;
+        border-radius: var(--radius-sm) !important;
+    }
+
+    /* Success/Info/Warning/Error messages */
+    .stSuccess {
+        background-color: var(--success-green) !important;
+        color: var(--text-white) !important;
+        border-radius: var(--radius-md) !important;
         border: none !important;
     }
 
-    .stSuccess {
-        background-color: var(--success-color) !important;
-        color: white !important;
+    .stInfo {
+        background-color: var(--info-cyan) !important;
+        color: var(--text-white) !important;
+        border-radius: var(--radius-md) !important;
+        border: none !important;
+    }
+
+    .stWarning {
+        background-color: var(--warning-orange) !important;
+        color: var(--text-white) !important;
+        border-radius: var(--radius-md) !important;
+        border: none !important;
+    }
+
+    .stError {
+        background-color: var(--error-red) !important;
+        color: var(--text-white) !important;
+        border-radius: var(--radius-md) !important;
+        border: none !important;
     }
 
     /* File uploader */
     .stFileUploader {
-        background: var(--card-bg) !important;
-        border: 2px dashed var(--accent-color) !important;
-        border-radius: var(--border-radius-md) !important;
+        background: var(--card-background) !important;
+        border: 2px dashed var(--border-color) !important;
+        border-radius: var(--radius-md) !important;
         padding: 2rem !important;
+        transition: border-color 0.2s ease !important;
     }
 
     .stFileUploader:hover {
-        border-color: var(--primary-color) !important;
+        border-color: var(--primary-blue) !important;
     }
 
-    /* Column containers - ensure they don't interfere with text */
-    .element-container,
-    [data-testid="column"] {
+    /* Column containers */
+    .main [data-testid="column"] > div {
         background: transparent !important;
+        padding: 0.5rem !important;
     }
 
-    /* Success messages */
-    .stSuccess > div {
-        color: white !important;
-    }
-
-    /* Info messages */
-    .stInfo > div {
-        color: var(--text-color) !important;
-    }
-
-    /* Warning messages */
-    .stWarning > div {
-        color: var(--text-color) !important;
-    }
-
-    /* Error messages */
-    .stError > div {
-        color: white !important;
-    }
-
-    /* Remove any conflicting main container styling that might hide text */
-    .main > div {
-        background: transparent !important;
-        color: var(--text-color) !important;
-    }
-
-    /* Ensure all text is visible */
-    * {
+    /* Ensure proper visibility and contrast */
+    .main * {
         visibility: visible !important;
     }
 
-    /* Fix any text that might be getting overridden */
-    .stApp * {
-        font-family: 'Inter', sans-serif !important;
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+        :root {
+            --border-color: var(--gray-400);
+            --text-secondary: var(--gray-700);
+        }
     }
 
-    /* Ensure checkbox text is visible */
-    .stCheckbox > label {
-        color: var(--text-color) !important;
-    }
-
-    /* Ensure radio button text is visible */
-    .stRadio > label {
-        color: var(--text-color) !important;
-    }
-
-    /* Make sure all form text is visible */
-    .stForm {
-        color: var(--text-color) !important;
-    }
-
-    .stForm * {
-        color: var(--text-color) !important;
+    /* Dark mode support (for future enhancement) */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --background-primary: var(--gray-900);
+            --background-secondary: var(--gray-800);
+            --card-background: var(--gray-800);
+            --text-primary: var(--white);
+            --text-secondary: var(--gray-300);
+            --border-color: var(--gray-600);
+        }
     }
 </style>
 """, unsafe_allow_html=True)
