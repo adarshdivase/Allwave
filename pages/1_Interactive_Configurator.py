@@ -608,150 +608,143 @@ class EnhancedVisualizationEngine:
 
         # Modern color scheme
         colors = {
-            'wall': '#e6e6e6',      # Light gray
-            'floor': '#f5f5f5',      # Lighter gray
-            'table': '#8B7355',      # Wood brown
-            'screen': '#000000',      # Black
-            'chairs': '#718096',      # Cool gray
-            'accent': '#4299E1'       # Brand blue
+            'wall': '#F0F2F5',      # Light gray walls
+            'floor': '#E5E9F0',      # Slightly darker floor
+            'accent': '#4A90E2',      # Brand blue
+            'wood': '#8B5E3C',      # Rich wood tone
+            'screen': '#1A1A1A',      # Deep black for display
+            'metal': '#B8B8B8'       # Metallic finish
         }
 
         # Add floor with modern finish
+        floor_vertices = np.array([
+            [0, 0, 0], [length, 0, 0], [length, width, 0], [0, width, 0]
+        ])
+        i, j, k = np.meshgrid(np.linspace(0, length, 50),
+                                 np.linspace(0, width, 50),
+                                 [0], indexing='ij')
+        
         fig.add_trace(go.Surface(
-            x=[[0, length], [0, length]],
-            y=[[0, 0], [width, width]],
-            z=[[0, 0], [0, 0]],
+            x=i, y=j, z=k,
             colorscale=[[0, colors['floor']], [1, colors['floor']]],
             showscale=False,
-            name='Floor'
+            opacity=1,
+            name='Floor',
+            lighting=dict(ambient=0.6, diffuse=0.5, fresnel=0.2, specular=0.1, roughness=0.9),
+            lightposition=dict(x=0, y=0, z=100000)
         ))
 
-        # Add walls with modern look
-        # Back wall (screen wall)
+        # Add walls with modern texture
+        # Back wall
         fig.add_trace(go.Surface(
-            x=[[0, 0], [0, 0]],
-            y=[[0, width], [0, width]],
-            z=[[0, 0], [height, height]],
+            x=np.array([[0, 0], [0, 0]]),
+            y=np.array([[0, width], [0, width]]),
+            z=np.array([[0, 0], [height, height]]),
             colorscale=[[0, colors['wall']], [1, colors['wall']]],
             showscale=False,
-            name='Back Wall'
+            lighting=dict(ambient=0.6, diffuse=0.5, fresnel=0.2, specular=0.1, roughness=0.5)
         ))
 
-        # Side walls with slight transparency
-        for y in [0, width]:
+        # Side walls with gradient effect
+        for y_coord in [0, width]:
             fig.add_trace(go.Surface(
-                x=[[0, length], [0, length]],
-                y=[[y, y], [y, y]],
-                z=[[0, 0], [height, height]],
-                colorscale=[[0, colors['wall']], [1, colors['wall']]],
+                x=np.array([[0, length], [0, length]]),
+                y=np.array([[y_coord, y_coord], [y_coord, y_coord]]),
+                z=np.array([[0, 0], [height, height]]),
+                colorscale=[[0, colors['wall']], [1, 'rgba(240, 242, 245, 0.8)']],
                 showscale=False,
-                opacity=0.8
+                opacity=0.95,
+                lighting=dict(ambient=0.6, diffuse=0.5, fresnel=0.2, specular=0.1, roughness=0.5)
             ))
 
-        # Add modern conference display
-        screen_width = min(width * 0.6, 3.5)
+        # Add modern display with LED backlight effect
+        screen_width = min(3.5, width * 0.6)
         screen_height = screen_width * 9/16
         screen_y = width/2
         screen_z = height * 0.45
 
-        # Display frame
-        fig.add_trace(go.Surface(
-            x=[[0.1, 0.1], [0.1, 0.1]],
-            y=[[screen_y - screen_width/2, screen_y + screen_width/2],
-               [screen_y - screen_width/2, screen_y + screen_width/2]],
-            z=[[screen_z - screen_height/2, screen_z - screen_height/2],
-               [screen_z + screen_height/2, screen_z + screen_height/2]],
-            colorscale=[[0, colors['screen']], [1, colors['screen']]],
-            showscale=False,
+        # Display frame with subtle shadow
+        fig.add_trace(go.Mesh3d(
+            x=[0.1, 0.1, 0.1, 0.1],
+            y=[screen_y - screen_width/2, screen_y + screen_width/2, 
+               screen_y + screen_width/2, screen_y - screen_width/2],
+            z=[screen_z - screen_height/2, screen_z - screen_height/2,
+               screen_z + screen_height/2, screen_z + screen_height/2],
+            i=[0, 0], j=[1, 2], k=[2, 3],
+            color=colors['screen'],
+            lighting=dict(ambient=0.3, diffuse=0.7, fresnel=0.2, specular=0.5, roughness=0.1),
             name='Display'
         ))
 
-        # Add sleek camera bar (Logitech Rally Bar style)
-        camera_width = screen_width * 0.8
-        camera_y = screen_y
-        camera_z = screen_z + screen_height/2 + 0.15
-
-        # Modern camera bar design
+        # Add LED backlight effect
+        backlight_points = []
+        for i in np.linspace(-screen_width/2, screen_width/2, 20):
+            backlight_points.append([0.12, screen_y + i, screen_z])
+        
+        backlight_x, backlight_y, backlight_z = zip(*backlight_points)
         fig.add_trace(go.Scatter3d(
-            x=[0.15, 0.15],
-            y=[camera_y - camera_width/2, camera_y + camera_width/2],
-            z=[camera_z, camera_z],
-            mode='lines',
-            line=dict(color='#2D3748', width=8),
-            name='Camera Bar'
+            x=backlight_x, y=backlight_y, z=backlight_z,
+            mode='markers',
+            marker=dict(
+                size=3,
+                color='rgb(100, 149, 237)',
+                opacity=0.6
+            ),
+            name='Ambient Light'
         ))
 
-        # Add modern conference table
+        # Add sleek conference table with glass surface effect
         table_length = min(length * 0.7, 4.5)
-        table_width = min(width * 0.4, 1.8)
+        table_width = min(width * 0.4, 1.5)
         table_height = 0.74
         table_x = length * 0.5
         table_y = width * 0.5
 
-        # Table surface with wood texture
+        # Table surface with realistic texture
+        x_grid, y_grid = np.meshgrid(
+            np.linspace(table_x - table_length/2, table_x + table_length/2, 20),
+            np.linspace(table_y - table_width/2, table_y + table_width/2, 20)
+        )
+        z_grid = np.full_like(x_grid, table_height)
+
         fig.add_trace(go.Surface(
-            x=[[table_x - table_length/2, table_x + table_length/2],
-               [table_x - table_length/2, table_x + table_length/2]],
-            y=[[table_y - table_width/2, table_y - table_width/2],
-               [table_y + table_width/2, table_y + table_width/2]],
-            z=[[table_height, table_height],
-               [table_height, table_height]],
-            colorscale=[[0, colors['table']], [1, colors['table']]],
+            x=x_grid, y=y_grid, z=z_grid,
+            colorscale=[[0, colors['wood']], [1, colors['wood']]],
             showscale=False,
+            lighting=dict(ambient=0.6, diffuse=0.8, fresnel=0.5, specular=0.8, roughness=0.3),
             name='Conference Table'
         ))
 
-        # Add modern office chairs
+        # Add modern ergonomic chairs
         chairs_per_side = min(6, room_specs['capacity'] // 2)
-        chair_positions = []
-        
-        # Calculate chair positions
         for i in range(chairs_per_side):
-            x_pos = table_x - table_length/2 + ((i + 1) * table_length/(chairs_per_side + 1))
-            chair_positions.extend([
-                (x_pos, table_y - table_width/2 - 0.4, 0.45),
-                (x_pos, table_y + table_width/2 + 0.4, 0.45)
-            ])
+            chair_x_pos = table_x - table_length/2 + (i + 1) * table_length/(chairs_per_side + 1)
+            
+            # Add chairs on both sides with detailed design
+            for offset in [-1, 1]:
+                chair_y_pos = table_y + offset * (table_width/2 + 0.4)
+                
+                # Chair base
+                fig.add_trace(go.Cone(
+                    x=[chair_x_pos], y=[chair_y_pos], z=[0.3],
+                    u=[0], v=[0], w=[1],
+                    colorscale=[[0, colors['metal']], [1, colors['metal']]],
+                    showscale=False,
+                    sizeref=0.3,
+                    name='Chair'
+                ))
+                
+                # Chair back
+                fig.add_trace(go.Mesh3d(
+                    x=[chair_x_pos-0.15, chair_x_pos+0.15, chair_x_pos+0.15, chair_x_pos-0.15],
+                    y=[chair_y_pos-0.05, chair_y_pos-0.05, chair_y_pos+0.05, chair_y_pos+0.05],
+                    z=[0.4, 0.4, 0.9, 0.9],
+                    i=[0, 0], j=[1, 2], k=[2, 3],
+                    color=colors['accent'],
+                    lighting=dict(ambient=0.6, diffuse=0.5, fresnel=0.2, specular=0.1)
+                ))
 
-        # Add chairs as markers
-        chair_x, chair_y, chair_z = zip(*chair_positions)
-        fig.add_trace(go.Scatter3d(
-            x=chair_x,
-            y=chair_y,
-            z=chair_z,
-            mode='markers',
-            marker=dict(
-                size=8,
-                color=colors['chairs'],
-                symbol='square'
-            ),
-            name='Chairs'
-        ))
-
-        # Add modern ceiling speakers
-        speaker_positions = [
-            (length * 0.25, width * 0.25, height - 0.1),
-            (length * 0.75, width * 0.25, height - 0.1),
-            (length * 0.25, width * 0.75, height - 0.1),
-            (length * 0.75, width * 0.75, height - 0.1)
-        ]
-        
-        speaker_x, speaker_y, speaker_z = zip(*speaker_positions)
-        fig.add_trace(go.Scatter3d(
-            x=speaker_x,
-            y=speaker_y,
-            z=speaker_z,
-            mode='markers',
-            marker=dict(
-                size=6,
-                color='#E2E8F0',
-                symbol='circle',
-                line=dict(color='#A0AEC0', width=1)
-            ),
-            name='Ceiling Speakers'
-        ))
-
-        # Add modern LED lighting
+        # Add modern lighting system
         light_positions = []
         for i in range(2):
             for j in range(3):
@@ -762,69 +755,61 @@ class EnhancedVisualizationEngine:
                 ))
         
         light_x, light_y, light_z = zip(*light_positions)
+        
+        # Add LED lights with glow effect
         fig.add_trace(go.Scatter3d(
-            x=light_x,
-            y=light_y,
-            z=light_z,
+            x=light_x, y=light_y, z=light_z,
             mode='markers',
             marker=dict(
-                size=5,
-                color='#FEFCBF',
+                size=8,
+                color='rgb(255, 255, 200)',
                 symbol='circle',
+                line=dict(color='rgb(255, 255, 150)', width=2),
                 opacity=0.8
             ),
             name='LED Lighting'
         ))
 
-        # Update layout for modern look
+        # Add camera system with modern design
+        camera_y_pos = width/2
+        camera_z_pos = screen_z + screen_height/2 + 0.15
+
+        fig.add_trace(go.Mesh3d(
+            x=[0.15, 0.15, 0.15, 0.15],
+            y=[camera_y_pos - 0.4, camera_y_pos + 0.4, camera_y_pos + 0.4, camera_y_pos - 0.4],
+            z=[camera_z_pos - 0.05, camera_z_pos - 0.05, camera_z_pos + 0.05, camera_z_pos + 0.05],
+            i=[0, 0], j=[1, 2], k=[2, 3],
+            color='rgb(50, 50, 50)',
+            lighting=dict(ambient=0.4, diffuse=0.6, fresnel=0.2, specular=0.3),
+            name='Camera System'
+        ))
+
+        # Update layout with enhanced camera angles and lighting
         fig.update_layout(
             scene=dict(
-                xaxis=dict(
-                    title="Length (m)",
-                    showgrid=False,
-                    zeroline=False,
-                    showbackground=True,
-                    backgroundcolor='rgb(248, 249, 250)'
-                ),
-                yaxis=dict(
-                    title="Width (m)",
-                    showgrid=False,
-                    zeroline=False,
-                    showbackground=True,
-                    backgroundcolor='rgb(248, 249, 250)'
-                ),
-                zaxis=dict(
-                    title="Height (m)",
-                    showgrid=False,
-                    zeroline=False,
-                    showbackground=True,
-                    backgroundcolor='rgb(248, 249, 250)'
-                ),
                 camera=dict(
-                    eye=dict(x=1.8, y=1.8, z=1.2),
-                    center=dict(x=0.5, y=0.5, z=0.3)
+                    up=dict(x=0, y=0, z=1),
+                    center=dict(x=0.3, y=0.3, z=0.3),
+                    eye=dict(x=2.2, y=2.2, z=1.5)
                 ),
-                aspectmode='data'
+                aspectmode='data',
+                xaxis_title="Length (m)",
+                yaxis_title="Width (m)",
+                zaxis_title="Height (m)",
+                xaxis=dict(range=[0, length], showbackground=False),
+                yaxis=dict(range=[0, width], showbackground=False),
+                zaxis=dict(range=[0, height], showbackground=False)
             ),
-            title=dict(
-                text="Modern Conference Room Design",
-                y=0.95,
-                x=0.5,
-                xanchor='center',
-                yanchor='top',
-                font=dict(size=16, color='#2D3748', family='Inter, sans-serif')
-            ),
+            title="Interactive Conference Room Design",
             showlegend=True,
             legend=dict(
                 yanchor="top",
                 y=0.99,
                 xanchor="left",
                 x=0.01,
-                bgcolor='rgba(255, 255, 255, 0.9)',
-                bordercolor='rgba(0, 0, 0, 0.1)',
-                borderwidth=1
+                bgcolor='rgba(255, 255, 255, 0.9)'
             ),
-            margin=dict(l=0, r=0, t=0, b=0)
+            margin=dict(l=0, r=0, t=30, b=0)
         )
 
         return fig
