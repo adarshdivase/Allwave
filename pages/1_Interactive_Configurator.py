@@ -586,7 +586,7 @@ class MaximizedAVRecommender:
         base_costs = {'Budget': 15000, 'Professional': 45000, 'Premium': 120000}
         return int(base_costs[tier] * (1 + (specs['capacity'] / 50)))
 
-# --- Professional 3D Room Visualization Engine ---
+# --- Simplified 3D Room Visualization Engine ---
 class EnhancedVisualizationEngine:
     @staticmethod
     def create_3d_room_visualization(room_specs, recommendations):
@@ -595,142 +595,132 @@ class EnhancedVisualizationEngine:
         # Room dimensions
         length, width, height = room_specs['length'], room_specs['width'], room_specs['ceiling_height']
         
-        # Create room walls using surfaces instead of lines
-        # Floor
-        fig.add_trace(go.Surface(
-            x=[[0, length], [0, length]],
-            y=[[0, 0], [width, width]],
-            z=[[0, 0], [0, 0]],
-            colorscale=[[0, 'rgb(245, 245, 240)'], [1, 'rgb(245, 245, 240)']],
-            showscale=False,
-            name='Floor',
-            hoverinfo='skip'
+        # Create room wireframe outline
+        # Floor outline
+        floor_x = [0, length, length, 0, 0]
+        floor_y = [0, 0, width, width, 0]
+        floor_z = [0, 0, 0, 0, 0]
+        
+        fig.add_trace(go.Scatter3d(
+            x=floor_x, y=floor_y, z=floor_z,
+            mode='lines',
+            line=dict(color='rgba(150, 150, 150, 0.8)', width=4),
+            name='Room Floor',
+            showlegend=False
         ))
         
-        # Back wall (where display goes)
-        fig.add_trace(go.Surface(
-            x=[[0, 0], [0, 0]],
-            y=[[0, width], [0, width]],
-            z=[[0, 0], [height, height]],
-            colorscale=[[0, 'rgb(210, 220, 215)'], [1, 'rgb(210, 220, 215)']],
-            showscale=False,
-            name='Back Wall',
-            hoverinfo='skip'
+        # Ceiling outline
+        ceiling_x = [0, length, length, 0, 0]
+        ceiling_y = [0, 0, width, width, 0]
+        ceiling_z = [height, height, height, height, height]
+        
+        fig.add_trace(go.Scatter3d(
+            x=ceiling_x, y=ceiling_y, z=ceiling_z,
+            mode='lines',
+            line=dict(color='rgba(150, 150, 150, 0.6)', width=3),
+            name='Room Ceiling',
+            showlegend=False
         ))
         
-        # Left wall
-        fig.add_trace(go.Surface(
-            x=[[0, length], [0, length]],
-            y=[[0, 0], [0, 0]],
-            z=[[0, 0], [height, height]],
-            colorscale=[[0, 'rgb(225, 230, 225)'], [1, 'rgb(225, 230, 225)']],
-            showscale=False,
-            name='Left Wall',
-            opacity=0.8,
-            hoverinfo='skip'
-        ))
+        # Vertical edges
+        for corner_x, corner_y in [(0, 0), (length, 0), (length, width), (0, width)]:
+            fig.add_trace(go.Scatter3d(
+                x=[corner_x, corner_x], y=[corner_y, corner_y], z=[0, height],
+                mode='lines',
+                line=dict(color='rgba(150, 150, 150, 0.6)', width=3),
+                showlegend=False
+            ))
         
-        # Right wall
-        fig.add_trace(go.Surface(
-            x=[[0, length], [0, length]],
-            y=[[width, width], [width, width]],
-            z=[[0, 0], [height, height]],
-            colorscale=[[0, 'rgb(225, 230, 225)'], [1, 'rgb(225, 230, 225)']],
-            showscale=False,
-            name='Right Wall',
-            opacity=0.8,
-            hoverinfo='skip'
-        ))
-        
-        # Display Screen (professional black screen)
+        # Display Screen (as a rectangle)
         screen_width = min(3, width * 0.6)
         screen_height = screen_width * 9/16
-        screen_y_start = (width - screen_width) / 2
-        screen_z_start = height * 0.3
+        screen_y_center = width / 2
+        screen_z_center = height * 0.4
         
-        fig.add_trace(go.Surface(
-            x=[[0.05, 0.05], [0.05, 0.05]],
-            y=[[screen_y_start, screen_y_start + screen_width], 
-               [screen_y_start, screen_y_start + screen_width]],
-            z=[[screen_z_start, screen_z_start], 
-               [screen_z_start + screen_height, screen_z_start + screen_height]],
-            colorscale=[[0, 'rgb(25, 25, 25)'], [1, 'rgb(25, 25, 25)']],
-            showscale=False,
+        # Screen corners
+        screen_corners_x = [0.05, 0.05, 0.05, 0.05, 0.05]
+        screen_corners_y = [
+            screen_y_center - screen_width/2,
+            screen_y_center + screen_width/2,
+            screen_y_center + screen_width/2,
+            screen_y_center - screen_width/2,
+            screen_y_center - screen_width/2
+        ]
+        screen_corners_z = [
+            screen_z_center - screen_height/2,
+            screen_z_center - screen_height/2,
+            screen_z_center + screen_height/2,
+            screen_z_center + screen_height/2,
+            screen_z_center - screen_height/2
+        ]
+        
+        fig.add_trace(go.Scatter3d(
+            x=screen_corners_x, y=screen_corners_y, z=screen_corners_z,
+            mode='lines+markers',
+            line=dict(color='black', width=8),
+            marker=dict(size=6, color='black'),
             name='Display Screen',
-            hovertemplate='<b>Display System</b><br>Size: %{customdata}<extra></extra>',
-            customdata=f"{screen_width:.1f}m × {screen_height:.1f}m"
+            fill='tonext'
         ))
         
-        # Display bezel/frame
-        bezel_thickness = 0.02
-        fig.add_trace(go.Surface(
-            x=[[0.04, 0.04], [0.04, 0.04]],
-            y=[[screen_y_start - bezel_thickness, screen_y_start + screen_width + bezel_thickness], 
-               [screen_y_start - bezel_thickness, screen_y_start + screen_width + bezel_thickness]],
-            z=[[screen_z_start - bezel_thickness, screen_z_start - bezel_thickness], 
-               [screen_z_start + screen_height + bezel_thickness, screen_z_start + screen_height + bezel_thickness]],
-            colorscale=[[0, 'rgb(50, 50, 50)'], [1, 'rgb(50, 50, 50)']],
-            showscale=False,
-            name='Display Frame',
-            hoverinfo='skip'
-        ))
-        
-        # Conference Table (realistic wood texture)
+        # Conference Table (as a rectangle)
         table_length = min(length * 0.7, 4)
         table_width = min(width * 0.4, 1.5)
         table_height = 0.75
         table_x_center = length * 0.6
         table_y_center = width * 0.5
         
-        # Table top
-        fig.add_trace(go.Surface(
-            x=[[table_x_center - table_length/2, table_x_center + table_length/2], 
-               [table_x_center - table_length/2, table_x_center + table_length/2]],
-            y=[[table_y_center - table_width/2, table_y_center - table_width/2],
-               [table_y_center + table_width/2, table_y_center + table_width/2]],
-            z=[[table_height, table_height], [table_height, table_height]],
-            colorscale=[[0, 'rgb(139, 115, 85)'], [1, 'rgb(160, 130, 95)']],
-            showscale=False,
-            name='Conference Table',
-            hovertemplate='<b>Conference Table</b><br>Size: %{customdata}<extra></extra>',
-            customdata=f"{table_length:.1f}m × {table_width:.1f}m"
-        ))
-        
-        # Camera System (sleek modern design)
-        camera_width = screen_width * 0.8
-        camera_y_center = width * 0.5
-        camera_z = screen_z_start + screen_height + 0.15
-        
-        # Camera body
-        camera_y_coords = np.linspace(camera_y_center - camera_width/2, 
-                                      camera_y_center + camera_width/2, 20)
-        camera_x = np.full_like(camera_y_coords, 0.1)
-        camera_z_coords = np.full_like(camera_y_coords, camera_z)
+        # Table outline
+        table_x = [
+            table_x_center - table_length/2,
+            table_x_center + table_length/2,
+            table_x_center + table_length/2,
+            table_x_center - table_length/2,
+            table_x_center - table_length/2
+        ]
+        table_y = [
+            table_y_center - table_width/2,
+            table_y_center - table_width/2,
+            table_y_center + table_width/2,
+            table_y_center + table_width/2,
+            table_y_center - table_width/2
+        ]
+        table_z = [table_height] * 5
         
         fig.add_trace(go.Scatter3d(
-            x=camera_x,
-            y=camera_y_coords,
-            z=camera_z_coords,
-            mode='markers',
-            marker=dict(
-                size=4,
-                color='rgb(60, 60, 60)',
-                symbol='square'
-            ),
-            name='Camera System',
-            hovertemplate='<b>Camera System</b><br>Model: %{customdata}<extra></extra>',
-            customdata=recommendations.get('camera', {}).get('model', 'Professional Camera')
+            x=table_x, y=table_y, z=table_z,
+            mode='lines+markers',
+            line=dict(color='rgb(139, 115, 85)', width=6),
+            marker=dict(size=4, color='rgb(139, 115, 85)'),
+            name='Conference Table'
         ))
         
-        # Chair positions (realistic spacing)
-        capacity = min(room_specs['capacity'], 12) # Limit for visualization
+        # Camera System (sleek bar above screen)
+        camera_width = screen_width * 0.8
+        camera_y_start = screen_y_center - camera_width/2
+        camera_y_end = screen_y_center + camera_width/2
+        camera_z = screen_z_center + screen_height/2 + 0.2
+        camera_x = 0.08
+        
+        fig.add_trace(go.Scatter3d(
+            x=[camera_x, camera_x],
+            y=[camera_y_start, camera_y_end],
+            z=[camera_z, camera_z],
+            mode='lines+markers',
+            line=dict(color='rgb(60, 60, 60)', width=10),
+            marker=dict(size=8, color='rgb(60, 60, 60)', symbol='square'),
+            name='Camera System'
+        ))
+        
+        # Seating arrangement
+        capacity = min(room_specs['capacity'], 12)
         chairs_per_side = min(6, capacity // 2)
         
         chair_x_positions = []
         chair_y_positions = []
         chair_z_positions = []
         
-        # Chairs along table length
+        # Chairs along table
         for i in range(chairs_per_side):
             chair_x = table_x_center - table_length/2 + (i + 1) * table_length / (chairs_per_side + 1)
             
@@ -751,27 +741,24 @@ class EnhancedVisualizationEngine:
             z=chair_z_positions,
             mode='markers',
             marker=dict(
-                size=8,
+                size=10,
                 color='rgb(70, 130, 180)',
-                symbol='square',
-                opacity=0.8
+                symbol='square'
             ),
-            name=f'Seating ({len(chair_x_positions)} chairs)',
-            hovertemplate='<b>Chair</b><br>Position: %{x:.1f}, %{y:.1f}<extra></extra>'
+            name=f'Seating ({len(chair_x_positions)} chairs)'
         ))
         
-        # Ceiling Speakers (modern flush-mount design)
-        speaker_count = 4
+        # Ceiling Speakers
         speaker_positions = [
-            (length * 0.25, width * 0.25),
-            (length * 0.75, width * 0.25),
-            (length * 0.25, width * 0.75),
-            (length * 0.75, width * 0.75)
+            (length * 0.25, width * 0.25, height - 0.1),
+            (length * 0.75, width * 0.25, height - 0.1),
+            (length * 0.25, width * 0.75, height - 0.1),
+            (length * 0.75, width * 0.75, height - 0.1)
         ]
         
         speaker_x = [pos[0] for pos in speaker_positions]
         speaker_y = [pos[1] for pos in speaker_positions]
-        speaker_z = [height - 0.1] * speaker_count
+        speaker_z = [pos[2] for pos in speaker_positions]
         
         fig.add_trace(go.Scatter3d(
             x=speaker_x,
@@ -779,27 +766,27 @@ class EnhancedVisualizationEngine:
             z=speaker_z,
             mode='markers',
             marker=dict(
-                size=6,
+                size=8,
                 color='rgb(220, 220, 220)',
                 symbol='circle',
                 line=dict(color='rgb(100, 100, 100)', width=1)
             ),
-            name='Ceiling Speakers',
-            hovertemplate='<b>Ceiling Speaker</b><br>Zone Coverage<extra></extra>'
+            name='Ceiling Speakers'
         ))
         
-        # LED Lighting (modern recessed lights)
-        light_rows = 2
-        light_cols = 3
-        light_x = []
-        light_y = []
-        light_z = []
+        # LED Lighting
+        light_positions = []
+        for i in range(2):
+            for j in range(3):
+                light_positions.append((
+                    length * (i + 1) / 3,
+                    width * (j + 1) / 4,
+                    height - 0.05
+                ))
         
-        for i in range(light_rows):
-            for j in range(light_cols):
-                light_x.append(length * (i + 1) / (light_rows + 1))
-                light_y.append(width * (j + 1) / (light_cols + 1))
-                light_z.append(height - 0.05)
+        light_x = [pos[0] for pos in light_positions]
+        light_y = [pos[1] for pos in light_positions]
+        light_z = [pos[2] for pos in light_positions]
         
         fig.add_trace(go.Scatter3d(
             x=light_x,
@@ -807,13 +794,11 @@ class EnhancedVisualizationEngine:
             z=light_z,
             mode='markers',
             marker=dict(
-                size=5,
-                color='rgb(255, 255, 200)',
-                symbol='circle',
-                opacity=0.8
+                size=6,
+                color='rgb(255, 255, 150)',
+                symbol='circle'
             ),
-            name='LED Lighting',
-            hovertemplate='<b>LED Light</b><br>Recessed Ceiling Mount<extra></extra>'
+            name='LED Lighting'
         ))
         
         # Touch Control Panel
@@ -823,53 +808,45 @@ class EnhancedVisualizationEngine:
             z=[height * 0.35],
             mode='markers',
             marker=dict(
-                size=10,
+                size=12,
                 color='rgb(240, 240, 240)',
                 symbol='square',
                 line=dict(color='rgb(150, 150, 150)', width=2)
             ),
-            name='Touch Control Panel',
-            hovertemplate='<b>Control Panel</b><br>Wall-mounted Touch Interface<extra></extra>'
+            name='Control Panel'
         ))
         
-        # Update layout for professional appearance
+        # Update layout
         fig.update_layout(
             title=dict(
-                text="Professional Conference Room - 3D Layout",
+                text="3D Conference Room Layout",
                 x=0.5,
-                font=dict(size=16, color='#2c3e50', family='Arial, sans-serif')
+                font=dict(size=16, color='#2c3e50')
             ),
             scene=dict(
                 xaxis=dict(
-                    title=dict(text=f"Length ({length:.1f}m)", font=dict(size=12)),
-                    showgrid=False,
-                    showbackground=False,
-                    showline=False,
-                    showticklabels=True,
+                    title=f"Length ({length:.1f}m)",
+                    showgrid=True,
+                    gridcolor='rgba(200, 200, 200, 0.3)',
                     range=[0, length + 0.5]
                 ),
                 yaxis=dict(
-                    title=dict(text=f"Width ({width:.1f}m)", font=dict(size=12)),
-                    showgrid=False,
-                    showbackground=False,
-                    showline=False,
-                    showticklabels=True,
+                    title=f"Width ({width:.1f}m)",
+                    showgrid=True,
+                    gridcolor='rgba(200, 200, 200, 0.3)',
                     range=[0, width + 0.5]
                 ),
                 zaxis=dict(
-                    title=dict(text=f"Height ({height:.1f}m)", font=dict(size=12)),
-                    showgrid=False,
-                    showbackground=False,
-                    showline=False,
-                    showticklabels=True,
+                    title=f"Height ({height:.1f}m)",
+                    showgrid=True,
+                    gridcolor='rgba(200, 200, 200, 0.3)',
                     range=[0, height + 0.2]
                 ),
                 camera=dict(
                     eye=dict(x=1.5, y=1.8, z=1.2),
-                    center=dict(x=0, y=0, z=0.2),
-                    up=dict(x=0, y=0, z=1)
+                    center=dict(x=0, y=0, z=0.3)
                 ),
-                bgcolor='rgb(248, 249, 250)',
+                bgcolor='rgb(250, 250, 250)',
                 aspectmode='cube'
             ),
             height=600,
@@ -879,12 +856,10 @@ class EnhancedVisualizationEngine:
                 y=0.8,
                 bgcolor='rgba(255, 255, 255, 0.9)',
                 bordercolor='rgba(0, 0, 0, 0.1)',
-                borderwidth=1,
-                font=dict(size=11)
+                borderwidth=1
             ),
             margin=dict(l=0, r=120, t=50, b=0),
-            paper_bgcolor='rgb(255, 255, 255)',
-            plot_bgcolor='rgb(255, 255, 255)'
+            paper_bgcolor='white'
         )
         
         return fig
@@ -927,44 +902,38 @@ class EnhancedVisualizationEngine:
             fillcolor="rgba(139, 115, 85, 0.4)"
         )
         
-        # Chairs
-        capacity = min(room_specs['capacity'], 12)
-        chairs_per_side = min(6, capacity // 2)
+        # Add text annotations for equipment
+        fig.add_annotation(
+            x=0.1, y=width*0.5,
+            text="Display<br>System",
+            showarrow=True,
+            arrowcolor="red",
+            bgcolor="white",
+            bordercolor="red"
+        )
         
-        chair_positions_x = []
-        chair_positions_y = []
-        
-        for i in range(chairs_per_side):
-            chair_x = table_x_center - table_length/2 + (i + 1) * table_length / (chairs_per_side + 1)
-            chair_positions_x.extend([chair_x, chair_x])
-            chair_positions_y.extend([
-                table_y_center - table_width/2 - 0.4,
-                table_y_center + table_width/2 + 0.4
-            ])
-        
-        fig.add_trace(go.Scatter(
-            x=chair_positions_x[:capacity],
-            y=chair_positions_y[:capacity],
-            mode='markers',
-            marker=dict(size=12, color='blue', symbol='square'),
-            name=f'Seating ({min(len(chair_positions_x), capacity)} chairs)'
-        ))
-        
-        # Equipment annotations
-        annotations = [
-            dict(x=0.1, y=width*0.5, text="Display<br>System", showarrow=True, 
-                 arrowcolor="red", bgcolor="rgba(255,255,255,0.8)"),
-            dict(x=length-0.3, y=width*0.85, text="Control<br>Panel", showarrow=True,
-                 arrowcolor="gray", bgcolor="rgba(255,255,255,0.8)")
-        ]
+        fig.add_annotation(
+            x=length-0.3, y=width*0.85,
+            text="Control<br>Panel",
+            showarrow=True,
+            arrowcolor="gray",
+            bgcolor="white",
+            bordercolor="gray"
+        )
         
         fig.update_layout(
             title="Equipment Layout - Floor Plan View",
-            xaxis=dict(title=f"Length ({length:.1f}m)", scaleanchor="y", scaleratio=1),
-            yaxis=dict(title=f"Width ({width:.1f}m)"),
+            xaxis=dict(
+                title=f"Length ({length:.1f}m)", 
+                scaleanchor="y", 
+                scaleratio=1,
+                range=[0, length + 0.5]
+            ),
+            yaxis=dict(
+                title=f"Width ({width:.1f}m)",
+                range=[0, width + 0.5]
+            ),
             height=400,
-            showlegend=True,
-            annotations=annotations,
             plot_bgcolor='white',
             paper_bgcolor='white'
         )
@@ -991,8 +960,7 @@ class EnhancedVisualizationEngine:
                 marker_color=colors,
                 text=[f"${cost:,.0f}" for cost in costs],
                 textposition='auto',
-                textfont=dict(color='white', size=12),
-                hovertemplate='<b>%{x}</b><br>Cost: $%{y:,.0f}<extra></extra>'
+                textfont=dict(color='white', size=12)
             )
         ])
         
@@ -1008,8 +976,7 @@ class EnhancedVisualizationEngine:
             showlegend=False,
             plot_bgcolor='white',
             paper_bgcolor='white',
-            yaxis=dict(tickformat='$,.0f'),
-            margin=dict(l=50, r=50, t=60, b=50)
+            yaxis=dict(tickformat='$,.0f')
         )
         
         return fig
@@ -1027,8 +994,7 @@ class EnhancedVisualizationEngine:
             fill='toself',
             name='Recommended Solution',
             line_color='#3498db',
-            fillcolor='rgba(52, 152, 219, 0.2)',
-            hovertemplate='<b>%{theta}</b><br>Score: %{r}/5<extra></extra>'
+            fillcolor='rgba(52, 152, 219, 0.2)'
         ))
         
         fig.update_layout(
@@ -1039,8 +1005,7 @@ class EnhancedVisualizationEngine:
                     tickmode='linear',
                     tick0=0,
                     dtick=1
-                ),
-                bgcolor='rgba(248, 249, 250, 0.8)'
+                )
             ),
             showlegend=True,
             title=dict(
