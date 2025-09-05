@@ -262,7 +262,6 @@ def classify_intent(prompt):
     return "search"
 
 # --- Initialization ---
-# Moved up to ensure these are available for the sidebar
 try:
     maintenance_pipeline = MaintenancePipeline()
     docs, paths = load_and_process_documents()
@@ -285,36 +284,40 @@ with st.sidebar:
     st.title("🤖 AI Support Assistant")
     st.markdown("**Quick Actions:**")
 
-    # Handler function for quick actions
+    # Upgraded handler function for quick actions
     def handle_quick_action(action_type: str):
+        prompt = ""
         if action_type == "alerts":
             prompt = "Show high-risk equipment alerts"
-        else:
+        elif action_type == "maintenance":
             prompt = "Show upcoming maintenance"
-            
-        now = datetime.now().strftime("%H:%M")
-        # Add user message
-        st.session_state.messages.append({
-            "role": "user",
-            "content": prompt,
-            "timestamp": now
-        })
+        elif action_type == "count_tickets":
+            prompt = "How many 'Device Faulty' issues are there?"
+        elif action_type == "summarize_docs":
+            prompt = "Summarize the INDIS project meeting minutes"
         
-        # Generate AI response context
-        if action_type == "alerts":
-            context = get_maintenance_context_with_actions(
-                prompt, 
-                maintenance_pipeline,
-                search_documents,
-                search_args
-            )
-        else:
-            context = get_maintenance_context_with_actions(
-                prompt,
-                maintenance_pipeline,
-                search_documents,
-                search_args
-            )
+        if not prompt:
+            return
+
+        now = datetime.now().strftime("%H:%M")
+        st.session_state.messages.append({"role": "user", "content": prompt, "timestamp": now})
+        
+        # Centralized context generation using intent classification
+        intent = classify_intent(prompt)
+        context = ""
+        if intent == "csv":
+            context = analyze_csv_data(prompt)
+        elif intent == "maintenance":
+            context = get_maintenance_context_with_actions(prompt, maintenance_pipeline, search_documents, search_args)
+        elif intent == "search":
+            if search_args:
+                search_results = search_documents(prompt, **search_args)
+                if search_results:
+                    context += "### Relevant Information from Documents:\n"
+                    for result in search_results[:2]: # Limit to 2 for concise quick actions
+                        source = os.path.basename(result['source'])
+                        content_preview = result['content'].strip().replace('\n', ' ')
+                        context += f"- **From `{source}`**: \"{content_preview[:250]}...\"\n"
             
         # Generate and add AI response
         response_stream = generate_response_stream(prompt, st.session_state.messages, context)
@@ -324,9 +327,9 @@ with st.sidebar:
             "content": full_response,
             "timestamp": now
         })
-        # Force a rerun to show the new messages
         st.rerun()
 
+    # --- Button Layout ---
     col1, col2 = st.columns(2)
     with col1:
         if st.button("📊 Risk Alerts", key="risk_btn", help="Show equipment with the highest failure probability."):
@@ -334,6 +337,15 @@ with st.sidebar:
     with col2:
         if st.button("📅 Maintenance", key="maint_btn", help="Show the upcoming maintenance schedule."):
             handle_quick_action("maintenance")
+            
+    col3, col4 = st.columns(2)
+    with col3:
+        if st.button("🎫 Count Tickets", key="ticket_btn", help="Count 'Device Faulty' issues from Jira export."):
+            handle_quick_action("count_tickets")
+    with col4:
+        if st.button("📋 Summarize Doc", key="summary_btn", help="Find and summarize meeting minutes."):
+            handle_quick_action("summarize_docs")
+
 
     # Rest of your sidebar code
     st.markdown("---")
@@ -345,7 +357,6 @@ with st.sidebar:
     uploaded_files = st.file_uploader("Add files", accept_multiple_files=True)
     if uploaded_files:
         for uploaded_file in uploaded_files:
-            # Save to a directory for persistent storage if needed
             with open(uploaded_file.name, "wb") as f:
                 f.write(uploaded_file.getbuffer())
         st.success("Files uploaded! Please reload the app to re-index documents.")
@@ -372,7 +383,6 @@ def chat_bubble(content, is_user=False, timestamp=None):
         border = "1px solid #ddd"
     
     color = user_color if is_user else assistant_color
-    align = "right" if is_user else "left"
     avatar_url = (
         "https://cdn-icons-png.flaticon.com/512/1946/1946429.png" if is_user
         else "https://cdn-icons-png.flaticon.com/512/4712/4712035.png"
@@ -381,7 +391,6 @@ def chat_bubble(content, is_user=False, timestamp=None):
     if not timestamp:
         timestamp = datetime.now().strftime("%H:%M")
     
-    # Sanitize content for HTML display
     content = content.replace("<", "&lt;").replace(">", "&gt;")
 
     st.markdown(
@@ -430,7 +439,6 @@ for message in st.session_state.messages:
 if prompt := st.chat_input("Ask a question..."):
     now = datetime.now().strftime("%H:%M")
     st.session_state.messages.append({"role": "user", "content": prompt, "timestamp": now})
-    # Display the user's message immediately
     chat_bubble(prompt, is_user=True, timestamp=now)
     
     with st.spinner("Thinking..."):
@@ -465,7 +473,6 @@ if prompt := st.chat_input("Ask a question..."):
 
 **Current System Status:** 🚨 {high_risk_count} high risk items | 📅 {upcoming_maintenance} tasks due this week."""
 
-        # Generate and display the AI's response
         with st.empty():
             response_stream = generate_response_stream(prompt, st.session_state.messages, context)
             full_response = ""
@@ -473,7 +480,6 @@ if prompt := st.chat_input("Ask a question..."):
                 full_response += chunk
                 chat_bubble(full_response + " ▌", is_user=False, timestamp=now)
             
-            # Final update to remove the cursor
             chat_bubble(full_response, is_user=False, timestamp=now)
         
         st.session_state.messages.append({"role": "assistant", "content": full_response, "timestamp": now})
