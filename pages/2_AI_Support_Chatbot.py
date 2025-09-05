@@ -17,13 +17,6 @@ import mailbox
 from email import policy
 from email.parser import BytesParser
 
-# Optional: For dark mode toggle
-try:
-    from streamlit_extras.switch_page_button import switch_page
-    from streamlit_extras.stoggle import stoggle
-except ImportError:
-    pass
-
 warnings.filterwarnings("ignore")
 st.set_page_config(
     page_title="AI Support Assistant",
@@ -135,7 +128,6 @@ except Exception as e:
     GEMINI_MODEL = None
 
 def summarize_history(history: List[Dict], max_tokens=300) -> str:
-    # Simple summarizer: join last few messages, truncate if too long
     text = ""
     for msg in history[-6:]:
         text += f"{msg['role'].capitalize()}: {msg['content']}\n"
@@ -265,9 +257,13 @@ with st.sidebar:
     st.title("🤖 AI Support Assistant")
     st.markdown("**Quick Actions:**")
     if st.button("Show High-Risk Alerts"):
-        st.session_state.messages.append({"role": "user", "content": "Show high-risk equipment alerts"})
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+        st.session_state.messages.append({"role": "user", "content": "Show high-risk equipment alerts", "timestamp": datetime.now().strftime("%H:%M")})
     if st.button("Upcoming Maintenance"):
-        st.session_state.messages.append({"role": "user", "content": "Show upcoming maintenance"})
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+        st.session_state.messages.append({"role": "user", "content": "Show upcoming maintenance", "timestamp": datetime.now().strftime("%H:%M")})
     st.markdown("---")
     st.markdown("**System Status:**")
     maintenance_pipeline = MaintenancePipeline()
@@ -285,26 +281,51 @@ with st.sidebar:
     st.markdown("**Settings:**")
     chunk_size = st.slider("Chunk size for document splitting", 200, 1000, st.session_state.settings["chunk_size"], 100)
     st.session_state.settings["chunk_size"] = chunk_size
-    # Optional: Theme toggle
-    if "theme" in st.session_state.settings:
-        theme = st.radio("Theme", ["light", "dark"], index=0 if st.session_state.settings["theme"]=="light" else 1)
-        st.session_state.settings["theme"] = theme
+    theme = st.radio("Theme", ["light", "dark"], index=0 if st.session_state.settings["theme"]=="light" else 1)
+    st.session_state.settings["theme"] = theme
 
-# --- Chat Bubble Styling ---
-def chat_bubble(content, is_user=False):
-    color = "#DCF8C6" if is_user else "#F1F0F0"
+# --- Improved Chat Bubble with Avatar and Timestamp ---
+def chat_bubble(content, is_user=False, timestamp=None):
+    theme = st.session_state.settings.get("theme", "light")
+    if theme == "dark":
+        user_color = "#3A6351"
+        assistant_color = "#222831"
+        text_color = "#fff"
+        border = "1px solid #393E46"
+    else:
+        user_color = "#DCF8C6"
+        assistant_color = "#F1F0F0"
+        text_color = "#222"
+        border = "1px solid #ddd"
+    color = user_color if is_user else assistant_color
     align = "right" if is_user else "left"
+    avatar_url = (
+        "https://cdn-icons-png.flaticon.com/512/1946/1946429.png" if is_user
+        else "https://cdn-icons-png.flaticon.com/512/4712/4712035.png"
+    )
+    name = "You" if is_user else "AI"
+    if not timestamp:
+        timestamp = datetime.now().strftime("%H:%M")
     st.markdown(
         f"""
-        <div style='background-color:{color};padding:10px;border-radius:10px;margin:5px 0;max-width:80%;float:{align};clear:both;'>
-            {content}
+        <div style='display:flex;flex-direction:{"row-reverse" if is_user else "row"};align-items:flex-end;margin:8px 0;'>
+            <img src="{avatar_url}" width="36" height="36" style="border-radius:50%;margin:0 8px;">
+            <div style='background-color:{color};
+                        color:{text_color};
+                        padding:14px 16px;
+                        border-radius:12px;
+                        max-width:70vw;
+                        min-width:80px;
+                        border:{border};
+                        box-shadow:0 2px 8px rgba(0,0,0,0.07);
+                        position:relative;'>
+                <div style='font-size:13px;font-weight:bold;opacity:0.7;'>{name}</div>
+                <div style='font-size:16px;margin:4px 0;'>{content}</div>
+                <div style='font-size:11px;opacity:0.5;text-align:right;'>{timestamp}</div>
+            </div>
         </div>
         """, unsafe_allow_html=True
     )
-
-# --- Typing Animation for Streaming ---
-def typing_animation():
-    st.markdown("<i>Assistant is typing...</i>", unsafe_allow_html=True)
 
 # --- Feedback Buttons ---
 def feedback_buttons():
@@ -339,16 +360,23 @@ except Exception as e:
     search_index, search_args = None, {}
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "Hi! How can I help you today?"}]
+    st.session_state.messages = [{"role": "assistant", "content": "Hi! How can I help you today?", "timestamp": datetime.now().strftime("%H:%M")}]
 
-# --- Chat History Display ---
+# --- Chat History Display with Avatars and Timestamps ---
 for message in st.session_state.messages:
-    chat_bubble(message["content"], is_user=(message["role"]=="user"))
+    if "timestamp" not in message:
+        message["timestamp"] = datetime.now().strftime("%H:%M")
+    chat_bubble(
+        message["content"],
+        is_user=(message["role"] == "user"),
+        timestamp=message["timestamp"]
+    )
 
 # --- Chat Input and Tool Routing ---
 if prompt := st.chat_input("Ask a question..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    chat_bubble(prompt, is_user=True)
+    now = datetime.now().strftime("%H:%M")
+    st.session_state.messages.append({"role": "user", "content": prompt, "timestamp": now})
+    chat_bubble(prompt, is_user=True, timestamp=now)
     with st.spinner("Thinking..."):
         intent = classify_intent(prompt)
         context = ""
@@ -378,12 +406,10 @@ if prompt := st.chat_input("Ask a question..."):
 - You can ask to count Jira tickets (e.g., "how many Device Faulty issues?").
 
 **Current System Status:** 🚨 {high_risk_count} high risk items | 📅 {upcoming_maintenance} tasks due this week."""
-        # --- Stream LLM Response with Typing Animation ---
         response_stream = generate_response_stream(prompt, st.session_state.messages, context)
         full_response = ""
         for chunk in response_stream:
             full_response += chunk
-            chat_bubble(full_response)
-            typing_animation()
-        st.session_state.messages.append({"role": "assistant", "content": full_response})
+            chat_bubble(full_response, is_user=False, timestamp=datetime.now().strftime("%H:%M"))
+        st.session_state.messages.append({"role": "assistant", "content": full_response, "timestamp": datetime.now().strftime("%H:%M")})
         feedback_buttons()
