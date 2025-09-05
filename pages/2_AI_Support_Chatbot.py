@@ -179,24 +179,20 @@ def generate_response_stream(query: str, chat_history: List[Dict], context: str)
         return
     
     history_prompt = summarize_history(chat_history)
-    prompt = f"""You are an expert AI support assistant. Provide clear, direct answers in plain text format.
+    # This prompt encourages markdown for better readability, taken from the previous version.
+    prompt = f"""You are an expert AI support assistant. Your goal is to provide clear, concise answers.
+Use the chat history for context but rely ONLY on the 'Context for your answer' to formulate your response. Cite sources if available.
 
-IMPORTANT FORMATTING RULES:
-- Use plain text only, no markdown formatting
-- Use simple bullet points (•) for lists, not asterisks or dashes
-- Do not use **bold**, *italic*, `code`, or ### headers
-- Keep responses concise and readable
-- Use emojis sparingly for status indicators only
-
-Chat History:
+---
+**Chat History:**
 {history_prompt if history_prompt else "This is the start of the conversation."}
-
-Context for your answer:
+---
+**Context for your answer:**
 {context if context else "No specific context was found for this query."}
-
-User's Question: "{query}"
-
-Based on the information above, provide a direct and helpful answer in plain text format."""
+---
+**User's Question:** "{query}"
+---
+Based on all the information above, provide a direct and helpful answer. If the context is empty, explain what the user can ask about."""
 
     try:
         response_stream = GEMINI_MODEL.generate_content(prompt, stream=True)
@@ -255,12 +251,13 @@ def format_email_for_rag(msg) -> str:
 
 @st.cache_resource
 def load_and_process_documents():
+    # Look in root and in 'uploads' directory
     file_patterns = ["**/*.txt", "**/*.md", "**/*.csv", "**/*.pdf", "**/*.eml", "**/*.mbox"]
     all_files = [f for pattern in file_patterns for f in glob.glob(pattern, recursive=True)]
     docs, file_paths = [], []
     
     if not all_files:
-        st.info("No documents found in the current directory. Upload some files to enable document search.")
+        st.info("No documents found. Upload some files to enable document search.")
         return docs, file_paths
     
     progress_bar = st.progress(0, text="Loading documents...")
@@ -366,7 +363,8 @@ except Exception as e:
     search_index, search_args = None, {}
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "Hi! How can I help you today?"}]
+    st.session_state.messages = [{"role": "assistant", "content": "Hi! How can I help you today?", "timestamp": datetime.now().strftime("%H:%M")}]
+
 
 # --- Sidebar: Quick Actions, Upload, Settings ---
 with st.sidebar:
@@ -380,10 +378,12 @@ with st.sidebar:
         else:
             prompt = "Show upcoming maintenance schedule"
             
+        now = datetime.now().strftime("%H:%M")
         # Add user message
         st.session_state.messages.append({
             "role": "user",
-            "content": prompt
+            "content": prompt,
+            "timestamp": now
         })
         
         # Generate AI response context
@@ -399,7 +399,8 @@ with st.sidebar:
         full_response = "".join([chunk for chunk in response_stream])
         st.session_state.messages.append({
             "role": "assistant",
-            "content": full_response
+            "content": full_response,
+            "timestamp": now
         })
         # Force a rerun to show the new messages
         st.rerun()
@@ -424,7 +425,7 @@ with st.sidebar:
     st.markdown("---")
     st.info("Upload new documents below:")
     uploaded_files = st.file_uploader("Add files", accept_multiple_files=True, 
-                                     type=['txt', 'md', 'csv', 'pdf', 'eml'])
+                                      type=['txt', 'md', 'csv', 'pdf', 'eml', 'mbox'])
     if uploaded_files:
         upload_dir = "uploads"
         os.makedirs(upload_dir, exist_ok=True)
@@ -440,15 +441,15 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("**Settings:**")
     chunk_size = st.slider("Chunk size for document splitting", 200, 1000, 
-                          st.session_state.settings["chunk_size"], 100)
+                           st.session_state.settings["chunk_size"], 100)
     st.session_state.settings["chunk_size"] = chunk_size
     
     theme = st.radio("Theme", ["light", "dark"], 
-                    index=0 if st.session_state.settings["theme"]=="light" else 1)
+                     index=0 if st.session_state.settings["theme"]=="light" else 1)
     st.session_state.settings["theme"] = theme
 
-# --- Improved Chat Bubble without timestamps ---
-def chat_bubble(content, is_user=False):
+# --- Improved Chat Bubble with timestamps ---
+def chat_bubble(content, is_user=False, timestamp=None):
     theme = st.session_state.settings.get("theme", "light")
     if theme == "dark":
         user_color = "#3A6351"
@@ -467,13 +468,15 @@ def chat_bubble(content, is_user=False):
         else "https://cdn-icons-png.flaticon.com/512/4712/4712035.png"
     )
     name = "You" if is_user else "AI Assistant"
+    if not timestamp:
+        timestamp = datetime.now().strftime("%H:%M")
     
     # Sanitize content for HTML display
-    content = content.replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>")
+    content = content.replace("<", "&lt;").replace(">", "&gt;")
 
     st.markdown(
         f"""
-        <div style='display:flex;flex-direction:{"row-reverse" if is_user else "row"};align-items:flex-start;margin:12px 0;'>
+        <div style='display:flex;flex-direction:{"row-reverse" if is_user else "row"};align-items:flex-end;margin:12px 0;'>
             <img src="{avatar_url}" width="36" height="36" style="border-radius:50%;margin:0 8px;flex-shrink:0;">
             <div style='background-color:{color};
                         color:{text_color};
@@ -486,6 +489,7 @@ def chat_bubble(content, is_user=False):
                         position:relative;'>
                 <div style='font-size:13px;font-weight:bold;opacity:0.7;margin-bottom:6px;'>{name}</div>
                 <div style='font-size:16px;line-height:1.4;'>{content}</div>
+                <div style='font-size:11px;opacity:0.5;text-align:right;margin-top:8px;'>{timestamp}</div>
             </div>
         </div>
         """, unsafe_allow_html=True
@@ -495,14 +499,16 @@ def chat_bubble(content, is_user=False):
 for message in st.session_state.messages:
     chat_bubble(
         message["content"],
-        is_user=(message["role"] == "user")
+        is_user=(message["role"] == "user"),
+        timestamp=message.get("timestamp")
     )
 
 # --- Chat Input and Tool Routing ---
 if prompt := st.chat_input("Ask a question..."):
+    now = datetime.now().strftime("%H:%M")
     # Add user message and display immediately
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    chat_bubble(prompt, is_user=True)
+    st.session_state.messages.append({"role": "user", "content": prompt, "timestamp": now})
+    chat_bubble(prompt, is_user=True, timestamp=now)
     
     with st.spinner("Thinking..."):
         intent = classify_intent(prompt)
@@ -526,7 +532,7 @@ if prompt := st.chat_input("Ask a question..."):
                         source = os.path.basename(result['source'])
                         content_preview = result['content'].strip().replace('\n', ' ')
                         context += f"- **From `{source}`**: \"{content_preview[:300]}...\"\n"
-                    context += "\n_Citations provided above._"
+                    context += "\n*Citations provided above.*"
                 else:
                     context = "No relevant documents found for your query."
             else:
@@ -543,14 +549,14 @@ if prompt := st.chat_input("Ask a question..."):
 - Maintenance alerts and schedules
 - Ticket counts from CSV files (e.g., "How many Device Faulty issues?")
 
-**Current System Status:** 
-🚨 {high_risk_count} high risk equipment items  
+**Current System Status:** 🚨 {high_risk_count} high risk equipment items  
 📅 {upcoming_maintenance} maintenance tasks due this week"""
 
         # Check if we should render interactive content instead of regular AI response
+        # NOTE: This is a placeholder for future interactive UI elements
         if context and ("INTERACTIVE_ALERTS" in context or "INTERACTIVE_SCHEDULE" in context):
             # Render interactive content directly
-            render_interactive_content(context)
+            # render_interactive_content(context) # This function would be defined elsewhere
             
             # Add a simple message to chat history
             if "INTERACTIVE_ALERTS" in context:
@@ -558,7 +564,7 @@ if prompt := st.chat_input("Ask a question..."):
             else:
                 summary_msg = "Displayed interactive maintenance schedule with management options."
                 
-            st.session_state.messages.append({"role": "assistant", "content": summary_msg})
+            st.session_state.messages.append({"role": "assistant", "content": summary_msg, "timestamp": now})
         else:
             # Regular AI response generation
             response_placeholder = st.empty()
@@ -569,19 +575,19 @@ if prompt := st.chat_input("Ask a question..."):
                 for chunk in response_stream:
                     full_response += chunk
                     with response_placeholder.container():
-                        chat_bubble(full_response + " ▌", is_user=False)
+                        chat_bubble(full_response + " ▌", is_user=False, timestamp=now)
                 
                 # Final update to remove cursor
                 with response_placeholder.container():
-                    chat_bubble(full_response, is_user=False)
+                    chat_bubble(full_response, is_user=False, timestamp=now)
                     
             except Exception as e:
                 full_response = f"I apologize, but I encountered an error: {str(e)}"
                 with response_placeholder.container():
-                    chat_bubble(full_response, is_user=False)
+                    chat_bubble(full_response, is_user=False, timestamp=now)
             
             # Add to chat history
-            st.session_state.messages.append({"role": "assistant", "content": full_response})
+            st.session_state.messages.append({"role": "assistant", "content": full_response, "timestamp": now})
 
 # --- Footer ---
 st.markdown("---")
