@@ -72,6 +72,11 @@ def load_custom_css():
         margin: 10px 0;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
+
+    /* Fix for invisible text on dashboard cards */
+    .metric-card h2, .metric-card small {
+        color: #212529;
+    }
     
     .metric-card:hover {
         transform: translateY(-2px);
@@ -129,7 +134,7 @@ def load_custom_css():
         background: #f8f9fa;
         border: 1px solid #e9ecef;
         margin-right: 20%;
-        color: #212529; /* This line fixes the text color issue */
+        color: #212529;
     }
     
     @keyframes slideIn {
@@ -1061,6 +1066,9 @@ def main():
                         <strong>Assistant:</strong><br>{full_response}
                     </div>
                     """, unsafe_allow_html=True)
+                
+                # Clean the final response before saving it to history
+                full_response = full_response.strip().removesuffix('</div>')
                 
                 # Add assistant response to history
                 st.session_state.chat_history.append({"role": "assistant", "content": full_response})
