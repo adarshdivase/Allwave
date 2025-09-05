@@ -287,7 +287,7 @@ def generate_response_stream(prompt_parts: List[Any]) -> Generator:
     except Exception as e:
         yield f"An error occurred while generating the response: {e}"
 
-# --- Document Processing (Unchanged) ---
+# --- Document Processing ---
 def clean_text(text: str) -> str:
     return re.sub(r'\s+', ' ', text.strip())
 
@@ -329,16 +329,15 @@ def format_email_for_rag(msg) -> str:
 @st.cache_resource
 def load_and_process_documents():
     # Assumes documents are in a 'documents' subfolder.
-    # Create this folder and place your files inside.
     script_dir = os.path.dirname(__file__)
     docs_path = os.path.join(script_dir, 'documents')
-    
+
     file_patterns = ["**/*.txt", "**/*.md", "**/*.csv", "**/*.pdf", "**/*.eml", "**/*.mbox"]
     all_files = [f for pattern in file_patterns for f in glob.glob(os.path.join(docs_path, pattern), recursive=True)]
     docs, file_paths = [], []
-    
+
     progress_bar = st.progress(0, text="Loading knowledge base...")
-    
+
     for i, file_path in enumerate(all_files):
         file_name = os.path.basename(file_path)
         progress_bar.progress((i + 1) / len(all_files), text=f"Processing: {file_name}")
@@ -357,11 +356,11 @@ def load_and_process_documents():
                     content = f.read()
         except Exception:
             continue
-        
+
         if content and len(content.strip()) > 50:
             docs.append(clean_text(content))
             file_paths.append(file_path)
-    
+
     progress_bar.empty()
     if docs:
         st.success(f"Knowledge base loaded with {len(docs)} documents.")
@@ -371,17 +370,17 @@ def load_and_process_documents():
 def create_search_index(_documents, _file_paths):
     model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
     all_chunks, chunk_metadata = [], []
-    
+
     for i, doc in enumerate(_documents):
         chunks = smart_chunking(doc, config.chunk_size)
         all_chunks.extend(chunks)
         chunk_metadata.extend([{'path': _file_paths[i]}] * len(chunks))
-    
+
     if not all_chunks: return None, None, [], []
-    
+
     with st.spinner("Embedding documents..."):
         embeddings = model.encode(all_chunks, show_progress_bar=True, normalize_embeddings=True)
-    
+
     index = faiss.IndexFlatIP(embeddings.shape[1])
     index.add(embeddings.astype('float32'))
     st.success(f"✅ Search index created with {len(all_chunks)} text chunks.")
@@ -406,33 +405,33 @@ def detect_equipment_from_schema(filename: str, image_data=None) -> str:
         return 'electrical'
     if 'network' in name or 'switch' in name or 'router' in name:
         return 'network'
-    
+
     # Fallback for demo purposes
     return random.choice(['hvac', 'electrical', 'network'])
 
 def start_detailed_diagnostic(issue_description: str, equipment_type: str) -> Dict:
     if equipment_type not in EQUIPMENT_DATABASE:
         return {'error': f"Equipment type '{equipment_type}' not found in database"}
-    
+
     equipment = EQUIPMENT_DATABASE[equipment_type]
     issue_lower = issue_description.lower()
-    
+
     matched_issue = None
     matched_key = None
-    
+
     for key, issue in equipment['detailed_issues'].items():
         if key in issue_lower or any(symptom in issue_lower for symptom in issue['symptoms']):
             matched_issue = issue
             matched_key = key
             break
-            
+
     if not matched_issue:
         available_issues = list(equipment['detailed_issues'].keys())
         return {
             'error': f"Issue '{issue_description}' not found in diagnostic database",
             'available_issues': available_issues
         }
-    
+
     return {
         'equipment_type': equipment_type,
         'issue_key': matched_key,
@@ -444,14 +443,14 @@ def start_detailed_diagnostic(issue_description: str, equipment_type: str) -> Di
 def get_diagnostic_step_info(diagnostic_session: Dict, step_number: int) -> Dict:
     if step_number >= len(diagnostic_session['issue_data']['diagnostic_flow']):
         return {'error': 'Step number out of range'}
-    
+
     step = diagnostic_session['issue_data']['diagnostic_flow'][step_number]
-    
+
     sensor_data = {}
     if 'sensors' in step:
         for sensor in step['sensors']:
             sensor_data[sensor] = generate_sensor_data(sensor, diagnostic_session['equipment_type'])
-    
+
     return {
         'step': step,
         'sensor_data': sensor_data,
@@ -465,19 +464,19 @@ def initialize_session_state():
         st.session_state.messages = [
             {"role": "assistant", "content": "🔧 **Advanced Equipment Diagnostic AI Ready!**\n\nI provide real-time, step-by-step diagnostics with live sensor monitoring. Upload a schema diagram and describe your equipment issue to begin detailed analysis.", "timestamp": datetime.now()}
         ]
-    
+
     if "current_analysis" not in st.session_state:
         st.session_state.current_analysis = None
-    
+
     if "diagnostic_session" not in st.session_state:
         st.session_state.diagnostic_session = None
-    
+
     if "current_step" not in st.session_state:
         st.session_state.current_step = 0
-    
+
     if "sensor_data" not in st.session_state:
         st.session_state.sensor_data = {}
-    
+
     if "is_diagnostic_active" not in st.session_state:
         st.session_state.is_diagnostic_active = False
 
@@ -485,9 +484,9 @@ def initialize_session_state():
 def main():
     st.title("🔧 Advanced Equipment Diagnostic AI")
     st.markdown("*Real-time troubleshooting with live sensor monitoring, powered by Gemini & RAG*")
-    
+
     initialize_session_state()
-    
+
     # Initialize systems
     if "init_done" not in st.session_state:
         st.session_state.init_done = False
@@ -508,24 +507,24 @@ def main():
         except Exception as e:
             st.error(f"Initialization error: {e}")
             st.session_state.search_args = None
-    
+
     # Sidebar Controls
     with st.sidebar:
         st.header("🛠️ Diagnostic Controls")
-        
+
         st.subheader("📋 Schema Analysis")
         uploaded_file = st.file_uploader("Upload Schema Diagram", type=['png', 'jpg', 'jpeg', 'pdf'])
-        
+
         if uploaded_file:
             if uploaded_file.type.startswith('image'):
                 image = Image.open(uploaded_file)
                 st.image(image, caption="Schema Diagram", use_column_width=True)
-                
+
                 if st.button("🔍 Analyze Schema", use_container_width=True):
                     with st.spinner("Analyzing schema diagram..."):
                         equipment_type = detect_equipment_from_schema(uploaded_file.name, image)
                         equipment = EQUIPMENT_DATABASE[equipment_type]
-                        
+
                         st.session_state.current_analysis = {
                             'equipment_type': equipment_type,
                             'equipment_name': equipment['name'],
@@ -533,14 +532,14 @@ def main():
                             'sensors': equipment['sensors'],
                             'confidence': random.randint(85, 95)
                         }
-                        
+
                         analysis_msg = f"""🔍 **Schema Analysis Complete!**
-                        
+
 **Equipment Detected**: {equipment['name']}
 **Confidence**: {st.session_state.current_analysis['confidence']}%
 
 **Ready for diagnostics!** Describe your specific issue in the chat below."""
-                        
+
                         st.session_state.messages.append({
                             "role": "assistant",
                             "content": analysis_msg,
@@ -548,12 +547,13 @@ def main():
                             "type": "analysis"
                         })
                         st.rerun()
-        
+
         st.subheader("🚨 Alert Simulation")
         if st.button("Generate Real-Time Alert", use_container_width=True):
+            # FIXED: Added check for maintenance_pipeline existence
             if hasattr(st.session_state, 'maintenance_pipeline'):
                 alert = st.session_state.maintenance_pipeline.simulate_real_time_alert()
-                
+
                 alert_msg = f"""🚨 **REAL-TIME ALERT DETECTED**
 
 **Device**: `{alert['device_id']}` ({alert['device_type']})
@@ -561,7 +561,7 @@ def main():
 **Location**: {alert['location']}
 
 Initiating automated diagnostic protocol..."""
-                
+
                 st.session_state.messages.append({
                     "role": "assistant",
                     "content": alert_msg,
@@ -569,13 +569,15 @@ Initiating automated diagnostic protocol..."""
                     "type": "alert"
                 })
                 st.rerun()
-        
+            else:
+                st.warning("Please wait for system initialization to complete before generating an alert.")
+
         if st.session_state.is_diagnostic_active:
             st.subheader("🔧 Active Diagnostic")
             if st.session_state.diagnostic_session:
                 progress = (st.session_state.current_step + 1) / st.session_state.diagnostic_session['total_steps']
                 st.progress(progress, f"Step {st.session_state.current_step + 1} of {st.session_state.diagnostic_session['total_steps']}")
-            
+
             if st.button("⏭️ Next Step", use_container_width=True):
                 if st.session_state.diagnostic_session and st.session_state.current_step < st.session_state.diagnostic_session['total_steps'] - 1:
                     st.session_state.current_step += 1
@@ -622,19 +624,18 @@ Initiating automated diagnostic protocol..."""
             st.subheader("📋 Equipment Analysis")
             st.metric("Equipment", st.session_state.current_analysis['equipment_name'])
             st.metric("Confidence", f"{st.session_state.current_analysis['confidence']}%")
-        
+
         if st.session_state.sensor_data:
             st.subheader("📊 Live Sensor Data")
             for sensor, value in st.session_state.sensor_data.items():
                 st.metric(sensor.title(), value)
-            
+
             # Auto-refresh sensor data
             if st.session_state.is_diagnostic_active:
                 time.sleep(3)
                 step_info = get_diagnostic_step_info(st.session_state.diagnostic_session, st.session_state.current_step)
                 st.session_state.sensor_data = step_info.get('sensor_data', {})
                 st.rerun()
-
 
     # Chat input is always at the bottom
     if prompt := st.chat_input("Describe the issue or ask a question..."):
@@ -668,7 +669,7 @@ Initiating automated diagnostic protocol..."""
 """
             else:
                 response = f"❌ {diagnostic_result['error']}.\nAvailable issues: " + ", ".join(diagnostic_result.get('available_issues', []))
-        
+
         # If no diagnostic context, fall back to RAG/AI Search
         else:
             if st.session_state.search_args:
@@ -676,7 +677,6 @@ Initiating automated diagnostic protocol..."""
                 if search_results:
                     relevant_info = "\n\n".join([f"From {os.path.basename(r['source'])}:\n{r['content']}" for r in search_results[:2]])
                     prompt_parts = ["Based on this info:\n", relevant_info, "\n\nRespond to this query:\n", prompt]
-                    # Since write_stream can't be used directly here, we aggregate the response
                     response = "".join(list(generate_response_stream(prompt_parts)))
                 else:
                     response = "I couldn't find any relevant information in the knowledge base. Please try rephrasing or upload a schema to start a specific diagnostic."
