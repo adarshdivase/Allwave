@@ -43,6 +43,8 @@ class MaintenancePipeline:
         self.maintenance_data = self._load_maintenance_data()
 
     def _load_maintenance_data(self) -> Dict:
+        # Set random seed for consistent demo data
+        random.seed(42)
         equipment_data = {}
         equipment_types = ['HVAC', 'IT_EQUIPMENT', 'ELECTRICAL', 'FIRE_SAFETY']
         for i in range(20):
