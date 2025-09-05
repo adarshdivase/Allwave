@@ -73,116 +73,8 @@ EQUIPMENT_KNOWLEDGE = {
 class SmartDiagnosticEngine:
     def __init__(self, gemini_model):
         self.gemini_model = gemini_model
-        self.diagnostic_history = []
+    # This class can be expanded later if needed, but for now, the main logic is in the handler
     
-    def analyze_user_query(self, query: str, equipment_context: Optional[Dict] = None) -> Dict:
-        system_prompt = """You are an expert equipment diagnostic AI. Analyze the user's query and extract:
-1. Equipment type (hvac, electrical, network, server, industrial, etc.)
-2. Specific component mentioned (if any)
-3. Problem description
-4. Urgency level (low, medium, high, critical)
-5. Keywords that indicate the issue type
-Respond in JSON format:
-{
-    "equipment_type": "detected equipment type",
-    "component": "specific component or null",
-    "problem_summary": "brief problem description",
-    "urgency": "urgency level",
-    "keywords": ["keyword1", "keyword2"],
-    "confidence": "confidence percentage as integer"
-}"""
-        try:
-            response = self.gemini_model.generate_content(
-                f"{system_prompt}\n\nUser Query: {query}"
-            )
-            response_text = response.text
-            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
-            if json_match:
-                analysis = json.loads(json_match.group())
-                return analysis
-            else:
-                return self._fallback_analysis(query)
-        except Exception as e:
-            st.error(f"Error in query analysis: {e}")
-            return self._fallback_analysis(query)
-    
-    def _fallback_analysis(self, query: str) -> Dict:
-        query_lower = query.lower()
-        equipment_type = "general"
-        for eq_type, eq_data in EQUIPMENT_KNOWLEDGE.items():
-            if any(keyword in query_lower for keyword in [eq_type, eq_data['name'].lower()]):
-                equipment_type = eq_type
-                break
-        urgency = "medium"
-        if any(word in query_lower for word in ['urgent', 'critical', 'emergency', 'fire', 'smoke']):
-            urgency = "critical"
-        elif any(word in query_lower for word in ['broken', 'failed', 'dead', 'not working']):
-            urgency = "high"
-        return {
-            "equipment_type": equipment_type,
-            "component": None,
-            "problem_summary": query[:100],
-            "urgency": urgency,
-            "keywords": query_lower.split()[:5],
-            "confidence": 70
-        }
-    
-    def generate_diagnostic_solution(self, query: str, analysis: Dict, rag_context: str = "") -> str:
-        equipment_info = EQUIPMENT_KNOWLEDGE.get(analysis.get('equipment_type', 'general'), {})
-        diagnostic_prompt = f"""You are an expert equipment diagnostic technician. Provide a comprehensive diagnostic solution for the following issue:
-**Equipment Type**: {analysis.get('equipment_type', 'Unknown')}
-**Problem**: {analysis.get('problem_summary', query)}
-**Urgency**: {analysis.get('urgency', 'medium')}
-**Component**: {analysis.get('component', 'Not specified')}
-**Equipment Knowledge**:
-- Components: {equipment_info.get('components', [])}
-- Common Issues: {equipment_info.get('common_issues', [])}
-**Additional Context from Knowledge Base**:
-{rag_context}
-**User's Original Query**: {query}
-Please provide:
-1. **Immediate Safety Checks** (if applicable)
-2. **Diagnostic Steps** (step-by-step troubleshooting)
-3. **Possible Causes** (ranked by likelihood)
-4. **Solutions** (detailed repair/fix instructions)
-5. **Tools/Parts Needed**
-6. **Prevention Tips**
-7. **When to Call Professional** (if applicable)
-Format your response in clear sections with actionable steps. Be specific and practical."""
-        try:
-            response = self.gemini_model.generate_content(diagnostic_prompt)
-            return response.text
-        except Exception as e:
-            return f"Error generating solution: {e}\n\nPlease try rephrasing your question or contact technical support."
-    
-    def generate_followup_questions(self, query: str, analysis: Dict) -> List[str]:
-        equipment_type = analysis.get('equipment_type', 'general')
-        try:
-            followup_prompt = f"""Based on this equipment issue, generate 3-4 specific diagnostic questions to better understand the problem:
-Equipment Type: {equipment_type}
-Issue: {analysis.get('problem_summary', query)}
-Generate practical questions that a technician would ask to diagnose the issue. Return only the questions, one per line, starting with '- '."""
-            response = self.gemini_model.generate_content(followup_prompt)
-            questions = [line.strip()[2:] for line in response.text.split('\n') if line.strip().startswith('- ')]
-            return questions[:4]
-        except:
-            return self._get_fallback_questions(equipment_type)
-    
-    def _get_fallback_questions(self, equipment_type: str) -> List[str]:
-        common_questions = [
-            "When did the problem first occur?",
-            "Are there any error messages or warning lights?",
-            "Has anything changed recently (maintenance, updates, etc.)?",
-            "Is the problem constant or intermittent?"
-        ]
-        equipment_specific = {
-            'hvac': ["What is the current temperature reading?", "Are all vents blowing air?"],
-            'electrical': ["Are any circuit breakers tripped?", "Do you smell anything burning?"],
-            'network': ["Are the status LEDs on the device lit?", "Can you ping the device?"],
-            'server': ["What error messages appear during boot?", "Are the fans running?"]
-        }
-        return common_questions + equipment_specific.get(equipment_type, [])
-
 # --- Enhanced Maintenance Pipeline ---
 class MaintenancePipeline:
     def __init__(self):
@@ -216,56 +108,33 @@ class MaintenancePipeline:
         device = random.choice(self.equipment_list)
         device_info = self.maintenance_data[device]
         return {
-            "alert_type": alert_type,
-            "device_id": device,
-            "device_type": device_info['type'],
-            "location": device_info['location'],
-            "severity": random.choice(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+            "alert_type": alert_type, "device_id": device, "device_type": device_info['type'],
+            "location": device_info['location'], "severity": random.choice(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "description": f"{alert_type} detected on {device_info['type']} at {device_info['location']}"
         }
 
-# --- Tool: Data Analysis Tool ---
-def analyze_csv_data(query: str) -> str:
-    try:
-        csv_files = glob.glob("*.csv")
-        if not csv_files:
-            return "No CSV files found in the current directory."
-        
-        ticket_file = None
-        for file in csv_files:
-            if any(keyword in file.lower() for keyword in ['ticket', 'maintenance', 'issue', 'problem']):
-                ticket_file = file
-                break
-        if not ticket_file:
-            ticket_file = csv_files[0]
-
-        df = pd.read_csv(ticket_file)
-        if 'GEMINI_MODEL' in globals() and GEMINI_MODEL:
-            analysis_prompt = f"""Analyze this CSV data query: "{query}"
-CSV columns: {list(df.columns)}
-CSV shape: {df.shape}
-Sample data: {df.head().to_string()}
-Provide analysis based on the query. If it's asking for counts, provide the numbers. If asking for trends, describe them."""
-            try:
-                response = GEMINI_MODEL.generate_content(analysis_prompt)
-                return f"**CSV Analysis Results:**\n\n{response.text}"
-            except Exception as e:
-                return f"Error in CSV analysis: {e}"
-        return f"CSV file '{ticket_file}' loaded with {len(df)} records. Please specify what analysis you need."
-    except Exception as e:
-        return f"Error analyzing CSV data: {e}"
-
 # --- LLM Configuration ---
 try:
-    # IMPORTANT: Set your GEMINI_API_KEY in Streamlit's secrets manager
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
     GEMINI_MODEL = genai.GenerativeModel('gemini-1.5-flash')
 except Exception as e:
     st.error(f"❌ Error configuring Gemini API: {e}. Please set your API key in Streamlit secrets.")
     GEMINI_MODEL = None
 
-# --- Document Processing Functions ---
+def generate_response_stream(prompt: str) -> Generator[str, None, None]:
+    if not GEMINI_MODEL:
+        yield "❌ Gemini AI is not configured. Please check your API key in Streamlit secrets."
+        return
+    try:
+        response = GEMINI_MODEL.generate_content(prompt, stream=True)
+        for chunk in response:
+            if chunk.text:
+                yield chunk.text
+    except Exception as e:
+        yield f"❌ Error generating response: {e}"
+
+# --- Document Processing & RAG Functions ---
 def clean_text(text: str) -> str:
     return re.sub(r'\s+', ' ', text.strip())
 
@@ -281,28 +150,6 @@ def smart_chunking(text: str, chunk_size: int) -> List[str]:
     if current_chunk: chunks.append(current_chunk.strip())
     return [c for c in chunks if len(c) > 30]
 
-def extract_text_from_pdf(file_path: str) -> str:
-    try:
-        with fitz.open(file_path) as doc:
-            return "".join(page.get_text() for page in doc)
-    except Exception: return ""
-
-def extract_text_from_email(msg) -> str:
-    if msg.is_multipart():
-        for part in msg.walk():
-            if part.get_content_type() == "text/plain" and "attachment" not in str(part.get("Content-Disposition")):
-                try: return part.get_payload(decode=True).decode(part.get_content_charset() or 'utf-8')
-                except: continue
-    elif msg.get_content_type() == "text/plain":
-        try: return msg.get_payload(decode=True).decode(msg.get_content_charset() or 'utf-8')
-        except: return ""
-    return ""
-
-def format_email_for_rag(msg) -> str:
-    body = extract_text_from_email(msg)
-    if not body: return ""
-    return f"--- Email ---\nFrom: {msg['From']}\nTo: {msg['To']}\nSubject: {msg['Subject']}\nDate: {msg['Date']}\n{body.strip()}\n--- End Email ---"
-
 @st.cache_resource
 def load_and_process_documents():
     script_dir = os.path.dirname(__file__)
@@ -311,10 +158,7 @@ def load_and_process_documents():
         st.warning(f"Knowledge Base folder not found at {docs_path}. Create a 'documents' folder next to app.py to enable RAG.")
         return [], []
     file_patterns = ["**/*.txt", "**/*.md", "**/*.csv", "**/*.pdf", "**/*.eml", "**/*.mbox"]
-    all_files = []
-    for pattern in file_patterns:
-        all_files.extend(glob.glob(os.path.join(docs_path, pattern), recursive=True))
-    
+    all_files = [f for p in file_patterns for f in glob.glob(os.path.join(docs_path, p), recursive=True)]
     docs, file_paths = [], []
     if all_files:
         progress_bar = st.progress(0, text="Loading knowledge base...")
@@ -323,23 +167,20 @@ def load_and_process_documents():
             progress_bar.progress((i + 1) / len(all_files), text=f"Processing: {file_name}")
             content = ""
             try:
-                if file_path.endswith('.pdf'): content = extract_text_from_pdf(file_path)
+                if file_path.endswith('.pdf'):
+                    with fitz.open(file_path) as doc: content = "".join(page.get_text() for page in doc)
                 elif file_path.endswith('.eml'):
-                    with open(file_path, 'rb') as f: content = format_email_for_rag(BytesParser(policy=policy.default).parse(f))
-                elif file_path.endswith('.mbox'):
-                    mbox_content = [format_email_for_rag(msg) for msg in mailbox.mbox(file_path)]
-                    content = "\n\n".join(filter(None, mbox_content))
+                    with open(file_path, 'rb') as f:
+                        msg = BytesParser(policy=policy.default).parse(f)
+                        body = msg.get_body(preferencelist=('plain')).get_content() if msg else ''
+                        content = f"From: {msg['From']}\nSubject: {msg['Subject']}\n{body}"
                 elif file_path.endswith(('.txt', '.md', '.csv')):
                     with open(file_path, 'r', encoding='utf-8', errors='ignore') as f: content = f.read()
-            except Exception as e:
-                st.warning(f"Could not process {file_name}: {e}")
-                continue
-            if content and len(content.strip()) > 50:
-                docs.append(clean_text(content)); file_paths.append(file_path)
+            except Exception as e: st.warning(f"Could not process {file_name}: {e}")
+            if content and len(content.strip()) > 50: docs.append(clean_text(content)); file_paths.append(file_path)
         progress_bar.empty()
-
     if docs: st.success(f"📚 Knowledge base loaded: {len(docs)} documents")
-    else: st.info("📝 No documents found. You can still use the AI for general equipment diagnostics.")
+    else: st.info("📝 No documents found in 'documents' folder.")
     return docs, file_paths
 
 @st.cache_resource
@@ -347,17 +188,15 @@ def create_search_index(_documents, _file_paths):
     if not _documents: return None, None, [], []
     try:
         model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-        all_chunks, chunk_metadata = [], []
-        for i, doc in enumerate(_documents):
-            chunks = smart_chunking(doc, config.chunk_size)
-            all_chunks.extend(chunks)
-            chunk_metadata.extend([{'path': _file_paths[i]}] * len(chunks))
+        all_chunks = [chunk for doc in _documents for chunk in smart_chunking(doc, config.chunk_size)]
         if not all_chunks: return None, None, [], []
         with st.spinner("🔍 Creating search embeddings..."):
-            embeddings = model.encode(all_chunks, show_progress_bar=False, normalize_embeddings=True)
+            embeddings = model.encode(all_chunks, show_progress_bar=True, normalize_embeddings=True)
         index = faiss.IndexFlatIP(embeddings.shape[1])
         index.add(embeddings.astype('float32'))
         st.success(f"✅ Search index ready: {len(all_chunks)} chunks")
+        # Store file paths corresponding to chunks for citation (simplified mapping)
+        chunk_metadata = [{'source': path} for path, doc in zip(_file_paths, _documents) for _ in smart_chunking(doc, config.chunk_size)]
         return index, model, all_chunks, chunk_metadata
     except Exception as e:
         st.error(f"Error creating search index: {e}")
@@ -368,23 +207,20 @@ def search_documents(query: str, index, model, chunks: List[str], metadata: List
     try:
         query_embedding = model.encode([query], normalize_embeddings=True)
         scores, indices = index.search(query_embedding.astype('float32'), config.top_k_retrieval)
-        results = []
-        for i, idx in enumerate(indices[0]):
-            if idx != -1 and scores[0][i] > config.similarity_threshold:
-                results.append({'content': chunks[idx], 'source': metadata[idx]['path'], 'similarity': scores[0][i]})
+        results = [{'content': chunks[idx], 'source': metadata[idx]['source'], 'similarity': scores[0][i]}
+                   for i, idx in enumerate(indices[0]) if idx != -1 and scores[0][i] > config.similarity_threshold]
         return sorted(results, key=lambda x: x['similarity'], reverse=True)
     except Exception as e:
         st.error(f"Search error: {e}")
         return []
 
 def detect_equipment_from_schema(filename: str, image_data=None) -> Dict:
+    # This function remains the same, with vision capabilities
     filename_lower = filename.lower()
     equipment_mapping = {
-        'hvac': ['hvac', 'cooling', 'heating', 'air', 'ventilation', 'climate', 'chiller', 'boiler'],
-        'electrical': ['electrical', 'power', 'panel', 'circuit', 'voltage', 'current', 'transformer'],
-        'network': ['network', 'switch', 'router', 'ethernet', 'lan', 'wan', 'tcp', 'ip'],
-        'server': ['server', 'cpu', 'memory', 'storage', 'rack', 'blade', 'datacenter'],
-        'industrial': ['motor', 'pump', 'valve', 'conveyor', 'machine', 'industrial', 'manufacturing']
+        'hvac': ['hvac', 'cooling', 'heating'], 'electrical': ['electrical', 'power', 'panel'],
+        'network': ['network', 'switch', 'router'], 'server': ['server', 'cpu', 'rack'],
+        'industrial': ['motor', 'pump', 'valve']
     }
     detected_type = 'general'
     for eq_type, keywords in equipment_mapping.items():
@@ -392,273 +228,172 @@ def detect_equipment_from_schema(filename: str, image_data=None) -> Dict:
             detected_type = eq_type; break
     if image_data and GEMINI_MODEL:
         try:
-            prompt = """You are an expert systems engineer specializing in equipment diagnostics. 
-Analyze the provided schema image. 
-1. Identify the primary type of equipment shown (e.g., HVAC, Electrical Panel, Network Rack).
-2. List the key components, instruments, or parts that are visible and are common points of failure.
-Respond ONLY with a valid JSON object in the following format:
-{
-  "equipment_type": "The detected equipment type",
-  "identified_components": ["Component 1", "Sensor X", "Valve Y", "Circuit Breaker Z"]
-}"""
+            prompt = """Analyze the provided schema image. Identify the primary equipment type and list key components/instruments that are common points of failure. Respond ONLY with a valid JSON object: {"equipment_type": "...", "identified_components": ["..."]}"""
             response = GEMINI_MODEL.generate_content([prompt, image_data])
             json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
             if json_match:
                 vision_analysis = json.loads(json_match.group())
                 final_type = vision_analysis.get('equipment_type', detected_type).lower()
                 equipment_info = EQUIPMENT_KNOWLEDGE.get(final_type, {})
-                return {
-                    'equipment_type': final_type,
-                    'equipment_name': equipment_info.get('name', 'Unknown Equipment'),
-                    'components': vision_analysis.get('identified_components', []),
-                    'common_issues': equipment_info.get('common_issues', []),
-                    'confidence': 95
-                }
-        except Exception as e:
-            st.warning(f"Vision analysis failed: {e}. Falling back to filename analysis.")
+                return {'equipment_type': final_type, 'equipment_name': equipment_info.get('name', 'Unknown'),
+                        'components': vision_analysis.get('identified_components', []),
+                        'common_issues': equipment_info.get('common_issues', []), 'confidence': 95}
+        except Exception as e: st.warning(f"Vision analysis failed: {e}. Falling back to filename analysis.")
     equipment_info = EQUIPMENT_KNOWLEDGE.get(detected_type, {})
-    return {
-        'equipment_type': detected_type,
-        'equipment_name': equipment_info.get('name', 'General Equipment'),
-        'components': equipment_info.get('components', ['various components']),
-        'common_issues': equipment_info.get('common_issues', ['general malfunctions']),
-        'confidence': 60
-    }
+    return {'equipment_type': detected_type, 'equipment_name': equipment_info.get('name', 'General'),
+            'components': equipment_info.get('components', []), 'common_issues': equipment_info.get('common_issues', []),
+            'confidence': 60}
 
-# --- Session State Initialization (NEW UI VERSION) ---
+# --- Session State Initialization ---
 def initialize_session_state():
     if "messages" not in st.session_state:
-        st.session_state.messages = [
-            {
-                "role": "assistant", 
-                "content": """<span style="font-size:1.3em">🔧 <b>Smart Equipment Diagnostic AI Ready!</b></span>
-Welcome! I can help you with:
-- <b>Any equipment issue</b> (HVAC, electrical, network, servers, industrial)
-- <b>Intelligent problem analysis</b>
-- <b>Step-by-step solutions</b>
-- <b>Safety recommendations</b>
-- <b>Preventive maintenance</b>
-<b>Just describe your problem in plain English!</b>  
-<i>e.g. "My air conditioner stopped working"</i>
-""", 
-                "timestamp": datetime.now()
-            }
-        ]
-    defaults = {
-        "current_analysis": None,
-        "diagnostic_engine": None,
-        "followup_questions": [],
-        "maintenance_pipeline": None,
-        "chat_history": []
-    }
+        st.session_state.messages = [{"role": "assistant", "content": "🔧 **Smart Equipment Diagnostic AI Ready!**\nHow can I help you troubleshoot today?", "timestamp": datetime.now()}]
+    defaults = {"current_analysis": None, "diagnostic_engine": None, "maintenance_pipeline": None}
     for key, value in defaults.items():
-        if key not in st.session_state:
-            st.session_state[key] = value
+        if key not in st.session_state: st.session_state[key] = value
 
-# --- Refactored Response Handling Function ---
-def handle_user_prompt(prompt: str):
-    with st.spinner("🤖 Analyzing issue and generating solution..."):
-        try:
-            response_content = ""
-            if st.session_state.diagnostic_engine:
-                analysis = st.session_state.diagnostic_engine.analyze_user_query(
-                    prompt,
-                    st.session_state.current_analysis
-                )
-                if analysis.get('equipment_type') != 'general':
-                     st.session_state.current_analysis = {
-                         'equipment_name': EQUIPMENT_KNOWLEDGE.get(analysis['equipment_type'], {}).get('name', 'Unknown'),
-                         'confidence': analysis.get('confidence', 75),
-                         'components': EQUIPMENT_KNOWLEDGE.get(analysis['equipment_type'], {}).get('components', [])
-                     }
-                rag_context = ""
-                if st.session_state.search_args:
-                    search_results = search_documents(prompt, **st.session_state.search_args)
-                    if search_results:
-                        rag_context = "\n\n".join([
-                            f"From {os.path.basename(r['source'])}:\n{r['content']}" 
-                            for r in search_results[:2]
-                        ])
-                response_content = st.session_state.diagnostic_engine.generate_diagnostic_solution(
-                    prompt, analysis, rag_context
-                )
-                st.session_state.followup_questions = st.session_state.diagnostic_engine.generate_followup_questions(
-                    prompt, analysis
-                )
-            else:
-                response_content = analyze_csv_data(prompt)
-                if "No CSV files found" in response_content:
-                    response_content = "The diagnostic engine is not available. Please check the Gemini API configuration."
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": response_content,
-                "timestamp": datetime.now()
-            })
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": f"❌ An error occurred while processing your request: {e}",
-                "timestamp": datetime.now()
-            })
+# --- NEW: Enhanced Chat Response Logic ---
+def get_kb_context(query: str, search_args) -> List[Dict]:
+    """Search the knowledge base and return top relevant chunks."""
+    if not search_args: return []
+    return search_documents(query, **search_args)
 
-# --- Main Application (NEW UI VERSION) ---
+def format_kb_citations(results: List[Dict]) -> str:
+    """Format KB results for display as expandable citations."""
+    if not results: return ""
+    citations = [f"<details><summary><b>📄 Source {i+1}: {os.path.basename(res['source'])} (score: {res['similarity']:.2f})</b></summary>{res['content']}</details>"
+                 for i, res in enumerate(results)]
+    return "\n".join(citations)
+
+def enhanced_chat_response(user_query: str):
+    """Handles the entire chat response pipeline: RAG search, LLM call, and streaming."""
+    # 1. Search Knowledge Base
+    kb_results = get_kb_context(user_query, st.session_state.get("search_args"))
+    kb_context = "\n\n".join([f"[Source {i+1}] {r['content']}" for i, r in enumerate(kb_results)])
+    citations_md = format_kb_citations(kb_results)
+
+    # 2. Compose LLM prompt with diagnostic instructions and context
+    prompt = f"""You are a world-class equipment diagnostic assistant.
+Your goal is to help users solve technical problems step-by-step.
+If the answer is available in the knowledge base, use it and cite the source number (e.g., [1]) at the end of the relevant sentence.
+
+Knowledge Base Context:
+{kb_context if kb_context else '[No relevant context found]'}
+
+User Query:
+{user_query}
+
+Provide a clear, actionable, and safe diagnostic response.
+"""
+
+    # 3. Stream LLM response
+    if 'live_response' not in st.session_state:
+        st.session_state.live_response = ""
+    
+    response_placeholder = st.empty()
+    full_response = ""
+    for chunk in generate_response_stream(prompt):
+        full_response += chunk
+        with response_placeholder.container():
+             st.chat_message("assistant").markdown(full_response + " ▌", unsafe_allow_html=True)
+    
+    # 4. Finalize response and add to history
+    final_content = full_response + (f"\n\n---\n**Sources:**\n{citations_md}" if citations_md else "")
+    st.session_state.messages.append({"role": "assistant", "content": final_content, "timestamp": datetime.now()})
+    
+    # Clean up and rerun
+    if 'live_response' in st.session_state:
+        del st.session_state['live_response']
+    response_placeholder.empty()
+    st.rerun()
+
+# --- Main Application ---
 def main():
-    st.markdown(
-        """
-        <style>
-        .stChatMessage.user {background-color: #e3f2fd;}
-        .stChatMessage.assistant {background-color: #f1f8e9;}
-        .stMetric {background: #f5f5f5; border-radius: 8px;}
-        .stButton>button {width: 100%;}
-        .stTabs [data-baseweb="tab-list"] {margin-bottom: 0;}
-        </style>
-        """, unsafe_allow_html=True
-    )
-
+    st.markdown("""<style> .stTabs [data-baseweb="tab-list"] {margin-bottom: 0;} </style>""", unsafe_allow_html=True)
     initialize_session_state()
 
     if "welcome_shown" not in st.session_state:
-        st.balloons()
-        st.session_state.welcome_shown = True
+        st.balloons(); st.session_state.welcome_shown = True
 
     if GEMINI_MODEL and not st.session_state.diagnostic_engine:
         st.session_state.diagnostic_engine = SmartDiagnosticEngine(GEMINI_MODEL)
 
     if "init_done" not in st.session_state:
         with st.spinner("🚀 Initializing Smart Diagnostic AI..."):
-            try:
-                st.session_state.maintenance_pipeline = MaintenancePipeline()
-                docs, paths = load_and_process_documents()
-                if docs:
-                    search_index, model, all_chunks, chunk_meta = create_search_index(docs, paths)
-                    st.session_state.search_args = {
-                        'index': search_index, 'model': model,
-                        'chunks': all_chunks, 'metadata': chunk_meta
-                    }
-                else: st.session_state.search_args = None
-                st.session_state.init_done = True
-            except Exception as e:
-                st.error(f"Initialization error: {e}")
+            st.session_state.maintenance_pipeline = MaintenancePipeline()
+            docs, paths = load_and_process_documents()
+            if docs:
+                search_index, model, all_chunks, chunk_meta = create_search_index(docs, paths)
+                st.session_state.search_args = {'index': search_index, 'model': model, 'chunks': all_chunks, 'metadata': chunk_meta}
+            else: st.session_state.search_args = None
+            st.session_state.init_done = True
 
-    st.markdown(
-        f"""
-        <div style="background:#e3f2fd;padding:0.7em 1em;border-radius:10px;margin-bottom:1em;">
-            <b>Status:</b> <span style="color:green">Online</span> &nbsp;|&nbsp;
-            <b>Knowledge Base:</b> {"Loaded" if st.session_state.get("search_args") else "Not Loaded"} &nbsp;|&nbsp;
-            <b>Gemini AI:</b> {"Connected" if GEMINI_MODEL else "Not Connected"}
-        </div>
-        """, unsafe_allow_html=True
-    )
+    st.markdown(f"""<div style="background:#e3f2fd;padding:0.7em 1em;border-radius:10px;margin-bottom:1em;">
+        <b>Status:</b> <span style="color:green">Online</span> &nbsp;|&nbsp;
+        <b>Knowledge Base:</b> {"Loaded" if st.session_state.get("search_args") else "Not Loaded"} &nbsp;|&nbsp;
+        <b>Gemini AI:</b> {"Connected" if GEMINI_MODEL else "Not Connected"}
+        </div>""", unsafe_allow_html=True)
 
-    tabs = st.tabs(["💬 Chat", "📚 Knowledge Base Search", "🛠️ Maintenance Overview"])
+    tabs = st.tabs(["💬 Chat", "🛠️ Maintenance Overview"])
 
+    # --- Chat Tab ---
     with tabs[0]:
         st.subheader("Smart Diagnostic Chat")
-        col1, col2 = st.columns([8,2])
-        with col2:
-            if st.button("🧹 Clear Chat", help="Clear all chat history"):
-                st.session_state.messages = st.session_state.messages[:1]
-                st.session_state.followup_questions = []
-                st.rerun()
-        
-        chat_container = st.container(height=500, border=False)
-        with chat_container:
-            for msg in st.session_state.messages:
-                with st.chat_message(msg["role"]):
-                    st.markdown(msg["content"], unsafe_allow_html=True)
-                    st.caption(f"_{msg['timestamp'].strftime('%H:%M:%S')}_")
+        if st.button("🧹 Clear Chat", help="Clear all chat history"):
+            st.session_state.messages = st.session_state.messages[:1]
+            st.rerun()
+
+        for msg in st.session_state.messages:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"], unsafe_allow_html=True)
+                st.caption(f"_{msg['timestamp'].strftime('%H:%M:%S')}_")
 
         if prompt := st.chat_input("Describe your equipment issue or ask any technical question..."):
-            st.session_state.messages.append({
-                "role": "user", "content": prompt, "timestamp": datetime.now()
-            })
-            handle_user_prompt(prompt)
-            st.rerun()
-        
-        if st.session_state.followup_questions:
-            st.markdown("**🤔 Diagnostic Questions:**")
-            cols = st.columns(len(st.session_state.followup_questions))
-            for i, question in enumerate(st.session_state.followup_questions):
-                with cols[i]:
-                    if st.button(f"❓ {question}", key=f"q_{i}"):
-                        st.session_state.messages.append({
-                            "role": "user", "content": question, "timestamp": datetime.now()
-                        })
-                        handle_user_prompt(question)
-                        st.session_state.followup_questions = []
-                        st.rerun()
+            st.session_state.messages.append({"role": "user", "content": prompt, "timestamp": datetime.now()})
+            st.rerun() # Show user message immediately
 
+    # Handle response generation after user message is displayed
+    if st.session_state.messages[-1]["role"] == "user":
+        enhanced_chat_response(st.session_state.messages[-1]["content"])
+
+    # --- Maintenance Overview Tab ---
     with tabs[1]:
-        st.subheader("Knowledge Base Search")
-        kb_query = st.text_input("🔎 Search the knowledge base for any topic, error, or procedure...")
-        if kb_query and st.session_state.search_args:
-            kb_results = search_documents(kb_query, **st.session_state.search_args)
-            if kb_results:
-                for res in kb_results:
-                    with st.container(border=True):
-                        st.markdown(f"**Source:** {os.path.basename(res['source'])} | **Similarity:** {res['similarity']:.2f}")
-                        st.info(res['content'])
-            else: st.info("No relevant documents found.")
-        elif kb_query: st.warning("Knowledge base is not loaded.")
-
-    with tabs[2]:
         st.subheader("Maintenance Overview")
         if st.session_state.maintenance_pipeline:
             df = pd.DataFrame(st.session_state.maintenance_pipeline.maintenance_data).T
-            st.dataframe(df, use_container_width=True, height=350)
+            st.dataframe(df, use_container_width=True, height=400)
             with st.expander("Show High Risk Equipment"):
-                high_risk = df[df['risk_level'] == 'HIGH']
-                st.write(high_risk)
+                st.write(df[df['risk_level'] == 'HIGH'])
         else: st.info("Maintenance data not loaded.")
 
+    # --- Sidebar ---
     with st.sidebar:
         st.header("🛠️ Diagnostic Tools")
         st.markdown("Upload a schema or generate a real-time alert to start.")
         st.divider()
         st.subheader("📋 Schema Analysis")
-        uploaded_file = st.file_uploader(
-            "Upload Equipment Schema/Diagram", 
-            type=['png', 'jpg', 'jpeg', 'pdf'],
-            help="Upload a diagram to help identify your equipment"
-        )
+        uploaded_file = st.file_uploader("Upload Equipment Schema/Diagram", type=['png', 'jpg', 'jpeg'])
         if uploaded_file:
-            if uploaded_file.type.startswith('image'):
-                image = Image.open(uploaded_file)
-                st.image(image, caption="Uploaded Schema", use_column_width=True)
-                if st.button("🔍 Analyze Schema", use_container_width=True):
-                    with st.spinner("Analyzing equipment schema with vision..."):
-                        analysis_result = detect_equipment_from_schema(uploaded_file.name, image)
-                        st.session_state.current_analysis = analysis_result
-                        components_list = analysis_result.get('components', [])
-                        if components_list:
-                            components_str = '\n'.join([f"- {comp}" for comp in components_list[:7]])
-                            analysis_msg = f"""🔍 **Vision Analysis Complete!**
-**Equipment Detected**: {analysis_result['equipment_name']}
-**Confidence**: {analysis_result['confidence']}%
-**Key Components Identified from Schema:**
-{components_str}
-Describe any issues you're experiencing with these components."""
-                        else:
-                            analysis_msg = "Could not identify specific components from the schema. Please describe the issue."
-                        st.session_state.messages.append({
-                            "role": "assistant", "content": analysis_msg, "timestamp": datetime.now(), "type": "analysis"
-                        })
-                        st.rerun()
+            image = Image.open(uploaded_file)
+            st.image(image, caption="Uploaded Schema", use_column_width=True)
+            if st.button("🔍 Analyze Schema", use_container_width=True):
+                with st.spinner("Analyzing equipment schema with vision..."):
+                    analysis_result = detect_equipment_from_schema(uploaded_file.name, image)
+                    st.session_state.current_analysis = analysis_result
+                    components_list = analysis_result.get('components', [])
+                    if components_list:
+                        components_str = '\n'.join([f"- {comp}" for comp in components_list[:7]])
+                        analysis_msg = f"🔍 **Vision Analysis Complete!**\n**Equipment Detected**: {analysis_result['equipment_name']}\n**Key Components Identified:**\n{components_str}\n\nDescribe any issues with these components."
+                    else: analysis_msg = "Could not identify specific components from the schema. Please describe the issue."
+                    st.session_state.messages.append({"role": "assistant", "content": analysis_msg, "timestamp": datetime.now()})
+                    st.rerun()
         st.divider()
         st.subheader("🚨 Equipment Monitoring")
         if st.button("Generate Alert", use_container_width=True):
             if st.session_state.maintenance_pipeline:
                 alert = st.session_state.maintenance_pipeline.simulate_real_time_alert()
-                alert_msg = f"""🚨 **EQUIPMENT ALERT**
-**Device**: {alert['device_id']}
-**Issue**: {alert['alert_type']}
-**Severity**: {alert['severity']}
-**Location**: {alert['location']}
-Would you like diagnostic assistance for this issue?"""
-                st.session_state.messages.append({
-                    "role": "assistant", "content": alert_msg, "timestamp": datetime.now(), "type": "alert"
-                })
+                alert_msg = f"🚨 **EQUIPMENT ALERT**\n**Device**: {alert['device_id']}\n**Issue**: {alert['alert_type']}\n**Severity**: {alert['severity']}\n\nWould you like diagnostic assistance for this issue?"
+                st.session_state.messages.append({"role": "assistant", "content": alert_msg, "timestamp": datetime.now()})
                 st.rerun()
         st.divider()
         if st.session_state.current_analysis:
@@ -667,9 +402,7 @@ Would you like diagnostic assistance for this issue?"""
                 st.metric("Equipment", st.session_state.current_analysis.get('equipment_name', 'N/A'))
                 st.metric("Confidence", f"{st.session_state.current_analysis.get('confidence', 0)}%")
                 with st.expander("Identified Components"):
-                    st.write("**Components:**")
-                    for comp in st.session_state.current_analysis.get('components', [])[:10]:
-                        st.write(f"• {comp}")
+                    for comp in st.session_state.current_analysis.get('components', []): st.write(f"• {comp}")
 
 if __name__ == "__main__":
     main()
