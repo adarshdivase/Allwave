@@ -1,1035 +1,1672 @@
 import streamlit as st
 import pandas as pd
+import os
+import glob
+from sentence_transformers import SentenceTransformer
+import faiss
 import numpy as np
-import plotly.graph_objects as go
-from typing import Dict, List, Any
+import warnings
+import re
+from typing import List, Dict, Any, Generator
+import fitz  # PyMuPDF
+from datetime import datetime, timedelta
+import random
+from dataclasses import dataclass
+import google.generativeai as genai
+import mailbox
+from email import policy
+from email.parser import BytesParser
 
-# --- PAGE CONFIGURATION ---
+warnings.filterwarnings("ignore")
 st.set_page_config(
-    page_title="AI Room Configurator Pro Max",
-    page_icon="🏢",
-    layout="wide"
+    page_title="AI Support Assistant",
+    page_icon="🤖",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# --- CSS STYLING ---
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    
-    :root {
-        /* Primary Brand Colors */
-        --primary-blue: #2563eb;
-        --primary-blue-hover: #1d4ed8;
-        --primary-blue-light: #3b82f6;
-        --primary-blue-dark: #1e40af;
-        
-        /* Secondary Colors */
-        --success-green: #10b981;
-        --error-red: #ef4444;
-        
-        /* Neutral Colors */
-        --white: #ffffff;
-        --gray-50: #f9fafb;
-        --gray-100: #f3f4f6;
-        --gray-200: #e5e7eb;
-        --gray-300: #d1d5db;
-        --gray-500: #6b7280;
-        --gray-600: #4b5563;
-        --gray-700: #374151;
-        --gray-800: #1f2937;
-        --gray-900: #111827;
-        
-        /* Background Colors */
-        --background-primary: var(--gray-50);
-        --background-sidebar: var(--gray-900);
-        
-        /* Text Colors */
-        --text-primary: var(--gray-900);
-        --text-secondary: var(--gray-600);
-        --text-white: var(--white);
-        --text-white-secondary: rgba(255,255,255,0.9);
-        
-        /* Component Colors */
-        --card-background: var(--white);
-        --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
-        --card-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
-        --border-color: var(--gray-200);
-        --border-color-focus: var(--primary-blue);
-        
-        /* Radius and Spacing */
-        --radius-sm: 6px;
-        --radius-md: 12px;
-        --radius-lg: 16px;
-        --radius-xl: 24px;
-        
-        /* Specific Component Colors */
-        --metric-bg: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
-        --premium-card-bg: var(--background-dark);
-        --feature-card-accent: var(--primary-blue);
-        --comparison-card-border: var(--gray-300);
-    }
+# --- Settings ---
+@dataclass
+class RAGConfig:
+    chunk_size: int = 500
+    top_k_retrieval: int = 5
+    similarity_threshold: float = 0.4
 
-    /* Base App Styling */
-    .stApp {
-        background-color: var(--background-primary) !important;
-        font-family: 'Inter', sans-serif !important;
-        color: var(--text-primary) !important;
-    }
+if "settings" not in st.session_state:
+    st.session_state.settings = {"chunk_size": 500, "theme": "light"}
 
-    /* Main Content Area */
-    .main .block-container {
-        padding: 2rem 1rem !important;
-        max-width: 1200px !important;
-    }
+config = RAGConfig(chunk_size=st.session_state.settings["chunk_size"])
 
-    /* General Content Cards */
-    .main > div > div {
-        background: var(--card-background) !important;
-        border-radius: var(--radius-lg) !important;
-        padding: 2rem !important;
-        margin: 1rem 0 !important;
-        box-shadow: var(--card-shadow) !important;
-        border: 1px solid var(--border-color) !important;
-        transition: box-shadow 0.2s ease !important;
-    }
-
-    .main > div > div:hover {
-        box-shadow: var(--card-shadow-hover) !important;
-    }
-
-    /* Typography */
-    .main h1, .main h2, .main h3, .main h4 {
-        color: var(--text-primary) !important;
-        font-weight: 600 !important;
-    }
-    
-    .main p, .main li {
-        color: var(--text-secondary) !important;
-        font-size: 16px !important;
-        line-height: 1.6 !important;
-    }
-
-    /* Tabs Styling */
-    .stTabs [data-baseweb="tab-list"] {
-        background: var(--background-dark) !important;
-        border-radius: var(--radius-md) !important;
-        padding: 8px !important;
-    }
-
-    .stTabs [data-baseweb="tab"] {
-        background: rgba(255,255,255,0.1) !important;
-        color: var(--text-white-secondary) !important;
-        border-radius: var(--radius-sm) !important;
-    }
-
-    .stTabs [aria-selected="true"] {
-        background: var(--primary-blue) !important;
-        color: var(--text-white) !important;
-    }
-
-    /* Metric Cards */
-    div[data-testid="metric-container"] {
-        background: var(--metric-bg) !important;
-        border-radius: var(--radius-md) !important;
-        padding: 1.5rem !important;
-    }
-
-    div[data-testid="metric-container"] label {
-        color: var(--text-white-secondary) !important;
-        font-weight: 600 !important;
-    }
-
-    div[data-testid="metric-container"] [data-testid="metric-value"] {
-        color: var(--text-white) !important;
-        font-size: 2rem !important;
-    }
-
-    /* Custom CSS Classes */
-    .premium-card {
-        background: var(--premium-card-bg) !important;
-        color: var(--text-white) !important;
-        border-color: var(--gray-700) !important;
-    }
-    .premium-card h2, .premium-card p {
-        color: var(--text-white) !important;
-    }
-    
-    .feature-card {
-        border-left: 4px solid var(--feature-card-accent) !important;
-    }
-    
-    .comparison-card {
-        border: 2px solid var(--comparison-card-border) !important;
-    }
-    
-    .comparison-card:hover {
-        border-color: var(--primary-blue) !important;
-    }
-
-    /* Buttons */
-    .stButton > button {
-        background: var(--metric-bg) !important;
-        color: var(--text-white) !important;
-        border: none !important;
-        border-radius: var(--radius-xl) !important;
-        font-weight: 600 !important;
-    }
-
-    .stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 24px rgba(37,99,235,0.3) !important;
-    }
-
-    /* Sidebar */
-    [data-testid="stSidebar"] {
-        background: var(--background-sidebar) !important;
-    }
-    
-    [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] label {
-        color: var(--text-white) !important;
-    }
-
-    [data-testid="stSidebar"] p {
-        color: var(--text-white-secondary) !important;
-    }
-
-</style>
-""", unsafe_allow_html=True)
-
-
-# --- DATA MODELS ---
-
-class EnhancedProductDatabase:
-    """A comprehensive database of AV equipment and room templates."""
+# --- Predictive Maintenance Integration (Simulation) ---
+class MaintenancePipeline:
     def __init__(self):
-        self.products = {
-            'displays': {
-                'Budget': {
-                    'BenQ IRP55': {'price': 1299, 'specs': '55" 4K Interactive Display, 20-point touch', 'rating': 4.2, 'brand': 'BenQ'},
-                    'LG 75UP8000PUA': {'price': 1899, 'specs': '75" 4K LED, webOS, ThinQ AI', 'rating': 4.4, 'brand': 'LG'},
-                    'Samsung QB65R': {'price': 2499, 'specs': '65" 4K QLED Business Display', 'rating': 4.5, 'brand': 'Samsung'}
-                },
-                'Professional': {
-                    'Sharp/NEC 100" 4K Display': {'price': 15999, 'specs': '100" 4K UHD, 500 nits, 24/7 Operation', 'rating': 4.7, 'brand': 'Sharp/NEC'},
-                    'Sony BRAVIA FW-85BZ40H': {'price': 8999, 'specs': '85" 4K Pro Display, Android TV', 'rating': 4.6, 'brand': 'Sony'},
-                    'Planar UltraRes X Series': {'price': 12999, 'specs': '86" 4K Multi-touch Display', 'rating': 4.5, 'brand': 'Planar'}
-                },
-                'Premium': {
-                    'LG MAGNIT 136"': {'price': 75000, 'specs': 'MicroLED, 4K, AI-powered processing, Cable-less', 'rating': 4.9, 'brand': 'LG'},
-                    'Samsung "The Wall" 146"': {'price': 99999, 'specs': 'MicroLED, 4K, 0.8mm Pixel Pitch, AI Upscaling', 'rating': 5.0, 'brand': 'Samsung'},
-                    'Sony Crystal LED 220"': {'price': 150000, 'specs': 'Crystal LED, 4K+, Seamless Modular Design', 'rating': 5.0, 'brand': 'Sony'}
-                }
-            },
-            'cameras': {
-                'Budget': {
-                    'Logitech MeetUp': {'price': 899, 'specs': '4K Ultra HD, 120° FOV, Built-in Speakers', 'rating': 4.3, 'brand': 'Logitech'},
-                    'Poly Studio P5': {'price': 699, 'specs': 'HD Webcam, Automatic Group Framing', 'rating': 4.2, 'brand': 'Poly'},
-                    'Jabra PanaCast': {'price': 1199, 'specs': '4K Panoramic Camera, 180° FOV', 'rating': 4.4, 'brand': 'Jabra'}
-                },
-                'Professional': {
-                    'Logitech Rally Bar': {'price': 3999, 'specs': '4K PTZ, AI Viewfinder, RightSight Auto-Framing', 'rating': 4.8, 'brand': 'Logitech'},
-                    'Poly Studio E70': {'price': 4200, 'specs': 'Dual 4K sensors, Poly DirectorAI, Speaker Tracking', 'rating': 4.9, 'brand': 'Poly'},
-                    'Aver CAM520 Pro3': {'price': 2899, 'specs': '4K PTZ, 18x Optical Zoom, AI Auto-Framing', 'rating': 4.6, 'brand': 'Aver'}
-                },
-                'Premium': {
-                    'Cisco Room Kit EQ': {'price': 19999, 'specs': 'AI-powered Quad Camera, Speaker Tracking, Codec', 'rating': 5.0, 'brand': 'Cisco'},
-                    'Crestron Flex UC-MM30-Z': {'price': 15999, 'specs': 'Advanced AI Camera, 4K PTZ, Zoom Integration', 'rating': 4.9, 'brand': 'Crestron'},
-                    'Polycom Studio X70': {'price': 12999, 'specs': 'Dual 4K cameras, AI-powered Director', 'rating': 4.8, 'brand': 'Polycom'}
-                }
-            },
-            'audio': {
-                'Budget': {
-                    'Yamaha YVC-1000': {'price': 1299, 'specs': 'USB/Bluetooth Speakerphone, Adaptive Echo Canceller', 'rating': 4.3, 'brand': 'Yamaha'},
-                    'ClearOne CHAT 50': {'price': 599, 'specs': 'USB Speakerphone, Duplex Audio', 'rating': 4.1, 'brand': 'ClearOne'},
-                    'Jabra Speak 750': {'price': 399, 'specs': 'UC Speakerphone, 360° Microphone', 'rating': 4.4, 'brand': 'Jabra'}
-                },
-                'Professional': {
-                    'QSC Core Nano': {'price': 2500, 'specs': 'Network Audio I/O, Q-SYS Ecosystem, Software DSP', 'rating': 4.7, 'brand': 'QSC'},
-                    'Biamp TesiraFORTE X 400': {'price': 4500, 'specs': 'AEC, Dante/AVB, USB Audio, Launch Config', 'rating': 4.8, 'brand': 'Biamp'},
-                    'ClearOne BMA 360': {'price': 3299, 'specs': 'Beamforming Mic Array, 360° Coverage', 'rating': 4.6, 'brand': 'ClearOne'}
-                },
-                'Premium': {
-                    'Shure MXA920 Ceiling Array': {'price': 6999, 'specs': 'Automatic Coverage, Steerable Coverage, IntelliMix DSP', 'rating': 5.0, 'brand': 'Shure'},
-                    'Sennheiser TeamConnect Ceiling 2': {'price': 5999, 'specs': 'AI-Enhanced Audio, Beam Steering Technology', 'rating': 4.9, 'brand': 'Sennheiser'},
-                    'Audio-Technica ATUC-50CU': {'price': 4999, 'specs': 'Ceiling Array, AI Noise Reduction', 'rating': 4.8, 'brand': 'Audio-Technica'}
-                }
-            },
-            'control_systems': {
-                'Budget': {
-                    'Extron TouchLink Pro 725T': {'price': 1999, 'specs': '7" Touchpanel, PoE+, Web Interface', 'rating': 4.3, 'brand': 'Extron'},
-                    'AMX Modero X Series NXD-700Vi': {'price': 2299, 'specs': '7" Touch Panel, Built-in Video', 'rating': 4.4, 'brand': 'AMX'},
-                    'Crestron TSW-570': {'price': 1799, 'specs': '5" Touch Screen, Wi-Fi, PoE', 'rating': 4.5, 'brand': 'Crestron'}
-                },
-                'Professional': {
-                    'Crestron Flex UC': {'price': 3999, 'specs': 'Tabletop Touchpanel, UC Integration', 'rating': 4.6, 'brand': 'Crestron'},
-                    'AMX Enova DGX': {'price': 5999, 'specs': 'Digital Matrix Switching, Control System', 'rating': 4.7, 'brand': 'AMX'},
-                    'Extron DTP3 CrossPoint': {'price': 7999, 'specs': '4K60 Matrix Switching, Advanced Control', 'rating': 4.8, 'brand': 'Extron'}
-                },
-                'Premium': {
-                    'Crestron NVX System': {'price': 15999, 'specs': 'Enterprise Control Platform, AV over IP', 'rating': 4.9, 'brand': 'Crestron'},
-                    'Q-SYS Core 8 Flex': {'price': 12999, 'specs': 'Unified AV/IT Platform, Software-based', 'rating': 5.0, 'brand': 'QSC'},
-                    'Biamp Vocia MS-1': {'price': 18999, 'specs': 'Networked Paging System, Enterprise Grade', 'rating': 4.9, 'brand': 'Biamp'}
-                }
-            },
-            'lighting': {
-                'Budget': {
-                    'Philips Hue Pro': {'price': 899, 'specs': 'Smart LED System, App Control', 'rating': 4.2, 'brand': 'Philips'},
-                    'Lutron Caseta Pro': {'price': 1299, 'specs': 'Wireless Dimming System', 'rating': 4.4, 'brand': 'Lutron'},
-                    'Leviton Decora Smart': {'price': 799, 'specs': 'Wi-Fi Enabled Switches and Dimmers', 'rating': 4.1, 'brand': 'Leviton'}
-                },
-                'Professional': {
-                    'Crestron DIN-2MC2': {'price': 2999, 'specs': '2-Channel Dimmer, 0-10V Control', 'rating': 4.6, 'brand': 'Crestron'},
-                    'Lutron Quantum': {'price': 4999, 'specs': 'Total Light Management System', 'rating': 4.8, 'brand': 'Lutron'},
-                    'ETC ColorSource': {'price': 3999, 'specs': 'LED Architectural Lighting', 'rating': 4.7, 'brand': 'ETC'}
-                },
-                'Premium': {
-                    'Ketra N4 Hub': {'price': 8999, 'specs': 'Natural Light Technology, Circadian Rhythm', 'rating': 5.0, 'brand': 'Lutron/Ketra'},
-                    'USAI BeveLED': {'price': 12999, 'specs': 'Architectural LED Lighting System', 'rating': 4.9, 'brand': 'USAI'},
-                    'Signify Interact Pro': {'price': 15999, 'specs': 'IoT-connected Lighting Management', 'rating': 4.8, 'brand': 'Signify'}
-                }
+        self.maintenance_data = self._load_maintenance_data()
+
+    def _load_maintenance_data(self) -> Dict:
+        equipment_data = {}
+        equipment_types = ['HVAC', 'IT_EQUIPMENT', 'ELECTRICAL', 'FIRE_SAFETY']
+        for i in range(20):
+            eq_type = random.choice(equipment_types)
+            fail_prob = random.uniform(0.1, 0.9)
+            equipment_data[f"{eq_type}_{i+1}"] = {
+                'type': eq_type,
+                'location': f"Building A - Floor {random.randint(1,4)}",
+                'failure_probability': fail_prob,
+                'risk_level': 'HIGH' if fail_prob > 0.7 else 'MEDIUM' if fail_prob > 0.4 else 'LOW',
+                'next_maintenance': (datetime.now() + timedelta(days=random.randint(7, 90))).strftime('%Y-%m-%d'),
+                'maintenance_cost': random.randint(200, 5000)
             }
-        }
-        
-        self.room_templates = {
-            'Huddle Room (2-6 people)': {
-                'typical_size': (3, 4), 'capacity_range': (2, 6),
-                'recommended_tier': 'Budget', 'typical_usage': 'Quick meetings, brainstorming'
-            },
-            'Small Conference (6-12 people)': {
-                'typical_size': (4, 6), 'capacity_range': (6, 12),
-                'recommended_tier': 'Professional', 'typical_usage': 'Team meetings, presentations'
-            },
-            'Large Conference (12-20 people)': {
-                'typical_size': (6, 10), 'capacity_range': (12, 20),
-                'recommended_tier': 'Professional', 'typical_usage': 'Department meetings, training'
-            },
-            'Boardroom (8-16 people)': {
-                'typical_size': (5, 8), 'capacity_range': (8, 16),
-                'recommended_tier': 'Premium', 'typical_usage': 'Executive meetings, board meetings'
-            },
-            'Training Room (20-50 people)': {
-                'typical_size': (8, 12), 'capacity_range': (20, 50),
-                'recommended_tier': 'Professional', 'typical_usage': 'Training, workshops, seminars'
-            },
-            'Auditorium (50+ people)': {
-                'typical_size': (12, 20), 'capacity_range': (50, 200),
-                'recommended_tier': 'Premium', 'typical_usage': 'Large presentations, events'
-            }
-        }
+        return equipment_data
 
-class BudgetManager:
-    """Manages and validates equipment costs against budget tier limits."""
-    def __init__(self, budget_tier: str):
-        self.tier_limits = {
-            'Budget': {'min': 5000, 'max': 25000},
-            'Professional': {'min': 25000, 'max': 75000},
-            'Premium': {'min': 75000, 'max': 500000}
-        }
-        self.current_tier = budget_tier
-        self.running_total = 0
-    
-    def validate_item(self, item_cost: float):
-        """Checks if adding an item exceeds the budget. Updates total if valid."""
-        new_total = self.running_total + item_cost
-        tier_limit = self.tier_limits[self.current_tier]['max']
-        
-        if new_total > tier_limit:
-            return False, f"Budget exceeded for {self.current_tier} tier (${tier_limit:,})"
-        
-        self.running_total = new_total
-        return True, None
+    def get_equipment_by_risk(self, risk_level: str) -> List[Dict]:
+        return [{'id': eid, **edata} for eid, edata in self.maintenance_data.items() if edata['risk_level'] == risk_level.upper()]
 
-# --- LOGIC CLASSES ---
+    def get_maintenance_schedule(self, days_ahead: int = 30) -> List[Dict]:
+        target_date = datetime.now() + timedelta(days=days_ahead)
+        items = [{'id': eid, **edata} for eid, edata in self.maintenance_data.items() if datetime.strptime(edata['next_maintenance'], '%Y-%m-%d') <= target_date]
+        return sorted(items, key=lambda x: x['next_maintenance'])
 
-class MaximizedAVRecommender:
-    """The core engine for generating intelligent AV recommendations."""
-    def __init__(self):
-        self.db = EnhancedProductDatabase()
-    
-    def get_comprehensive_recommendations(
-        self,
-        room_specs: Dict,
-        user_preferences: Dict,
-        budget_manager: BudgetManager
-    ) -> Dict:
-        """
-        Generates a full set of recommendations and analyses for a given room.
-        
-        Args:
-            room_specs: Dictionary of room dimensions and environmental details.
-            user_preferences: Dictionary of user's budget, brand, and feature choices.
-            budget_manager: The BudgetManager instance to track costs.
-
-        Returns:
-            A dictionary containing all recommendations and analytical results.
-        """
-        budget_tier = user_preferences.get('budget_tier', 'Professional')
-        brand_preference = user_preferences.get('preferred_brands', [])
-        special_features = user_preferences.get('special_features', [])
-        
-        recommendations = {}
-        
-        # Sequentially recommend and validate budget for each category
-        recommendations['display'] = self._recommend_display_advanced(room_specs, budget_tier, brand_preference)
-        budget_manager.validate_item(recommendations['display']['price'])
-        
-        recommendations['camera'] = self._recommend_camera_advanced(room_specs, budget_tier, brand_preference)
-        budget_manager.validate_item(recommendations['camera']['price'])
-        
-        recommendations['audio'] = self._recommend_audio_advanced(room_specs, budget_tier, special_features)
-        budget_manager.validate_item(recommendations['audio']['price'])
-        
-        recommendations['control'] = self._recommend_control_advanced(room_specs, budget_tier)
-        budget_manager.validate_item(recommendations['control']['price'])
-        
-        recommendations['lighting'] = self._recommend_lighting_advanced(room_specs, budget_tier, user_preferences, special_features)
-        budget_manager.validate_item(recommendations['lighting']['price'])
-        
-        recommendations['accessories'] = self._recommend_accessories_advanced(room_specs, special_features)
-        for acc in recommendations['accessories']:
-            budget_manager.validate_item(acc['price'])
-        
-        # Add supplementary analysis
-        recommendations['alternatives'] = self._generate_alternatives(room_specs, budget_tier)
-        recommendations['confidence_score'] = self._calculate_advanced_confidence(room_specs, user_preferences)
-        recommendations['room_analysis'] = self._analyze_room_characteristics(room_specs)
-        recommendations['upgrade_path'] = self._suggest_upgrade_path(room_specs, budget_tier)
-        
-        return recommendations
-    
-    def _recommend_display_advanced(self, specs: Dict, tier: str, brands: List[str]) -> Dict:
-        """Recommends a display based on room size and viewing distance."""
-        room_area = specs['length'] * specs['width']
-        viewing_distance = max(specs['length'], specs['width']) * 0.6
-        
-        if room_area < 20 and specs['capacity'] <= 8:
-            size_category = 'small'
-        elif room_area < 60 and specs['capacity'] <= 20:
-            size_category = 'medium'
-        else:
-            size_category = 'large'
-        
-        products = self.db.products['displays'][tier]
-        
-        if brands:
-            products = {k: v for k, v in products.items() if v['brand'] in brands}
-        
-        if not products:
-            products = self.db.products['displays'][tier] # Fallback if no brand match
-
-        selected = list(products.items())[0] # Default selection
-        for name, product in products.items():
-            if size_category == 'large' and ('100"' in name or 'Wall' in name):
-                selected = (name, product)
-                break
-            elif size_category == 'medium' and any(size in name for size in ['75"', '85"', '86"']):
-                selected = (name, product)
-                break
-        
-        result = selected[1].copy()
-        result['model'] = selected[0]
-        result['viewing_distance_optimal'] = f"{viewing_distance:.1f}m"
-        result['brightness_needed'] = self._calculate_brightness_needs(specs)
-        return result
-    
-    # ... Other recommendation helper methods (_recommend_camera_advanced, etc.) ...
-    # (These methods follow similar logic to the one above, using room specs to
-    # filter and select the most appropriate product from the database)
-    
-    def _recommend_camera_advanced(self, specs, tier, brands):
-        products = self.db.products['cameras'][tier]
-        if brands:
-            products = {k: v for k, v in products.items() if v['brand'] in brands}
-        if not products:
-            products = self.db.products['cameras'][tier]
-
-        room_depth = max(specs['length'], specs['width'])
-        
-        if specs['capacity'] <= 6 and room_depth <= 5:
-            camera_type = 'fixed'
-        elif specs['capacity'] <= 16:
-            camera_type = 'ptz'
-        else:
-            camera_type = 'multi_camera'
-        
-        selected = list(products.items())[0]
-        for name, product in products.items():
-            if camera_type == 'multi_camera' and ('EQ' in name or 'Studio X' in name):
-                selected = (name, product)
-                break
-            elif camera_type == 'ptz' and ('Rally' in name or 'E70' in name):
-                selected = (name, product)
-                break
-        
-        result = selected[1].copy()
-        result['model'] = selected[0]
-        result['recommended_mounting'] = self._suggest_camera_mounting(specs)
-        result['coverage_analysis'] = self._analyze_camera_coverage(specs, camera_type)
-        return result
-
-    def _recommend_audio_advanced(self, specs, tier, features):
-        products = self.db.products['audio'][tier]
-        room_volume = specs['length'] * specs['width'] * specs['ceiling_height']
-        acoustic_features = specs.get('environment', {}).get('acoustic_features', [])
-        
-        config_type = 'table_system'
-        if 'Sound Absorption Needed' in acoustic_features or 'Echo Control Required' in acoustic_features:
-            config_type = 'premium_processing'
-        elif room_volume > 200 or specs.get('environment', {}).get('ceiling_type') == "Open Plenum":
-            config_type = 'distributed'
-        elif specs['ceiling_height'] > 3.5:
-            config_type = 'ceiling_array'
-        
-        selected = list(products.items())[0]
-        for name, product in products.items():
-            if config_type == 'ceiling_array' and ('MXA920' in name or 'Ceiling' in name):
-                selected = (name, product)
-                break
-            elif config_type == 'premium_processing' and ('TesiraFORTE' in name or 'Core' in name):
-                selected = (name, product)
-                break
-        
-        result = selected[1].copy()
-        result['model'] = selected[0]
-        result['configuration'] = self._design_audio_config(specs, config_type)
-        result['acoustic_analysis'] = self._analyze_acoustics(specs)
-        return result
-
-    def _recommend_control_advanced(self, specs, tier):
-        products = self.db.products['control_systems'][tier]
-        complexity_score = len(specs.get('special_requirements', [])) + (specs['capacity'] // 10)
-        complexity_score += len(specs.get('environment', {}).get('env_controls', []))
-
-        selected = list(products.items())[0]
-        if complexity_score > 4:
-            for name, product in products.items():
-                if any(k in name for k in ['NVX', 'DGX', 'Core']):
-                    selected = (name, product)
+# --- Tool 1: Data Analysis Tool ---
+def analyze_csv_data(query: str) -> str:
+    try:
+        jira_file = next(f for f in glob.glob("*.csv") if "Closed tickets" in f)
+    except StopIteration:
+        return "The Jira ticket export CSV file was not found."
+    try:
+        df = pd.read_csv(jira_file)
+        query_lower = query.lower()
+        match = re.search(r"count of (.+?) issues|how many (.+?) issues", query_lower)
+        if not match:
+             match = re.search(r"related to a '(.+?)' issue", query_lower)
+        if match:
+            target_value = next(g for g in match.groups() if g is not None).strip()
+            target_column = None
+            for col in df.columns:
+                if "rca" in col.lower() or "root cause" in col.lower():
+                    target_column = col
                     break
-        
-        result = selected[1].copy()
-        result['model'] = selected[0]
-        result['integration_options'] = self._suggest_integrations(specs)
-        return result
+            if not target_column:
+                return "Could not determine the 'Root Cause Analysis' column in the CSV."
+            count = df[df[target_column].str.contains(target_value, case=False, na=False)].shape[0]
+            return f"Found **{count} tickets** related to **'{target_value}'**."
+        return "I can count issues from the Jira file, but I didn't understand what to count. Try 'how many Device Faulty issues?'"
+    except Exception as e:
+        return f"An error occurred during CSV analysis: {e}"
 
-    def _recommend_lighting_advanced(self, specs, tier, user_prefs, features):
-        products = self.db.products['lighting'][tier]
-        env_config = specs.get('environment', {})
-        
-        needs_daylight_sync = 'Circadian Lighting' in features or env_config.get('natural_light') in ['High', 'Very High']
-        
-        selected = list(products.items())[0]
-        if needs_daylight_sync and tier == 'Premium':
-            for name, product in products.items():
-                if 'Ketra' in name or 'Natural Light' in product['specs']:
-                    selected = (name, product)
-                    break
-        
-        result = selected[1].copy()
-        result['model'] = selected[0]
-        result['lighting_analysis'] = self._analyze_lighting_needs(specs, features)
-        return result
+# --- Tool 2: Maintenance and RAG Tool ---
+def get_maintenance_context_with_actions(query: str, maintenance_pipeline: MaintenancePipeline, search_func, search_args) -> str:
+    query_lower = query.lower()
+    context_parts = []
+    if any(kw in query_lower for kw in ['risk', 'failure', 'alert']):
+        high_risk = maintenance_pipeline.get_equipment_by_risk('HIGH')
+        if high_risk:
+            context_parts.append("### High-Risk Equipment Alerts:\n")
+            for eq in high_risk[:3]:
+                context_parts.append(f"- **ID:** `{eq['id']}` | **Location:** {eq['location']} | **Failure Probability:** {eq['failure_probability']:.1%}")
+                action_query = f"troubleshooting procedure for {eq['type']}"
+                action_results = search_func(action_query, **search_args)
+                if action_results:
+                    action_text = action_results[0]['content'].strip().replace('\n', ' ')
+                    source = os.path.basename(action_results[0]['source'])
+                    context_parts.append(f"  - **▶️ Recommended Action:** Based on `{source}`, you should: *\"{action_text[:200]}...\"*")
+                else:
+                    context_parts.append("  - *No specific troubleshooting guide found in the documents.*")
+    elif any(kw in query_lower for kw in ['schedule', 'calendar', 'upcoming']):
+        schedule = maintenance_pipeline.get_maintenance_schedule(30)
+        if schedule:
+            context_parts.append("### Upcoming Maintenance (Next 30 Days):\n")
+            for item in schedule[:5]:
+                context_parts.append(f"- **{item['next_maintenance']}**: `{item['id']}` at {item['location']} (Cost: ${item['maintenance_cost']})")
+    return "\n".join(context_parts)
 
-    def _recommend_accessories_advanced(self, specs, features):
-        accessories = []
-        accessibility_needs = specs.get('environment', {}).get('accessibility', [])
-        
-        accessories.append({'category': 'Cable Management', 'item': 'Under-table Cable Tray System', 'model': 'FSR FL-500P Series', 'price': 1299, 'necessity': 'Essential'})
-        if 'Wireless Presentation' in features:
-            accessories.append({'category': 'Wireless Presentation', 'item': 'Professional Wireless System', 'model': 'Barco ClickShare Conference CX-50', 'price': 2999, 'necessity': 'Required'})
-        if 'Room Scheduling' in features:
-            accessories.append({'category': 'Room Booking', 'item': 'Smart Room Panel', 'model': 'Crestron TSS-1070-B-S', 'price': 1899, 'necessity': 'Required'})
-        if 'Hearing Loop System' in accessibility_needs:
-            accessories.append({'category': 'Accessibility', 'item': 'Inductive Loop System', 'model': 'Williams AV PLR BP1', 'price': 1500, 'necessity': 'Required'})
-        if specs['capacity'] > 16:
-            accessories.append({'category': 'Power Management', 'item': 'Intelligent Power Distribution', 'model': 'Middle Atlantic UPS-2200R', 'price': 1599, 'necessity': 'Recommended'})
-        
-        return accessories
+# --- LLM and Response Generation (Upgraded) ---
+try:
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+    GEMINI_MODEL = genai.GenerativeModel('gemini-1.5-flash')
+except Exception as e:
+    st.error(f"Error configuring Gemini API: {e}")
+    GEMINI_MODEL = None
 
-    def _generate_alternatives(self, specs, tier):
-        alternatives = {}
-        all_tiers = ['Budget', 'Professional', 'Premium']
-        
-        for alt_tier in all_tiers:
-            if alt_tier != tier:
-                alt_recs = {}
-                for category in ['displays', 'cameras', 'audio']:
-                    products = self.db.products[category][alt_tier]
-                    alt_recs[category] = list(products.items())[0]
-                alternatives[alt_tier] = alt_recs
-        
-        return alternatives
+def summarize_history(history: List[Dict], max_tokens=300) -> str:
+    text = ""
+    for msg in history[-6:]:
+        text += f"{msg['role'].capitalize()}: {msg['content']}\n"
+    return text[-max_tokens:]
 
-    def _analyze_room_characteristics(self, specs):
-        room_area = specs['length'] * specs['width']
-        aspect_ratio = max(specs['length'], specs['width']) / min(specs['length'], specs['width']) if min(specs['length'], specs['width']) > 0 else 1
-        
-        return {
-            'size_category': self._categorize_room_size(room_area),
-            'shape_analysis': self._analyze_room_shape(aspect_ratio),
-            'acoustic_properties': self._estimate_acoustic_properties(specs),
-            'lighting_challenges': self._identify_lighting_challenges(specs),
-            'capacity_efficiency': self._analyze_capacity_efficiency(specs)
-        }
+def generate_response_stream(query: str, chat_history: List[Dict], context: str) -> Generator:
+    if not GEMINI_MODEL:
+        yield "The AI model is not configured. Please check your API key."
+        return
+    history_prompt = summarize_history(chat_history)
+    prompt = f"""You are an expert AI support assistant. Your goal is to provide clear, concise answers.
+Use the chat history for context but rely ONLY on the 'Context for your answer' to formulate your response. Cite sources if available.
 
-    def _suggest_upgrade_path(self, specs, current_tier):
-        tiers = ['Budget', 'Professional', 'Premium']
-        current_index = tiers.index(current_tier)
-        upgrade_path = []
-        
-        if current_index < len(tiers) - 1:
-            next_tier = tiers[current_index + 1]
-            upgrade_path.append({
-                'phase': 'Short-term (6-12 months)', 'tier': next_tier, 'focus': 'Core AV upgrade',
-                'estimated_cost': self._estimate_tier_cost(specs, next_tier) - self._estimate_tier_cost(specs, current_tier)
-            })
-        
-        if current_index < len(tiers) - 2:
-            ultimate_tier = tiers[-1]
-            upgrade_path.append({
-                'phase': 'Long-term (2-3 years)', 'tier': ultimate_tier, 'focus': 'Premium features & AI integration',
-                'estimated_cost': self._estimate_tier_cost(specs, ultimate_tier) - self._estimate_tier_cost(specs, current_tier)
-            })
-        
-        return upgrade_path
+---
+**Chat History:**
+{history_prompt if history_prompt else "This is the start of the conversation."}
+---
+**Context for your answer:**
+{context if context else "No specific context was found for this query."}
+---
+**User's Question:** "{query}"
+---
+Based on all the information above, provide a direct and helpful answer. If the context is empty, explain what the user can ask about."""
+    try:
+        response_stream = GEMINI_MODEL.generate_content(prompt, stream=True)
+        for chunk in response_stream:
+            yield chunk.text
+    except Exception as e:
+        yield f"An error occurred while generating the response: {e}"
 
-    def _generate_smart_upgrade_plan(self, specs, current_tier, estimated_cost):
-        """Generate a detailed phased upgrade plan."""
-        phases = {
-            'Immediate (0-3 months)': {
-                'priorities': [
-                    'Essential software upgrades and licensing',
-                    'Control system programming optimization',
-                    'Staff training on current systems'
-                ], 'cost_percentage': 0.15, 'focus': 'Maximizing current infrastructure'
-            },
-            'Phase 1 (3-6 months)': {
-                'priorities': ['Display system upgrade','Camera system enhancement','Basic audio improvements'],
-                'cost_percentage': 0.35, 'focus': 'Core AV capabilities'
-            },
-            'Phase 2 (6-9 months)': {
-                'priorities': ['Advanced audio processing implementation','Lighting control system upgrade','Room automation integration'],
-                'cost_percentage': 0.30, 'focus': 'Enhanced functionality'
-            },
-            'Final Phase (9-12 months)': {
-                'priorities': ['Premium features activation','AI analytics integration','Complete system optimization'],
-                'cost_percentage': 0.20, 'focus': 'Premium capabilities'
-            }
-        }
-        for phase in phases.values():
-            phase['budget'] = estimated_cost * phase['cost_percentage']
-        
-        roi_metrics = {
-            'Productivity Gain': '15-20%', 'Energy Savings': '10-15%',
-            'Maintenance Cost Reduction': '25-30%', 'System Downtime Reduction': '40-50%'
-        }
-        return {
-            'phases': phases, 
-            'roi_metrics': roi_metrics, 
-            'total_investment': estimated_cost, 
-            'monthly_investment': estimated_cost / 12 if estimated_cost > 0 else 0
-        }
-    
-    # ... Other helper methods for analysis (_calculate_brightness_needs, etc.) ...
-    
-    def _calculate_brightness_needs(self, specs):
-        env = specs.get('environment', {})
-        light_levels = {"Very Low": -50, "Low": -25, "Moderate": 0, "High": 50, "Very High": 100}
-        natural_light_adjust = light_levels.get(env.get('natural_light', 'Moderate'), 0)
-        return int(350 + natural_light_adjust)
+# --- Document Processing and Search ---
+def clean_text(text: str) -> str:
+    return re.sub(r'\s+', ' ', text.strip())
 
-    def _suggest_camera_mounting(self, specs):
-        return "Ceiling mount recommended for optimal coverage" if specs['ceiling_height'] > 3.5 else "Wall mount at display location"
-
-    def _analyze_camera_coverage(self, specs, camera_type):
-        room_area = specs['length'] * specs['width']
-        coverage_factor = 80 if camera_type == 'multi_camera' else 50
-        coverage = min(100, (room_area / coverage_factor) * 100)
-        return f"{coverage:.0f}% optimal coverage"
-
-    def _design_audio_config(self, specs, config_type):
-        room_volume = specs['length'] * specs['width'] * specs['ceiling_height']
-        return {
-            'type': config_type, 
-            'coverage': f"{min(100, room_volume / 2):.0f}%",
-            'microphone_count': max(2, specs['capacity'] // 4), 
-            'speaker_zones': max(1, specs['capacity'] // 8),
-            'processing_power': 'High' if room_volume > 150 else 'Standard'
-        }
-
-    def _analyze_acoustics(self, specs):
-        env = specs.get('environment', {})
-        wall_absorb = {"Drywall": 0.1, "Glass": 0.03, "Concrete": 0.02, "Wood Panels": 0.15, "Acoustic Panels": 0.8}
-        absorption_coeff = wall_absorb.get(env.get('wall_material', 'Drywall'), 0.1)
-        
-        room_volume = specs['length'] * specs['width'] * specs['ceiling_height']
-        surface_area = 2 * (specs['length'] * specs['width'] + specs['length'] * specs['ceiling_height'] + specs['width'] * specs['ceiling_height'])
-        
-        if absorption_coeff > 0:
-            rt60_estimate = 0.161 * room_volume / (absorption_coeff * surface_area)
+def smart_chunking(text: str, chunk_size: int) -> List[str]:
+    sentences = re.split(r'(?<=[.!?])\s+', text)
+    chunks, current_chunk = [], ""
+    for sentence in sentences:
+        if len(current_chunk) + len(sentence) < chunk_size:
+            current_chunk += sentence + " "
         else:
-            rt60_estimate = float('inf')
-            
-        return {
-            'rt60_estimate': f"{rt60_estimate:.2f} seconds", 
-            'acoustic_treatment_needed': rt60_estimate > 0.8,
-            'sound_masking_recommended': 'Speech Privacy Important' in env.get('acoustic_features', []),
-            'echo_risk': 'High' if env.get('wall_material') in ['Glass', 'Concrete'] else 'Low'
-        }
+            if current_chunk: chunks.append(current_chunk.strip())
+            current_chunk = sentence + " "
+    if current_chunk: chunks.append(current_chunk.strip())
+    return [c for c in chunks if len(c) > 30]
 
-    def _suggest_integrations(self, specs):
-        integrations = ['Microsoft Teams', 'Zoom', 'Google Meet']
-        if specs['capacity'] > 16:
-            integrations.extend(['Cisco Webex', 'BlueJeans'])
-        if 'VTC' in specs.get('special_requirements', []):
-            integrations.append('Polycom RealPresence')
-        return integrations
+def extract_text_from_pdf(file_path: str) -> str:
+    try:
+        with fitz.open(file_path) as doc:
+            return "".join(page.get_text() for page in doc)
+    except Exception as e:
+        st.warning(f"Could not read {os.path.basename(file_path)} with PyMuPDF: {e}")
+        return ""
 
-    def _analyze_lighting_needs(self, specs, features):
-        env = specs.get('environment', {})
-        natural_light = env.get('natural_light', 'Moderate')
-        return {
-            'natural_light_factor': f"{natural_light}",
-            'artificial_light_zones': max(1, (specs['length'] * specs['width']) // 20),
-            'dimming_required': True,
-            'color_temperature_control': 'Circadian Lighting' in features or env.get('color_scheme') != 'Neutral',
-            'daylight_harvesting': 'Daylight Harvesting' in env.get('env_controls', [])
-        }
+def extract_text_from_email(msg) -> str:
+    if msg.is_multipart():
+        for part in msg.walk():
+            if part.get_content_type() == "text/plain" and "attachment" not in str(part.get("Content-Disposition")):
+                try: return part.get_payload(decode=True).decode(part.get_content_charset() or 'utf-8')
+                except: continue
+    elif msg.get_content_type() == "text/plain":
+        try: return msg.get_payload(decode=True).decode(msg.get_content_charset() or 'utf-8')
+        except: return ""
+    return ""
 
-    def _calculate_advanced_confidence(self, specs, preferences):
-        base_confidence = 0.85
-        if len(specs.get('special_requirements', [])) > 3:
-            base_confidence -= 0.1
-        if preferences.get('preferred_brands'):
-            base_confidence += 0.05
-        if preferences.get('budget_tier') == 'Premium':
-            base_confidence += 0.1
-        return min(0.99, max(0.70, base_confidence))
+def format_email_for_rag(msg) -> str:
+    body = extract_text_from_email(msg)
+    if not body: return ""
+    return f"--- Email ---\nFrom: {msg['From']}\nTo: {msg['To']}\nSubject: {msg['Subject']}\nDate: {msg['Date']}\n{body.strip()}\n--- End Email ---"
 
-    def _categorize_room_size(self, area):
-        if area < 20: return "Small (Huddle)"
-        elif area < 50: return "Medium (Conference)"
-        elif area < 100: return "Large (Training)"
-        else: return "Extra Large (Auditorium)"
-
-    def _analyze_room_shape(self, aspect_ratio):
-        if aspect_ratio < 1.3: return "Square - Good for collaboration"
-        elif aspect_ratio < 2.0: return "Rectangular - Versatile layout"
-        else: return "Long/Narrow - Challenging for AV"
-
-    def _estimate_acoustic_properties(self, specs):
-        room_volume = specs['length'] * specs['width'] * specs['ceiling_height']
-        return {
-            'reverb_category': 'High' if room_volume > 200 else 'Moderate' if room_volume > 80 else 'Low',
-            'treatment_needed': room_volume > 150, 
-            'echo_potential': max(specs['length'], specs['width']) > 10
-        }
-
-    def _identify_lighting_challenges(self, specs):
-        challenges = []
-        if specs.get('environment', {}).get('natural_light') in ['High', 'Very High']:
-            challenges.append("High natural light - glare control needed")
-        if specs['ceiling_height'] > 4:
-            challenges.append("High ceiling - requires powerful fixtures")
-        if 'Presentations' in specs.get('environment', {}).get('room_purpose', []):
-            challenges.append("Presentation mode requires zoned lighting")
-        return challenges if challenges else ["Standard lighting requirements"]
-
-    def _analyze_capacity_efficiency(self, specs):
-        area = specs['length'] * specs['width']
-        efficiency = specs['capacity'] / area if area > 0 else 0
-        
-        if efficiency > 0.5: return "High density - space optimization good"
-        elif efficiency > 0.3: return "Moderate density - balanced layout"
-        else: return "Low density - spacious environment"
-
-    def _estimate_tier_cost(self, specs, tier):
-        base_costs = {'Budget': 15000, 'Professional': 45000, 'Premium': 120000}
-        return int(base_costs[tier] * (1 + (specs['capacity'] / 50)))
-
-# --- VISUALIZATION ENGINE ---
-
-class EnhancedVisualizationEngine:
-    """Handles the creation of all data visualizations."""
-    
-    def calculate_table_requirements(self, room_specs: Dict) -> Dict:
-        """Calculates the optimal conference table size based on room capacity."""
-        capacity = room_specs['capacity']
-        space_per_person = 0.75
-        
-        min_table_length = max(capacity * 0.6, 2.0)
-        min_table_width = max(capacity * 0.3, 1.0)
-        
-        max_length = room_specs['length'] * 0.7
-        max_width = room_specs['width'] * 0.4
-        
-        table_length = min(min_table_length, max_length)
-        table_width = min(min_table_width, max_width)
-        
-        perimeter = (table_length * 2) + (table_width * 2)
-        perimeter_seats = int(perimeter / space_per_person)
-        
-        return {
-            'length': table_length,
-            'width': table_width,
-            'area': table_length * table_width,
-            'seats': min(capacity, perimeter_seats)
-        }
-
-    def create_3d_room_visualization(self, room_specs: Dict, recommendations: Dict, viz_config: Dict) -> go.Figure:
-        """Creates an interactive 3D model of the room with equipment."""
-        fig = go.Figure()
-        length, width, height = room_specs['length'], room_specs['width'], room_specs['ceiling_height']
-
-        # Floor, Walls, and Ceiling
-        # ... (Code for creating surfaces remains the same) ...
-
-        # Display Screen
-        # ... (Code for creating display screen remains the same) ...
-        
-        return fig # Placeholder for full implementation
-
-    @staticmethod
-    def create_equipment_layout_2d(room_specs: Dict, recommendations: Dict) -> go.Figure:
-        """Creates a top-down 2D floor plan with equipment and coverage zones."""
-        fig = go.Figure()
-        length, width = room_specs['length'], room_specs['width']
-
-        # Room Outline
-        fig.add_shape(type="rect", x0=0, y0=0, x1=length, y1=width, line=dict(color="black", width=2), fillcolor="lightgrey")
-        
-        # ... (Code for adding equipment shapes and coverage zones) ...
-        
-        fig.update_layout(
-            title="2D Equipment Layout",
-            xaxis_title="Length (m)",
-            yaxis_title="Width (m)",
-            height=600
-        )
-        return fig # Placeholder for full implementation
-
-    @staticmethod
-    def create_cost_breakdown_chart(recommendations: Dict) -> go.Figure:
-        """Creates a bar chart showing the cost breakdown by category."""
-        categories = ['Display', 'Camera', 'Audio', 'Control', 'Lighting']
-        costs = [
-            recommendations['display']['price'],
-            recommendations['camera']['price'],
-            recommendations['audio']['price'],
-            recommendations['control']['price'],
-            recommendations['lighting']['price']
-        ]
-        
-        fig = go.Figure(data=[go.Bar(
-            x=categories,
-            y=costs,
-            text=[f"${c:,.0f}" for c in costs],
-            textposition='auto'
-        )])
-        
-        fig.update_layout(
-            title_text="Investment Breakdown by Category",
-            xaxis_title="Equipment Category",
-            yaxis_title="Cost (USD)"
-        )
-        return fig
-
-    @staticmethod
-    def create_feature_comparison_radar(recommendations: Dict, alternatives: Dict) -> go.Figure:
-        """Creates a radar chart for comparing solution features."""
-        categories = ['Performance', 'Features', 'Reliability', 'Integration', 'Value']
-        current_scores = [4.5, 4.2, 4.6, 4.4, 4.3] # Simulated scores
-        
-        fig = go.Figure()
-        fig.add_trace(go.Scatterpolar(
-            r=current_scores,
-            theta=categories,
-            fill='toself',
-            name='Recommended Solution'
-        ))
-        
-        fig.update_layout(
-            polar=dict(radialaxis=dict(visible=True, range=[0, 5])),
-            title_text="Solution Performance Analysis"
-        )
-        return fig
-
-# --- UTILITY FUNCTIONS ---
-
-def validate_configuration(room_specs: Dict, budget_manager: BudgetManager) -> (List[str], List[str]):
-    """Validates the user's configuration for logical errors and warnings."""
-    warnings = []
-    errors = []
-    
-    min_area_per_person = 1.5
-    room_area = room_specs['length'] * room_specs['width']
-    required_area = room_specs['capacity'] * min_area_per_person
-    
-    if room_area < required_area:
-        errors.append(f"Room is too small for {room_specs['capacity']} people. Minimum {required_area:.1f}m² required.")
-    
-    if room_specs['width'] > 0:
-        aspect_ratio = room_specs['length'] / room_specs['width']
-        if aspect_ratio > 3 or aspect_ratio < 0.33:
-            warnings.append("Room's aspect ratio may be challenging for AV equipment placement.")
-            
-    return warnings, errors
-
-# --- MAIN APPLICATION ---
-
-def main():
-    """Main function to run the Streamlit application."""
-    
-    # Initialize session state
-    if 'app_state' not in st.session_state:
-        st.session_state.app_state = {
-            'active_features': {'table_space', 'budget_tracking', 'camera_angles'},
-            'table_config': None
-        }
-    if 'recommendations' not in st.session_state:
-        st.session_state.recommendations = None
-    if 'room_specs' not in st.session_state:
-        st.session_state.room_specs = None
-
-    # --- SIDEBAR UI ---
-    with st.sidebar:
-        st.markdown(
-            '<div class="premium-card" style="margin-top: -50px;">'
-            '<h2>🎛️ Room Configuration</h2></div>', 
-            unsafe_allow_html=True
-        )
-        
-        db = EnhancedProductDatabase()
-        template = st.selectbox(
-            "Room Template", 
-            list(db.room_templates.keys()), 
-            help="Choose a template to pre-fill common values."
-        )
-        template_info = db.room_templates[template]
-        
-        st.subheader("📐 Dimensions")
-        col1, col2 = st.columns(2)
-        length = col1.slider("Length (m)", 2.0, 20.0, float(template_info['typical_size'][0]), 0.5)
-        width = col2.slider("Width (m)", 2.0, 20.0, float(template_info['typical_size'][1]), 0.5)
-        ceiling_height = col1.slider("Ceiling Height (m)", 2.4, 6.0, 3.0, 0.1)
-        capacity = col2.slider("Capacity", 2, 100, template_info['capacity_range'][1])
-        
-        st.divider()
-        st.subheader("🌟 Environment & Atmosphere")
-        # ... (Additional sidebar inputs for environment, budget, features) ...
-        env_col1, env_col2 = st.columns(2)
-        with env_col1:
-            windows = st.slider("Windows (%)", 0, 80, 20, 5, help="Percentage of wall space with windows")
-            natural_light = st.select_slider("Natural Light Level", options=["Very Low", "Low", "Moderate", "High", "Very High"], value="Moderate")
-        with env_col2:
-            ceiling_type = st.selectbox("Ceiling Type", ["Standard", "Drop Ceiling", "Open Plenum", "Acoustic Tiles"])
-            wall_material = st.selectbox("Wall Material", ["Drywall", "Glass", "Concrete", "Wood Panels", "Acoustic Panels"])
-        
-        st.markdown("##### 🎯 Room Purpose & Acoustics")
-        room_purpose = st.multiselect("Primary Activities", ["Video Conferencing", "Presentations", "Training", "Board Meetings"], default=["Video Conferencing", "Presentations"])
-        acoustic_features = st.multiselect("Acoustic Considerations", ["Sound Absorption", "Echo Control", "Noise Issues"])
-        
-        st.divider()
-        st.subheader("💰 Budget & Brands")
-        budget_tier = st.selectbox("Budget Tier", ['Budget', 'Professional', 'Premium'], index=1)
-        preferred_brands = st.multiselect("Preferred Brands", ['Samsung', 'LG', 'Sony', 'Crestron', 'Cisco', 'Logitech', 'QSC', 'Shure'])
-        
-        st.subheader("✨ Special Features")
-        special_features = st.multiselect("Required Features", ['Wireless Presentation', 'Digital Whiteboard', 'Room Scheduling', 'AI Analytics'])
-
-    # --- MAIN PAGE UI ---
-    st.title("🏢 AI Room Configurator Pro Max")
-    st.markdown("### Transform Your Space with Intelligent AV Design")
-
-    if st.button("🚀 Generate AI Recommendation"):
-        environment_config = {
-            'windows': windows, 'natural_light': natural_light, 'ceiling_type': ceiling_type,
-            'wall_material': wall_material, 'room_purpose': room_purpose,
-            'acoustic_features': acoustic_features
-        }
-        room_specs = {
-            'template': template, 'length': length, 'width': width, 'ceiling_height': ceiling_height,
-            'capacity': capacity, 'environment': environment_config, 'special_requirements': []
-        }
-        user_preferences = {
-            'budget_tier': budget_tier, 'preferred_brands': preferred_brands, 'special_features': special_features
-        }
-        
-        budget_manager = BudgetManager(budget_tier)
-        warnings, errors = validate_configuration(room_specs, budget_manager)
-        
-        if errors:
-            st.error(f"🚨 Please correct the following errors: \n\n* " + "\n* ".join(errors))
+@st.cache_resource
+def load_and_process_documents():
+    file_patterns = ["**/*.txt", "**/*.md", "**/*.csv", "**/*.pdf", "**/*.eml", "**/*.mbox"]
+    all_files = [f for pattern in file_patterns for f in glob.glob(pattern, recursive=True)]
+    docs, file_paths = [], []
+    progress_bar = st.progress(0, text="Loading documents...")
+    for i, file_path in enumerate(all_files):
+        file_name = os.path.basename(file_path)
+        progress_bar.progress((i + 1) / len(all_files), text=f"Processing: {file_name}")
+        content = ""
+        if file_path.endswith('.pdf'): content = extract_text_from_pdf(file_path)
+        elif file_path.endswith('.eml'):
+            with open(file_path, 'rb') as f: content = format_email_for_rag(BytesParser(policy=policy.default).parse(f))
+        elif file_path.endswith('.mbox'):
+            mbox_content = [format_email_for_rag(msg) for msg in mailbox.mbox(file_path)]
+            content = "\n\n".join(filter(None, mbox_content))
         else:
-            if warnings:
-                st.warning(f"⚠️ Consider these design warnings: \n\n* " + "\n* ".join(warnings))
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f: content = f.read()
+            except:
+                with open(file_path, 'r', encoding='latin-1') as f: content = f.read()
+        if content and len(content.strip()) > 50:
+            docs.append(clean_text(content))
+            file_paths.append(file_path)
+    progress_bar.empty()
+    if docs: st.success(f"Successfully loaded and processed {len(docs)} documents!")
+    return docs, file_paths
+
+@st.cache_resource
+def create_search_index(_documents, _file_paths):
+    model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+    all_chunks, chunk_metadata = [], []
+    for i, doc in enumerate(_documents):
+        chunks = smart_chunking(doc, config.chunk_size)
+        all_chunks.extend(chunks)
+        chunk_metadata.extend([{'path': _file_paths[i]}] * len(chunks))
+    if not all_chunks: return None, None, [], []
+    with st.spinner("Embedding documents for semantic search..."):
+        embeddings = model.encode(all_chunks, show_progress_bar=True, normalize_embeddings=True)
+    index = faiss.IndexFlatIP(embeddings.shape[1])
+    index.add(embeddings.astype('float32'))
+    st.success(f"✅ Search index created with {len(all_chunks)} text chunks.")
+    return index, model, all_chunks, chunk_metadata
+
+def search_documents(query: str, index, model, chunks: List[str], metadata: List[Dict]) -> List[Dict]:
+    if not query or index is None: return []
+    query_embedding = model.encode([query], normalize_embeddings=True)
+    scores, indices = index.search(query_embedding.astype('float32'), config.top_k_retrieval)
+    results = []
+    for i, idx in enumerate(indices[0]):
+        if idx != -1 and scores[0][i] > config.similarity_threshold:
+             results.append({'content': chunks[idx], 'source': metadata[idx]['path'], 'similarity': scores[0][i]})
+    return sorted(results, key=lambda x: x['similarity'], reverse=True)
+
+# --- Intent Classification ---
+def classify_intent(prompt):
+    prompt = prompt.lower()
+    if any(kw in prompt for kw in ["how many", "count", "total tickets"]):
+        return "csv"
+    if any(kw in prompt for kw in ['risk', 'failure', 'alert', 'schedule', 'calendar', 'upcoming']):
+        return "maintenance"
+    return "search"
+
+# --- Initialization ---
+# Moved up to ensure these are available for the sidebar
+try:
+    maintenance_pipeline = MaintenancePipeline()
+    docs, paths = load_and_process_documents()
+    if docs:
+        search_index, model, all_chunks, chunk_meta = create_search_index(docs, paths)
+        search_args = {'index': search_index, 'model': model, 'chunks': all_chunks, 'metadata': chunk_meta}
+    else:
+        search_index, model, all_chunks, chunk_meta, search_args = None, None, [], [], {}
+        st.warning("No documents found. Document search and actionable insights are disabled.")
+except Exception as e:
+    st.error(f"An error occurred during initialization: {e}")
+    search_index, search_args = None, {}
+
+if "messages" not in st.session_state:
+    st.session_state.messages = [{"role": "assistant", "content": "Hi! How can I help you today?", "timestamp": datetime.now().strftime("%H:%M")}]
+
+
+# --- Sidebar: Quick Actions, Upload, Settings ---
+with st.sidebar:
+    st.title("🤖 AI Support Assistant")
+    st.markdown("**Quick Actions:**")
+
+    # Handler function for quick actions
+    def handle_quick_action(action_type: str):
+        if action_type == "alerts":
+            prompt = "Show high-risk equipment alerts"
+        else:
+            prompt = "Show upcoming maintenance"
             
-            recommender = MaximizedAVRecommender()
-            viz_engine = EnhancedVisualizationEngine()
-            
-            st.session_state.app_state['table_config'] = viz_engine.calculate_table_requirements(room_specs)
-            
-            recommendations = recommender.get_comprehensive_recommendations(
-                room_specs, user_preferences, budget_manager=budget_manager
+        now = datetime.now().strftime("%H:%M")
+        # Add user message
+        st.session_state.messages.append({
+            "role": "user",
+            "content": prompt,
+            "timestamp": now
+        })
+        
+        # Generate AI response context
+        if action_type == "alerts":
+            context = get_maintenance_context_with_actions(
+                prompt, 
+                maintenance_pipeline,
+                search_documents,
+                search_args
+            )
+        else:
+            context = get_maintenance_context_with_actions(
+                prompt,
+                maintenance_pipeline,
+                search_documents,
+                search_args
             )
             
-            if budget_manager.running_total > budget_manager.tier_limits[budget_tier]['max']:
-                st.error(f"Cost of ${budget_manager.running_total:,.0f} exceeds the {budget_tier} tier limit.")
-            else:
-                st.session_state.recommendations = recommendations
-                st.session_state.room_specs = room_specs
-                st.session_state.budget_tier = budget_tier
-                st.success("✅ AI Analysis Complete!")
+        # Generate and add AI response
+        response_stream = generate_response_stream(prompt, st.session_state.messages, context)
+        full_response = "".join([chunk for chunk in response_stream])
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": full_response,
+            "timestamp": now
+        })
+        # Force a rerun to show the new messages
+        st.rerun()
 
-    # Display results if they exist in session state
-    if st.session_state.recommendations:
-        recs = st.session_state.recommendations
-        specs = st.session_state.room_specs
-        
-        total_cost = sum(item['price'] for item in recs.values() if isinstance(item, dict) and 'price' in item)
-        total_cost += sum(acc['price'] for acc in recs.get('accessories', []))
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("📊 Risk Alerts", key="risk_btn", help="Show equipment with the highest failure probability."):
+            handle_quick_action("alerts")
+    with col2:
+        if st.button("📅 Maintenance", key="maint_btn", help="Show the upcoming maintenance schedule."):
+            handle_quick_action("maintenance")
 
-        # Metric cards
-        col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Total Investment", f"${total_cost:,.0f}")
-        col2.metric("AI Confidence", f"{recs['confidence_score']:.0%}")
-        col3.metric("Room Size", f"{specs['length']}m × {specs['width']}m")
-        col4.metric("Capacity", f"{specs['capacity']}")
-        
-        # Tabs for detailed results
-        tab1, tab2, tab3, tab4, tab5 = st.tabs(["🎯 Recommendations", "📊 Analysis", "🎨 Visualization", "🔄 Alternatives", "📋 Report"])
-        
-        with tab1:
-            st.header("AI-Powered Equipment Recommendations")
-            # ... (Display recommended products in feature cards) ...
-            
-        with tab2:
-            st.header("Room Analysis & Performance Metrics")
-            # ... (Display room characteristics and performance charts) ...
-            
-        with tab3:
-            st.header("Interactive Room Visualization")
-            # viz_engine = EnhancedVisualizationEngine()
-            # fig_3d = viz_engine.create_3d_room_visualization(specs, recs, {})
-            # st.plotly_chart(fig_3d, use_container_width=True)
-            # st.plotly_chart(viz_engine.create_equipment_layout_2d(specs, recs), use_container_width=True)
+    # Rest of your sidebar code
+    st.markdown("---")
+    st.markdown("**System Status:**")
+    st.write(f"🚨 {len(maintenance_pipeline.get_equipment_by_risk('HIGH'))} high risk items")
+    st.write(f"📅 {len(maintenance_pipeline.get_maintenance_schedule(7))} tasks due this week")
+    st.markdown("---")
+    st.info("Upload new documents below:")
+    uploaded_files = st.file_uploader("Add files", accept_multiple_files=True)
+    if uploaded_files:
+        for uploaded_file in uploaded_files:
+            # Save to a directory for persistent storage if needed
+            with open(uploaded_file.name, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+        st.success("Files uploaded! Please reload the app to re-index documents.")
+        st.button("Reload App")
+    st.markdown("---")
+    st.markdown("**Settings:**")
+    chunk_size = st.slider("Chunk size for document splitting", 200, 1000, st.session_state.settings["chunk_size"], 100)
+    st.session_state.settings["chunk_size"] = chunk_size
+    theme = st.radio("Theme", ["light", "dark"], index=0 if st.session_state.settings["theme"]=="light" else 1)
+    st.session_state.settings["theme"] = theme
 
-        with tab4:
-            st.header("Alternative Configurations & Upgrade Planner")
-            # ... (Display alternatives and upgrade path) ...
-            
-        with tab5:
-            st.header("Professional Report Summary")
-            # ... (Display executive summary and detailed specs table) ...
-
+# --- Improved Chat Bubble with Avatar and Timestamp ---
+def chat_bubble(content, is_user=False, timestamp=None):
+    theme = st.session_state.settings.get("theme", "light")
+    if theme == "dark":
+        user_color = "#3A6351"
+        assistant_color = "#222831"
+        text_color = "#fff"
+        border = "1px solid #393E46"
     else:
-        st.markdown(
-            '''<div class="premium-card" style="text-align: center; padding: 50px;">
-                <h2>🚀 Welcome to AI Room Configurator Pro Max</h2>
-                <p style="font-size: 18px;">Configure your room in the sidebar to generate an intelligent AV design.</p>
-            </div>''',
-            unsafe_allow_html=True
-        )
+        user_color = "#DCF8C6"
+        assistant_color = "#F1F0F0"
+        text_color = "#222"
+        border = "1px solid #ddd"
+    
+    color = user_color if is_user else assistant_color
+    align = "right" if is_user else "left"
+    avatar_url = (
+        "https://cdn-icons-png.flaticon.com/512/1946/1946429.png" if is_user
+        else "https://cdn-icons-png.flaticon.com/512/4712/4712035.png"
+    )
+    name = "You" if is_user else "AI"
+    if not timestamp:
+        timestamp = datetime.now().strftime("%H:%M")
+    
+    # Sanitize content for HTML display
+    content = content.replace("<", "&lt;").replace(">", "&gt;")
 
-if __name__ == "__main__":
-    main()
+    st.markdown(
+        f"""
+        <div style='display:flex;flex-direction:{"row-reverse" if is_user else "row"};align-items:flex-end;margin:8px 0;'>
+            <img src="{avatar_url}" width="36" height="36" style="border-radius:50%;margin:0 8px;">
+            <div style='background-color:{color};
+                        color:{text_color};
+                        padding:14px 16px;
+                        border-radius:12px;
+                        max-width:70vw;
+                        min-width:80px;
+                        border:{border};
+                        box-shadow:0 2px 8px rgba(0,0,0,0.07);
+                        position:relative;'>
+                <div style='font-size:13px;font-weight:bold;opacity:0.7;'>{name}</div>
+                <div style='font-size:16px;margin:4px 0;'>{content}</div>
+                <div style='font-size:11px;opacity:0.5;text-align:right;'>{timestamp}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True
+    )
+
+# --- Feedback Buttons ---
+def feedback_buttons():
+    col1, col2 = st.columns([1,1])
+    with col1:
+        if st.button("👍", key="thumbs_up"):
+            st.success("Thanks for your feedback!")
+    with col2:
+        if st.button("👎", key="thumbs_down"):
+            st.warning("We'll try to improve!")
+
+
+# --- Chat History Display with Avatars and Timestamps ---
+for message in st.session_state.messages:
+    if "timestamp" not in message:
+        message["timestamp"] = datetime.now().strftime("%H:%M")
+    chat_bubble(
+        message["content"],
+        is_user=(message["role"] == "user"),
+        timestamp=message["timestamp"]
+    )
+
+# --- Chat Input and Tool Routing ---
+if prompt := st.chat_input("Ask a question..."):
+    now = datetime.now().strftime("%H:%M")
+    st.session_state.messages.append({"role": "user", "content": prompt, "timestamp": now})
+    # Display the user's message immediately
+    chat_bubble(prompt, is_user=True, timestamp=now)
+    
+    with st.spinner("Thinking..."):
+        intent = classify_intent(prompt)
+        context = ""
+        
+        if intent == "csv":
+            context = analyze_csv_data(prompt)
+        elif intent == "maintenance":
+            if search_args:
+                context = get_maintenance_context_with_actions(prompt, maintenance_pipeline, search_documents, search_args)
+            else:
+                context = "Maintenance data is available, but I can't provide actionable insights without documents."
+        else: # "search" intent
+            if search_args:
+                search_results = search_documents(prompt, **search_args)
+                if search_results:
+                    context += "### Relevant Information from Documents:\n"
+                    for result in search_results[:3]:
+                        source = os.path.basename(result['source'])
+                        content_preview = result['content'].strip().replace('\n', ' ')
+                        context += f"- **From `{source}`**: \"{content_preview}\"\n"
+                    context += "\n_Citations provided above._"
+        
+        if not context:
+            high_risk_count = len(maintenance_pipeline.get_equipment_by_risk('HIGH'))
+            upcoming_maintenance = len(maintenance_pipeline.get_maintenance_schedule(7))
+            context = f"""I couldn't find specific information for that query.
+- You can ask about document contents (e.g., "summarize the INDIS meeting").
+- You can ask for maintenance alerts or schedules.
+- You can ask to count Jira tickets (e.g., "how many Device Faulty issues?").
+
+**Current System Status:** 🚨 {high_risk_count} high risk items | 📅 {upcoming_maintenance} tasks due this week."""
+
+        # Generate and display the AI's response
+        with st.empty():
+            response_stream = generate_response_stream(prompt, st.session_state.messages, context)
+            full_response = ""
+            for chunk in response_stream:
+                full_response += chunk
+                chat_bubble(full_response + " ▌", is_user=False, timestamp=now)
+            
+            # Final update to remove the cursor
+            chat_bubble(full_response, is_user=False, timestamp=now)
+        
+        st.session_state.messages.append({"role": "assistant", "content": full_response, "timestamp": now})
+        feedback_buttons()
+        st.rerun()
+
+
+
+        import streamlit as st
+
+import pandas as pd
+
+import os
+
+import glob
+
+from sentence_transformers import SentenceTransformer
+
+import faiss
+
+import numpy as np
+
+import warnings
+
+import re
+
+from typing import List, Dict, Any, Generator
+
+import fitz  # PyMuPDF
+
+from datetime import datetime, timedelta
+
+import random
+
+from dataclasses import dataclass
+
+import google.generativeai as genai
+
+import mailbox
+
+from email import policy
+
+from email.parser import BytesParser
+
+
+
+warnings.filterwarnings("ignore")
+
+st.set_page_config(
+
+    page_title="AI Support Assistant",
+
+    page_icon="🤖",
+
+    layout="wide",
+
+    initial_sidebar_state="expanded"
+
+)
+
+
+
+# --- Settings ---
+
+@dataclass
+
+class RAGConfig:
+
+    chunk_size: int = 500
+
+    top_k_retrieval: int = 5
+
+    similarity_threshold: float = 0.4
+
+
+
+if "settings" not in st.session_state:
+
+    st.session_state.settings = {"chunk_size": 500, "theme": "light"}
+
+
+
+config = RAGConfig(chunk_size=st.session_state.settings["chunk_size"])
+
+
+
+# --- Predictive Maintenance Integration (Simulation) ---
+
+class MaintenancePipeline:
+
+    def __init__(self):
+
+        self.maintenance_data = self._load_maintenance_data()
+
+
+
+    def _load_maintenance_data(self) -> Dict:
+
+        # Set random seed for consistent demo data
+
+        random.seed(42)
+
+        equipment_data = {}
+
+        equipment_types = ['HVAC', 'IT_EQUIPMENT', 'ELECTRICAL', 'FIRE_SAFETY']
+
+        for i in range(20):
+
+            eq_type = random.choice(equipment_types)
+
+            fail_prob = random.uniform(0.1, 0.9)
+
+            equipment_data[f"{eq_type}_{i+1}"] = {
+
+                'type': eq_type,
+
+                'location': f"Building A - Floor {random.randint(1,4)}",
+
+                'failure_probability': fail_prob,
+
+                'risk_level': 'HIGH' if fail_prob > 0.7 else 'MEDIUM' if fail_prob > 0.4 else 'LOW',
+
+                'next_maintenance': (datetime.now() + timedelta(days=random.randint(7, 90))).strftime('%Y-%m-%d'),
+
+                'maintenance_cost': random.randint(200, 5000)
+
+            }
+
+        return equipment_data
+
+
+
+    def get_equipment_by_risk(self, risk_level: str) -> List[Dict]:
+
+        return [{'id': eid, **edata} for eid, edata in self.maintenance_data.items() if edata['risk_level'] == risk_level.upper()]
+
+
+
+    def get_maintenance_schedule(self, days_ahead: int = 30) -> List[Dict]:
+
+        target_date = datetime.now() + timedelta(days=days_ahead)
+
+        items = [{'id': eid, **edata} for eid, edata in self.maintenance_data.items() if datetime.strptime(edata['next_maintenance'], '%Y-%m-%d') <= target_date]
+
+        return sorted(items, key=lambda x: x['next_maintenance'])
+
+
+
+# --- Tool 1: Data Analysis Tool ---
+
+def analyze_csv_data(query: str) -> str:
+
+    try:
+
+        jira_files = [f for f in glob.glob("*.csv") if "Closed tickets" in f or "jira" in f.lower() or "tickets" in f.lower()]
+
+        if not jira_files:
+
+            return "No Jira ticket CSV files found. Please ensure the CSV file contains 'Closed tickets' in the filename or upload a tickets CSV file."
+
+        
+
+        jira_file = jira_files[0]
+
+        df = pd.read_csv(jira_file)
+
+        
+
+        query_lower = query.lower()
+
+        
+
+        # Enhanced pattern matching for various query formats
+
+        patterns = [
+
+            r"count of (.+?) issues",
+
+            r"how many (.+?) issues",
+
+            r"(.+?) issue count",
+
+            r"related to a?n? '(.+?)' issue",
+
+            r"(.+?) tickets"
+
+        ]
+
+        
+
+        target_value = None
+
+        for pattern in patterns:
+
+            match = re.search(pattern, query_lower)
+
+            if match:
+
+                target_value = next(g for g in match.groups() if g is not None).strip()
+
+                break
+
+        
+
+        if not target_value:
+
+            return f"I found the CSV file '{os.path.basename(jira_file)}' but couldn't understand what to count. Try asking 'How many Device Faulty issues?' or 'Count of Network issues'."
+
+        
+
+        # Find the appropriate column for analysis
+
+        target_column = None
+
+        possible_columns = ['root cause analysis', 'rca', 'issue type', 'category', 'problem type', 'cause']
+
+        for col in df.columns:
+
+            if any(pc in col.lower() for pc in possible_columns):
+
+                target_column = col
+
+                break
+
+        
+
+        if not target_column:
+
+            available_cols = ", ".join(df.columns[:5])
+
+            return f"Could not find a suitable analysis column in the CSV. Available columns include: {available_cols}..."
+
+        
+
+        # Perform the search and count
+
+        matching_rows = df[df[target_column].str.contains(target_value, case=False, na=False)]
+
+        count = matching_rows.shape[0]
+
+        
+
+        if count > 0:
+
+            return f"Found **{count} tickets** related to **'{target_value}'** in the '{target_column}' column."
+
+        else:
+
+            return f"No tickets found related to **'{target_value}'** in the '{target_column}' column. The file contains {len(df)} total tickets."
+
+            
+
+    except Exception as e:
+
+        return f"An error occurred during CSV analysis: {str(e)}. Please ensure the CSV file is properly formatted."
+
+
+
+# --- Tool 2: Maintenance and RAG Tool ---
+
+def get_maintenance_context_with_actions(query: str, maintenance_pipeline: MaintenancePipeline, search_func=None, search_args=None) -> str:
+
+    query_lower = query.lower()
+
+    context_parts = []
+
+    
+
+    if any(kw in query_lower for kw in ['risk', 'failure', 'alert']):
+
+        high_risk = maintenance_pipeline.get_equipment_by_risk('HIGH')
+
+        if high_risk:
+
+            context_parts.append("### High-Risk Equipment Alerts:\n")
+
+            for eq in high_risk[:3]:
+
+                context_parts.append(f"- **ID:** `{eq['id']}` | **Location:** {eq['location']} | **Failure Probability:** {eq['failure_probability']:.1%}")
+
+                
+
+                # Only attempt to search for actions if search functionality is available
+
+                if search_func and search_args:
+
+                    action_query = f"troubleshooting procedure for {eq['type']}"
+
+                    action_results = search_func(action_query, **search_args)
+
+                    if action_results:
+
+                        action_text = action_results[0]['content'].strip().replace('\n', ' ')
+
+                        source = os.path.basename(action_results[0]['source'])
+
+                        context_parts.append(f"  - **▶️ Recommended Action:** Based on `{source}`: *\"{action_text[:200]}...\"*")
+
+                    else:
+
+                        context_parts.append("  - *No specific troubleshooting guide found in documents.*")
+
+                else:
+
+                    context_parts.append("  - *Document search not available for specific procedures.*")
+
+                    
+
+    elif any(kw in query_lower for kw in ['schedule', 'calendar', 'upcoming']):
+
+        schedule = maintenance_pipeline.get_maintenance_schedule(30)
+
+        if schedule:
+
+            context_parts.append("### Upcoming Maintenance (Next 30 Days):\n")
+
+            for item in schedule[:5]:
+
+                context_parts.append(f"- **{item['next_maintenance']}**: `{item['id']}` at {item['location']} (Cost: ${item['maintenance_cost']})")
+
+        else:
+
+            context_parts.append("### No maintenance scheduled for the next 30 days.")
+
+    
+
+    return "\n".join(context_parts)
+
+
+
+# --- LLM and Response Generation (Upgraded) ---
+
+try:
+
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+
+    GEMINI_MODEL = genai.GenerativeModel('gemini-1.5-flash')
+
+except Exception as e:
+
+    st.error(f"Error configuring Gemini API: {e}")
+
+    GEMINI_MODEL = None
+
+
+
+def summarize_history(history: List[Dict], max_tokens=300) -> str:
+
+    text = ""
+
+    for msg in history[-6:]:
+
+        text += f"{msg['role'].capitalize()}: {msg['content']}\n"
+
+    return text[-max_tokens:]
+
+
+
+def generate_response_stream(query: str, chat_history: List[Dict], context: str) -> Generator:
+
+    if not GEMINI_MODEL:
+
+        yield "The AI model is not configured. Please check your API key."
+
+        return
+
+    
+
+    history_prompt = summarize_history(chat_history)
+
+    # This prompt encourages markdown for better readability, taken from the previous version.
+
+    prompt = f"""You are an expert AI support assistant. Your goal is to provide clear, concise answers.
+
+Use the chat history for context but rely ONLY on the 'Context for your answer' to formulate your response. Cite sources if available.
+
+
+
+---
+
+**Chat History:**
+
+{history_prompt if history_prompt else "This is the start of the conversation."}
+
+---
+
+**Context for your answer:**
+
+{context if context else "No specific context was found for this query."}
+
+---
+
+**User's Question:** "{query}"
+
+---
+
+Based on all the information above, provide a direct and helpful answer. If the context is empty, explain what the user can ask about."""
+
+
+
+    try:
+
+        response_stream = GEMINI_MODEL.generate_content(prompt, stream=True)
+
+        for chunk in response_stream:
+
+            if chunk.text:  # Ensure chunk has text content
+
+                yield chunk.text
+
+    except Exception as e:
+
+        yield f"An error occurred while generating the response: {e}"
+
+
+
+# --- Document Processing and Search ---
+
+def clean_text(text: str) -> str:
+
+    return re.sub(r'\s+', ' ', text.strip())
+
+
+
+def smart_chunking(text: str, chunk_size: int) -> List[str]:
+
+    sentences = re.split(r'(?<=[.!?])\s+', text)
+
+    chunks, current_chunk = [], ""
+
+    for sentence in sentences:
+
+        if len(current_chunk) + len(sentence) < chunk_size:
+
+            current_chunk += sentence + " "
+
+        else:
+
+            if current_chunk: 
+
+                chunks.append(current_chunk.strip())
+
+            current_chunk = sentence + " "
+
+    if current_chunk: 
+
+        chunks.append(current_chunk.strip())
+
+    return [c for c in chunks if len(c) > 30]
+
+
+
+def extract_text_from_pdf(file_path: str) -> str:
+
+    try:
+
+        with fitz.open(file_path) as doc:
+
+            return "".join(page.get_text() for page in doc)
+
+    except Exception as e:
+
+        st.warning(f"Could not read {os.path.basename(file_path)} with PyMuPDF: {e}")
+
+        return ""
+
+
+
+def extract_text_from_email(msg) -> str:
+
+    if msg.is_multipart():
+
+        for part in msg.walk():
+
+            if part.get_content_type() == "text/plain" and "attachment" not in str(part.get("Content-Disposition")):
+
+                try: 
+
+                    return part.get_payload(decode=True).decode(part.get_content_charset() or 'utf-8')
+
+                except: 
+
+                    continue
+
+    elif msg.get_content_type() == "text/plain":
+
+        try: 
+
+            return msg.get_payload(decode=True).decode(msg.get_content_charset() or 'utf-8')
+
+        except: 
+
+            return ""
+
+    return ""
+
+
+
+def format_email_for_rag(msg) -> str:
+
+    body = extract_text_from_email(msg)
+
+    if not body: 
+
+        return ""
+
+    return f"--- Email ---\nFrom: {msg['From']}\nTo: {msg['To']}\nSubject: {msg['Subject']}\nDate: {msg['Date']}\n{body.strip()}\n--- End Email ---"
+
+
+
+@st.cache_resource
+
+def load_and_process_documents():
+
+    # Look in root and in 'uploads' directory
+
+    file_patterns = ["**/*.txt", "**/*.md", "**/*.csv", "**/*.pdf", "**/*.eml", "**/*.mbox"]
+
+    all_files = [f for pattern in file_patterns for f in glob.glob(pattern, recursive=True)]
+
+    docs, file_paths = [], []
+
+    
+
+    if not all_files:
+
+        st.info("No documents found. Upload some files to enable document search.")
+
+        return docs, file_paths
+
+    
+
+    progress_bar = st.progress(0, text="Loading documents...")
+
+    
+
+    for i, file_path in enumerate(all_files):
+
+        file_name = os.path.basename(file_path)
+
+        progress_bar.progress((i + 1) / len(all_files), text=f"Processing: {file_name}")
+
+        content = ""
+
+        
+
+        try:
+
+            if file_path.endswith('.pdf'): 
+
+                content = extract_text_from_pdf(file_path)
+
+            elif file_path.endswith('.eml'):
+
+                with open(file_path, 'rb') as f: 
+
+                    content = format_email_for_rag(BytesParser(policy=policy.default).parse(f))
+
+            elif file_path.endswith('.mbox'):
+
+                mbox_content = [format_email_for_rag(msg) for msg in mailbox.mbox(file_path)]
+
+                content = "\n\n".join(filter(None, mbox_content))
+
+            else:
+
+                try:
+
+                    with open(file_path, 'r', encoding='utf-8') as f: 
+
+                        content = f.read()
+
+                except:
+
+                    with open(file_path, 'r', encoding='latin-1') as f: 
+
+                        content = f.read()
+
+                        
+
+            if content and len(content.strip()) > 50:
+
+                docs.append(clean_text(content))
+
+                file_paths.append(file_path)
+
+        except Exception as e:
+
+            st.warning(f"Could not process {file_name}: {e}")
+
+            continue
+
+    
+
+    progress_bar.empty()
+
+    if docs: 
+
+        st.success(f"Successfully loaded and processed {len(docs)} documents!")
+
+    return docs, file_paths
+
+
+
+@st.cache_resource
+
+def create_search_index(_documents, _file_paths):
+
+    if not _documents:
+
+        return None, None, [], []
+
+        
+
+    model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+
+    all_chunks, chunk_metadata = [], []
+
+    
+
+    for i, doc in enumerate(_documents):
+
+        chunks = smart_chunking(doc, config.chunk_size)
+
+        all_chunks.extend(chunks)
+
+        chunk_metadata.extend([{'path': _file_paths[i]}] * len(chunks))
+
+    
+
+    if not all_chunks: 
+
+        return None, None, [], []
+
+    
+
+    with st.spinner("Embedding documents for semantic search..."):
+
+        embeddings = model.encode(all_chunks, show_progress_bar=True, normalize_embeddings=True)
+
+    
+
+    index = faiss.IndexFlatIP(embeddings.shape[1])
+
+    index.add(embeddings.astype('float32'))
+
+    st.success(f"✅ Search index created with {len(all_chunks)} text chunks.")
+
+    return index, model, all_chunks, chunk_metadata
+
+
+
+def search_documents(query: str, index, model, chunks: List[str], metadata: List[Dict]) -> List[Dict]:
+
+    if not query or index is None: 
+
+        return []
+
+    
+
+    query_embedding = model.encode([query], normalize_embeddings=True)
+
+    scores, indices = index.search(query_embedding.astype('float32'), config.top_k_retrieval)
+
+    results = []
+
+    
+
+    for i, idx in enumerate(indices[0]):
+
+        if idx != -1 and scores[0][i] > config.similarity_threshold:
+
+             results.append({
+
+                 'content': chunks[idx], 
+
+                 'source': metadata[idx]['path'], 
+
+                 'similarity': scores[0][i]
+
+             })
+
+    
+
+    return sorted(results, key=lambda x: x['similarity'], reverse=True)
+
+
+
+# --- Intent Classification ---
+
+def classify_intent(prompt):
+
+    prompt = prompt.lower()
+
+    if any(kw in prompt for kw in ["how many", "count", "total tickets", "tickets", "jira"]):
+
+        return "csv"
+
+    if any(kw in prompt for kw in ['risk', 'failure', 'alert', 'schedule', 'calendar', 'upcoming', 'maintenance']):
+
+        return "maintenance"
+
+    return "search"
+
+
+
+# --- Initialization ---
+
+try:
+
+    maintenance_pipeline = MaintenancePipeline()
+
+    docs, paths = load_and_process_documents()
+
+    if docs:
+
+        search_index, model, all_chunks, chunk_meta = create_search_index(docs, paths)
+
+        search_args = {'index': search_index, 'model': model, 'chunks': all_chunks, 'metadata': chunk_meta}
+
+    else:
+
+        search_index, model, all_chunks, chunk_meta, search_args = None, None, [], [], {}
+
+        if not docs:
+
+            st.info("📁 No documents found. Document search will be limited until you upload files.")
+
+except Exception as e:
+
+    st.error(f"An error occurred during initialization: {e}")
+
+    search_index, search_args = None, {}
+
+
+
+if "messages" not in st.session_state:
+
+    st.session_state.messages = [{"role": "assistant", "content": "Hi! How can I help you today?", "timestamp": datetime.now().strftime("%H:%M")}]
+
+
+
+
+
+# --- Sidebar: Quick Actions, Upload, Settings ---
+
+with st.sidebar:
+
+    st.title("🤖 AI Support Assistant")
+
+    st.markdown("**Quick Actions:**")
+
+
+
+    # Handler function for quick actions
+
+    def handle_quick_action(action_type: str):
+
+        if action_type == "alerts":
+
+            prompt = "Show high-risk equipment alerts"
+
+        else:
+
+            prompt = "Show upcoming maintenance schedule"
+
+            
+
+        now = datetime.now().strftime("%H:%M")
+
+        # Add user message
+
+        st.session_state.messages.append({
+
+            "role": "user",
+
+            "content": prompt,
+
+            "timestamp": now
+
+        })
+
+        
+
+        # Generate AI response context
+
+        context = get_maintenance_context_with_actions(
+
+            prompt, 
+
+            maintenance_pipeline,
+
+            search_documents if search_args else None,
+
+            search_args if search_args else None
+
+        )
+
+            
+
+        # Generate and add AI response
+
+        response_stream = generate_response_stream(prompt, st.session_state.messages, context)
+
+        full_response = "".join([chunk for chunk in response_stream])
+
+        st.session_state.messages.append({
+
+            "role": "assistant",
+
+            "content": full_response,
+
+            "timestamp": now
+
+        })
+
+        # Force a rerun to show the new messages
+
+        st.rerun()
+
+
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        if st.button("📊 Risk Alerts", key="risk_btn", help="Show equipment with the highest failure probability."):
+
+            handle_quick_action("alerts")
+
+    with col2:
+
+        if st.button("📅 Maintenance", key="maint_btn", help="Show the upcoming maintenance schedule."):
+
+            handle_quick_action("maintenance")
+
+
+
+    # System status
+
+    st.markdown("---")
+
+    st.markdown("**System Status:**")
+
+    high_risk_count = len(maintenance_pipeline.get_equipment_by_risk('HIGH'))
+
+    upcoming_count = len(maintenance_pipeline.get_maintenance_schedule(7))
+
+    st.write(f"🚨 {high_risk_count} high risk items")
+
+    st.write(f"📅 {upcoming_count} tasks due this week")
+
+    
+
+    # File upload
+
+    st.markdown("---")
+
+    st.info("Upload new documents below:")
+
+    uploaded_files = st.file_uploader("Add files", accept_multiple_files=True, 
+
+                                      type=['txt', 'md', 'csv', 'pdf', 'eml', 'mbox'])
+
+    if uploaded_files:
+
+        upload_dir = "uploads"
+
+        os.makedirs(upload_dir, exist_ok=True)
+
+        for uploaded_file in uploaded_files:
+
+            file_path = os.path.join(upload_dir, uploaded_file.name)
+
+            with open(file_path, "wb") as f:
+
+                f.write(uploaded_file.getbuffer())
+
+        st.success(f"✅ {len(uploaded_files)} files uploaded!")
+
+        if st.button("🔄 Reload App", help="Reload to re-index uploaded documents"):
+
+            st.rerun()
+
+    
+
+    # Settings
+
+    st.markdown("---")
+
+    st.markdown("**Settings:**")
+
+    chunk_size = st.slider("Chunk size for document splitting", 200, 1000, 
+
+                           st.session_state.settings["chunk_size"], 100)
+
+    st.session_state.settings["chunk_size"] = chunk_size
+
+    
+
+    theme = st.radio("Theme", ["light", "dark"], 
+
+                     index=0 if st.session_state.settings["theme"]=="light" else 1)
+
+    st.session_state.settings["theme"] = theme
+
+
+
+# --- Improved Chat Bubble with timestamps ---
+
+def chat_bubble(content, is_user=False, timestamp=None):
+
+    theme = st.session_state.settings.get("theme", "light")
+
+    if theme == "dark":
+
+        user_color = "#3A6351"
+
+        assistant_color = "#222831"
+
+        text_color = "#fff"
+
+        border = "1px solid #393E46"
+
+    else:
+
+        user_color = "#DCF8C6"
+
+        assistant_color = "#F1F0F0"
+
+        text_color = "#222"
+
+        border = "1px solid #ddd"
+
+    
+
+    color = user_color if is_user else assistant_color
+
+    avatar_url = (
+
+        "https://cdn-icons-png.flaticon.com/512/1946/1946429.png" if is_user
+
+        else "https://cdn-icons-png.flaticon.com/512/4712/4712035.png"
+
+    )
+
+    name = "You" if is_user else "AI Assistant"
+
+    if not timestamp:
+
+        timestamp = datetime.now().strftime("%H:%M")
+
+    
+
+    # Sanitize content for HTML display
+
+    content = content.replace("<", "&lt;").replace(">", "&gt;")
+
+
+
+    st.markdown(
+
+        f"""
+
+        <div style='display:flex;flex-direction:{"row-reverse" if is_user else "row"};align-items:flex-end;margin:12px 0;'>
+
+            <img src="{avatar_url}" width="36" height="36" style="border-radius:50%;margin:0 8px;flex-shrink:0;">
+
+            <div style='background-color:{color};
+
+                        color:{text_color};
+
+                        padding:14px 16px;
+
+                        border-radius:12px;
+
+                        max-width:70%;
+
+                        min-width:80px;
+
+                        border:{border};
+
+                        box-shadow:0 2px 8px rgba(0,0,0,0.07);
+
+                        position:relative;'>
+
+                <div style='font-size:13px;font-weight:bold;opacity:0.7;margin-bottom:6px;'>{name}</div>
+
+                <div style='font-size:16px;line-height:1.4;'>{content}</div>
+
+                <div style='font-size:11px;opacity:0.5;text-align:right;margin-top:8px;'>{timestamp}</div>
+
+            </div>
+
+        </div>
+
+        """, unsafe_allow_html=True
+
+    )
+
+
+
+# --- Chat History Display ---
+
+for message in st.session_state.messages:
+
+    chat_bubble(
+
+        message["content"],
+
+        is_user=(message["role"] == "user"),
+
+        timestamp=message.get("timestamp")
+
+    )
+
+
+
+# --- Chat Input and Tool Routing ---
+
+if prompt := st.chat_input("Ask a question..."):
+
+    now = datetime.now().strftime("%H:%M")
+
+    # Add user message and display immediately
+
+    st.session_state.messages.append({"role": "user", "content": prompt, "timestamp": now})
+
+    chat_bubble(prompt, is_user=True, timestamp=now)
+
+    
+
+    with st.spinner("Thinking..."):
+
+        intent = classify_intent(prompt)
+
+        context = ""
+
+        
+
+        if intent == "csv":
+
+            context = analyze_csv_data(prompt)
+
+        elif intent == "maintenance":
+
+            context = get_maintenance_context_with_actions(
+
+                prompt, 
+
+                maintenance_pipeline, 
+
+                search_documents if search_args else None, 
+
+                search_args if search_args else None
+
+            )
+
+        else:  # "search" intent
+
+            if search_args:
+
+                search_results = search_documents(prompt, **search_args)
+
+                if search_results:
+
+                    context += "### Relevant Information from Documents:\n"
+
+                    for result in search_results[:3]:
+
+                        source = os.path.basename(result['source'])
+
+                        content_preview = result['content'].strip().replace('\n', ' ')
+
+                        context += f"- **From `{source}`**: \"{content_preview[:300]}...\"\n"
+
+                    context += "\n*Citations provided above.*"
+
+                else:
+
+                    context = "No relevant documents found for your query."
+
+            else:
+
+                context = "Document search is not available. Please upload documents to enable this feature."
+
+        
+
+        # Generate fallback context if nothing found
+
+        if not context.strip():
+
+            high_risk_count = len(maintenance_pipeline.get_equipment_by_risk('HIGH'))
+
+            upcoming_maintenance = len(maintenance_pipeline.get_maintenance_schedule(7))
+
+            context = f"""I couldn't find specific information for that query.
+
+
+
+**What you can ask about:**
+
+- Document contents (upload files first)
+
+- Maintenance alerts and schedules
+
+- Ticket counts from CSV files (e.g., "How many Device Faulty issues?")
+
+
+
+**Current System Status:** 🚨 {high_risk_count} high risk equipment items  
+
+📅 {upcoming_maintenance} maintenance tasks due this week"""
+
+
+
+        # Check if we should render interactive content instead of regular AI response
+
+        # NOTE: This is a placeholder for future interactive UI elements
+
+        if context and ("INTERACTIVE_ALERTS" in context or "INTERACTIVE_SCHEDULE" in context):
+
+            # Render interactive content directly
+
+            # render_interactive_content(context) # This function would be defined elsewhere
+
+            
+
+            # Add a simple message to chat history
+
+            if "INTERACTIVE_ALERTS" in context:
+
+                summary_msg = "Displayed interactive high-risk equipment alerts with action buttons."
+
+            else:
+
+                summary_msg = "Displayed interactive maintenance schedule with management options."
+
+                
+
+            st.session_state.messages.append({"role": "assistant", "content": summary_msg, "timestamp": now})
+
+        else:
+
+            # Regular AI response generation
+
+            response_placeholder = st.empty()
+
+            full_response = ""
+
+            
+
+            try:
+
+                response_stream = generate_response_stream(prompt, st.session_state.messages, context)
+
+                for chunk in response_stream:
+
+                    full_response += chunk
+
+                    with response_placeholder.container():
+
+                        chat_bubble(full_response + " ▌", is_user=False, timestamp=now)
+
+                
+
+                # Final update to remove cursor
+
+                with response_placeholder.container():
+
+                    chat_bubble(full_response, is_user=False, timestamp=now)
+
+                    
+
+            except Exception as e:
+
+                full_response = f"I apologize, but I encountered an error: {str(e)}"
+
+                with response_placeholder.container():
+
+                    chat_bubble(full_response, is_user=False, timestamp=now)
+
+            
+
+            # Add to chat history
+
+            st.session_state.messages.append({"role": "assistant", "content": full_response, "timestamp": now})
+
+
+
+# --- Footer ---
+
+st.markdown("---")
+
+st.markdown("*AI Support Assistant - Powered by Streamlit & Gemini*")
+
