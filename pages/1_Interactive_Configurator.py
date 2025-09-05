@@ -4,97 +4,559 @@ import numpy as np
 import plotly.graph_objects as go
 from typing import Dict, List, Any
 
-# --- Initialize Session State ---
-if 'session_state' not in st.session_state:
-    st.session_state.session_state = {
-        'form_values': {},
-        'camera_position': None,
-        'active_features': set(['table_space', 'budget_tracking', 'camera_angles']),
-        'selections': {},
-        'last_recommendations': None,
-        'table_config': None
-    }
+# --- PAGE CONFIGURATION ---
+st.set_page_config(page_title="AI Room Configurator Pro Max", page_icon="🏢", layout="wide")
 
-# --- Helper Functions ---
-def persist_form_value(key, value):
-    """Helper function to persist form values"""
-    if 'form_values' not in st.session_state.session_state:
-        st.session_state.session_state['form_values'] = {}
-    st.session_state.session_state['form_values'][key] = value
-    return value
-
-def get_camera_position(room_specs):
-    """Get persisted camera position or a default scaled to the room size"""
-    # This function is kept dynamic to provide a good initial view.
-    # User interactions will then be persisted by Plotly's uirevision feature.
-    return {
-        'eye': {'x': -1.5 * room_specs['length'], 'y': -1.5 * room_specs['width'], 'z': 1.2 * room_specs['ceiling_height']},
-        'center': {'x': 0.5 * room_specs['length'], 'y': 0.5 * room_specs['width'], 'z': 0.3 * room_specs['ceiling_height']},
-        'up': {'x': 0, 'y': 0, 'z': 1}
-    }
-
-def validate_form_inputs(room_specs, selections):
-    """Validate all form inputs"""
-    errors = []
-    warnings = []
+# --- IMPROVED AND CONSISTENT CSS STYLING ---
+st.markdown("""
+<style>
+    /* ... (CSS code remains the same as provided) ... */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
-    # Room dimension validations (using a safe default of 1.5)
-    min_area_per_person = 1.5
-    if (room_specs['width'] * room_specs['length']) < (room_specs['capacity'] * min_area_per_person):
-        errors.append(f"Room size is too small for the specified capacity. A minimum of {room_specs['capacity'] * min_area_per_person:.1f}m² is recommended.")
-
-    # Aspect Ratio validation
-    if room_specs['width'] > 0:
-        aspect_ratio = room_specs['length'] / room_specs['width']
-        if aspect_ratio > 3 or aspect_ratio < 0.33:
-            warnings.append("Room's aspect ratio may be challenging for AV equipment placement and viewing angles.")
-            
-    # Budget validations
-    if selections.get('budget_tier') == 'Budget' and \
-       len(selections.get('special_features', [])) > 2:
-        warnings.append("Multiple special features selected for a 'Budget' tier may compromise core component quality.")
+    :root {
+        /* Primary Brand Colors */
+        --primary-blue: #2563eb;
+        --primary-blue-hover: #1d4ed8;
+        --primary-blue-light: #3b82f6;
+        --primary-blue-dark: #1e40af;
         
-    return errors, warnings
+        /* Secondary Colors */
+        --success-green: #10b981;
+        --success-green-light: #22c55e;
+        --warning-orange: #f59e0b;
+        --error-red: #ef4444;
+        --info-cyan: #06b6d4;
+        
+        /* Neutral Colors */
+        --white: #ffffff;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-400: #9ca3af;
+        --gray-500: #6b7280;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-800: #1f2937;
+        --gray-900: #111827;
+        
+        /* Background Colors */
+        --background-primary: var(--gray-50);
+        --background-secondary: var(--white);
+        --background-dark: var(--gray-800);
+        --background-sidebar: var(--gray-900);
+        
+        /* Text Colors */
+        --text-primary: var(--gray-900);
+        --text-secondary: var(--gray-600);
+        --text-light: var(--gray-400);
+        --text-white: var(--white);
+        --text-white-secondary: rgba(255,255,255,0.9);
+        
+        /* Component Colors */
+        --card-background: var(--white);
+        --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+        --card-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
+        --border-color: var(--gray-200);
+        --border-color-focus: var(--primary-blue);
+        
+        /* Radius and Spacing */
+        --radius-sm: 6px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 24px;
+        
+        /* Specific Component Colors */
+        --metric-bg: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+        --premium-card-bg: var(--background-dark);
+        --feature-card-accent: var(--primary-blue);
+        --comparison-card-border: var(--gray-300);
+        --alert-success-bg: var(--success-green);
+    }
 
-def create_feature_controls():
-    """Create and manage feature controls"""
-    features = {
-        'table_space': {
-            'label': 'Table Space Calculator',
-            'description': 'Calculate and display optimal table dimensions in the analysis tab.'
-        },
-        'budget_tracking': {
-            'label': 'Budget Tracking',
-            'description': 'Enable real-time budget validation against selected tier limits.'
-        },
-        'camera_angles': {
-            'label': 'Camera Angle Lock',
-            'description': 'Lock the 3D view camera position between interactions.'
+    /* Base App Styling */
+    .stApp {
+        background-color: var(--background-primary) !important;
+        font-family: 'Inter', sans-serif !important;
+        color: var(--text-primary) !important;
+    }
+
+    /* Main Content Area */
+    .main .block-container {
+        padding: 2rem 1rem !important;
+        max-width: 1200px !important;
+    }
+
+    /* Content Cards */
+    .main > div > div {
+        background: var(--card-background) !important;
+        border-radius: var(--radius-lg) !important;
+        padding: 2rem !important;
+        margin: 1rem 0 !important;
+        box-shadow: var(--card-shadow) !important;
+        border: 1px solid var(--border-color) !important;
+        transition: box-shadow 0.2s ease !important;
+    }
+
+    .main > div > div:hover {
+        box-shadow: var(--card-shadow-hover) !important;
+    }
+
+    /* Typography Hierarchy */
+    .main h1 {
+        color: var(--text-primary) !important;
+        font-weight: 700 !important;
+        font-size: 2.5rem !important;
+        margin-bottom: 1rem !important;
+        letter-spacing: -0.025em !important;
+        line-height: 1.2 !important;
+    }
+
+    .main h2 {
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
+        font-size: 2rem !important;
+        margin: 1.5rem 0 1rem 0 !important;
+        letter-spacing: -0.015em !important;
+        line-height: 1.25 !important;
+    }
+
+    .main h3 {
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
+        font-size: 1.5rem !important;
+        margin: 1.25rem 0 0.75rem 0 !important;
+        line-height: 1.3 !important;
+    }
+
+    .main h4, .main h5, .main h6 {
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
+        margin: 1rem 0 0.5rem 0 !important;
+        line-height: 1.4 !important;
+    }
+
+    /* Body Text */
+    .main p, .main div[data-testid="stMarkdownContainer"] p {
+        color: var(--text-secondary) !important;
+        font-size: 16px !important;
+        font-weight: 400 !important;
+        line-height: 1.6 !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .main li {
+        color: var(--text-secondary) !important;
+        font-size: 16px !important;
+        font-weight: 400 !important;
+        line-height: 1.6 !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* Labels and Form Elements */
+    .main label, .main .stSelectbox label, .main .stTextInput label, 
+    .main .stSlider label, .main .stCheckbox label {
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* Tabs Styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px !important;
+        background: var(--background-dark) !important;
+        padding: 8px !important;
+        border-radius: var(--radius-md) !important;
+        margin-bottom: 1.5rem !important;
+        border: none !important;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        background: rgba(255,255,255,0.1) !important;
+        border-radius: var(--radius-sm) !important;
+        color: var(--text-white-secondary) !important;
+        font-weight: 500 !important;
+        padding: 12px 20px !important;
+        transition: all 0.2s ease !important;
+        font-size: 14px !important;
+        border: none !important;
+        cursor: pointer !important;
+    }
+
+    .stTabs [data-baseweb="tab"]:hover {
+        background: rgba(255,255,255,0.2) !important;
+        color: var(--text-white) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background: var(--primary-blue) !important;
+        color: var(--text-white) !important;
+        box-shadow: 0 4px 12px rgba(37,99,235,0.3) !important;
+        font-weight: 600 !important;
+    }
+
+    /* Tab Content */
+    .stTabs > div > div > div > div {
+        background: transparent !important;
+        padding: 0 !important;
+    }
+
+    /* Metric Cards */
+    div[data-testid="metric-container"] {
+        background: var(--metric-bg) !important;
+        padding: 1.5rem !important;
+        border-radius: var(--radius-md) !important;
+        box-shadow: 0 8px 25px rgba(37,99,235,0.15) !important;
+        border: none !important;
+        margin: 0.75rem 0 !important;
+        transition: transform 0.2s ease !important;
+    }
+
+    div[data-testid="metric-container"]:hover {
+        transform: translateY(-2px) !important;
+    }
+
+    div[data-testid="metric-container"] > div {
+        color: var(--text-white) !important;
+    }
+
+    div[data-testid="metric-container"] label {
+        color: var(--text-white-secondary) !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    div[data-testid="metric-container"] [data-testid="metric-value"] {
+        color: var(--text-white) !important;
+        font-size: 2rem !important;
+        font-weight: 700 !important;
+    }
+
+    /* Custom CSS Classes */
+    .premium-card {
+        background: var(--premium-card-bg) !important;
+        padding: 2rem !important;
+        border-radius: var(--radius-lg) !important;
+        color: var(--text-white) !important;
+        margin: 1rem 0 !important;
+        box-shadow: 0 12px 32px rgba(0,0,0,0.15) !important;
+        border: 1px solid var(--gray-700) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    }
+
+    .premium-card:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 16px 40px rgba(0,0,0,0.2) !important;
+    }
+
+    .premium-card h1, .premium-card h2, .premium-card h3, 
+    .premium-card h4, .premium-card h5, .premium-card h6 {
+        color: var(--text-white) !important;
+    }
+
+    .premium-card p, .premium-card div, .premium-card span, .premium-card li {
+        color: var(--text-white-secondary) !important;
+    }
+
+    .feature-card {
+        background: var(--card-background) !important;
+        padding: 1.5rem !important;
+        border-radius: var(--radius-md) !important;
+        margin: 1rem 0 !important;
+        border-left: 4px solid var(--feature-card-accent) !important;
+        box-shadow: var(--card-shadow) !important;
+        color: var(--text-primary) !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .feature-card:hover {
+        box-shadow: var(--card-shadow-hover) !important;
+        transform: translateY(-1px) !important;
+        border-left-color: var(--primary-blue-dark) !important;
+    }
+
+    .feature-card h3, .feature-card h4 {
+        color: var(--text-primary) !important;
+        margin-top: 0 !important;
+    }
+
+    .feature-card p, .feature-card span, .feature-card div {
+        color: var(--text-secondary) !important;
+    }
+
+    .feature-card strong {
+        color: var(--text-primary) !important;
+    }
+
+    .comparison-card {
+        background: var(--card-background) !important;
+        padding: 1.5rem !important;
+        border-radius: var(--radius-md) !important;
+        margin: 1rem 0 !important;
+        border: 2px solid var(--comparison-card-border) !important;
+        transition: all 0.2s ease !important;
+        box-shadow: var(--card-shadow) !important;
+    }
+
+    .comparison-card:hover {
+        border-color: var(--primary-blue) !important;
+        box-shadow: var(--card-shadow-hover) !important;
+        transform: translateY(-2px) !important;
+    }
+
+    .comparison-card h3, .comparison-card h4 {
+        color: var(--text-primary) !important;
+        margin-top: 0 !important;
+    }
+
+    .comparison-card p, .comparison-card span, .comparison-card div {
+        color: var(--text-secondary) !important;
+    }
+
+    .comparison-card strong {
+        color: var(--text-primary) !important;
+    }
+
+    .alert-success {
+        background: var(--alert-success-bg) !important;
+        color: var(--text-white) !important;
+        padding: 1rem 1.5rem !important;
+        border-radius: var(--radius-md) !important;
+        margin: 1rem 0 !important;
+        font-weight: 500 !important;
+        box-shadow: 0 4px 16px rgba(16,185,129,0.15) !important;
+        border: none !important;
+    }
+
+    .alert-success h1, .alert-success h2, .alert-success h3,
+    .alert-success h4, .alert-success h5, .alert-success h6,
+    .alert-success p, .alert-success div, .alert-success span {
+        color: var(--text-white) !important;
+    }
+
+    /* Buttons */
+    .stButton > button {
+        background: var(--metric-bg) !important;
+        color: var(--text-white) !important;
+        border: none !important;
+        padding: 0.75rem 2rem !important;
+        border-radius: var(--radius-xl) !important;
+        font-weight: 600 !important;
+        font-size: 16px !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 12px rgba(37,99,235,0.2) !important;
+        cursor: pointer !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    .stButton > button:hover {
+        background: linear-gradient(135deg, var(--primary-blue-hover) 0%, var(--primary-blue) 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 24px rgba(37,99,235,0.3) !important;
+    }
+
+    .stButton > button:focus {
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(37,99,235,0.2) !important;
+    }
+
+    /* Sidebar */
+    .css-1d391kg, [data-testid="stSidebar"] {
+        background: var(--background-sidebar) !important;
+        border-right: 1px solid var(--gray-700) !important;
+    }
+
+    .css-1d391kg .stMarkdown, [data-testid="stSidebar"] .stMarkdown {
+        color: var(--text-white) !important;
+    }
+
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, 
+    [data-testid="stSidebar"] h3, [data-testid="stSidebar"] h4 {
+        color: var(--text-white) !important;
+    }
+
+    [data-testid="stSidebar"] p, [data-testid="stSidebar"] div {
+        color: var(--text-white-secondary) !important;
+    }
+
+    [data-testid="stSidebar"] label {
+        color: var(--text-white) !important;
+        font-weight: 600 !important;
+    }
+
+    /* Input Fields */
+    .stTextInput input, .stTextArea textarea, .stSelectbox select {
+        background: var(--card-background) !important;
+        border: 2px solid var(--border-color) !important;
+        border-radius: var(--radius-sm) !important;
+        color: var(--text-primary) !important;
+        font-size: 16px !important;
+        padding: 0.75rem !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    }
+
+    .stTextInput input:focus, .stTextArea textarea:focus, .stSelectbox select:focus {
+        border-color: var(--border-color-focus) !important;
+        box-shadow: 0 0 0 3px rgba(37,99,235,0.1) !important;
+        outline: none !important;
+    }
+
+    /* Sliders */
+    .stSlider > div > div > div > div {
+        color: var(--primary-blue) !important;
+    }
+
+    /* Checkboxes and Radio buttons */
+    .stCheckbox > label > div {
+        background-color: var(--card-background) !important;
+        border-color: var(--border-color) !important;
+    }
+
+    .stCheckbox > label > div[data-checked="true"] {
+        background-color: var(--primary-blue) !important;
+        border-color: var(--primary-blue) !important;
+    }
+
+    /* DataFrames and Tables */
+    .stDataFrame {
+        border-radius: var(--radius-md) !important;
+        overflow: hidden !important;
+        box-shadow: var(--card-shadow) !important;
+        border: 1px solid var(--border-color) !important;
+    }
+
+    .stDataFrame table {
+        color: var(--text-primary) !important;
+    }
+
+    .stDataFrame th {
+        background-color: var(--gray-100) !important;
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
+    }
+
+    .stDataFrame td {
+        color: var(--text-secondary) !important;
+    }
+
+    /* Charts */
+    .stPlotlyChart {
+        background: var(--card-background) !important;
+        border-radius: var(--radius-md) !important;
+        padding: 1rem !important;
+        box-shadow: var(--card-shadow) !important;
+        border: 1px solid var(--border-color) !important;
+    }
+
+    /* Expander */
+    .streamlit-expanderHeader {
+        background-color: var(--gray-100) !important;
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
+        border-radius: var(--radius-sm) !important;
+        border: 1px solid var(--border-color) !important;
+    }
+
+    .streamlit-expanderContent {
+        background: var(--card-background) !important;
+        border-radius: var(--radius-sm) !important;
+        border: 1px solid var(--border-color) !important;
+        border-top: none !important;
+    }
+
+    /* Progress Bar */
+    .stProgress > div > div {
+        background: var(--primary-blue) !important;
+        border-radius: var(--radius-sm) !important;
+    }
+
+    .stProgress > div {
+        background-color: var(--gray-200) !important;
+        border-radius: var(--radius-sm) !important;
+    }
+
+    /* Success/Info/Warning/Error messages */
+    .stSuccess {
+        background-color: var(--success-green) !important;
+        color: var(--text-white) !important;
+        border-radius: var(--radius-md) !important;
+        border: none !important;
+    }
+
+    .stInfo {
+        background-color: var(--info-cyan) !important;
+        color: var(--text-white) !important;
+        border-radius: var(--radius-md) !important;
+        border: none !important;
+    }
+
+    .stWarning {
+        background-color: var(--warning-orange) !important;
+        color: var(--text-white) !important;
+        border-radius: var(--radius-md) !important;
+        border: none !important;
+    }
+
+    .stError {
+        background-color: var(--error-red) !important;
+        color: var(--text-white) !important;
+        border-radius: var(--radius-md) !important;
+        border: none !important;
+    }
+
+    /* File uploader */
+    .stFileUploader {
+        background: var(--card-background) !important;
+        border: 2px dashed var(--border-color) !important;
+        border-radius: var(--radius-md) !important;
+        padding: 2rem !important;
+        transition: border-color 0.2s ease !important;
+    }
+
+    .stFileUploader:hover {
+        border-color: var(--primary-blue) !important;
+    }
+
+    /* Column containers */
+    .main [data-testid="column"] > div {
+        background: transparent !important;
+        padding: 0.5rem !important;
+    }
+
+    /* Ensure proper visibility and contrast */
+    .main * {
+        visibility: visible !important;
+    }
+
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+        :root {
+            --border-color: var(--gray-400);
+            --text-secondary: var(--gray-700);
         }
     }
 
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### 🎯 Feature Controls")
-    
-    active_features = st.session_state.session_state.get('active_features', set())
-    
-    for feature_id, feature in features.items():
-        is_active = st.sidebar.checkbox(
-            f"{feature['label']}",
-            value=feature_id in active_features,
-            help=feature['description'],
-            key=f"feature_{feature_id}"
-        )
-        
-        if is_active:
-            active_features.add(feature_id)
-        else:
-            active_features.discard(feature_id)
-    
-    st.session_state.session_state['active_features'] = active_features
+    /* Dark mode support (for future enhancement) */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --background-primary: var(--gray-900);
+            --background-secondary: var(--gray-800);
+            --card-background: var(--gray-800);
+            --text-primary: var(--white);
+            --text-secondary: var(--gray-300);
+            --border-color: var(--gray-600);
+        }
+    }
+</style>
+""", unsafe_allow_html=True)
 
 
-# --- Data and Logic Classes (Keep as they are) ---
+# --- Comprehensive Product Database ---
 class EnhancedProductDatabase:
     def __init__(self):
         self.products = {
@@ -212,6 +674,7 @@ class EnhancedProductDatabase:
             }
         }
 
+# --- Budget Management ---
 class BudgetManager:
     def __init__(self, budget_tier):
         self.tier_limits = {
@@ -226,12 +689,13 @@ class BudgetManager:
         new_total = self.running_total + item_cost
         tier_limit = self.tier_limits[self.current_tier]['max']
         
-        if 'budget_tracking' in st.session_state.session_state['active_features'] and new_total > tier_limit:
+        if new_total > tier_limit:
             return False, f"Budget exceeded for {self.current_tier} tier (${tier_limit:,})"
         
         self.running_total = new_total
         return True, None
 
+# --- Recommendation Logic ---
 class MaximizedAVRecommender:
     def __init__(self):
         self.db = EnhancedProductDatabase()
@@ -595,6 +1059,7 @@ class MaximizedAVRecommender:
         base_costs = {'Budget': 15000, 'Professional': 45000, 'Premium': 120000}
         return int(base_costs[tier] * (1 + (specs['capacity'] / 50)))
 
+# --- Visualization Engine ---
 class EnhancedVisualizationEngine:
     def calculate_table_requirements(self, room_specs):
         capacity = room_specs['capacity']
@@ -670,7 +1135,7 @@ class EnhancedVisualizationEngine:
         ))
         
         # Conference Table
-        table_config = st.session_state.session_state.get('table_config')
+        table_config = st.session_state.app_state.get('table_config')
         if table_config:
             table_length = table_config['length']
             table_width = table_config['width']
@@ -740,7 +1205,11 @@ class EnhancedVisualizationEngine:
             name='Touch Control Panel', hovertemplate='<b>Control Panel</b><br>Wall-mounted Touch Interface<extra></extra>'
         ))
 
-        camera_position = get_camera_position(room_specs)
+        default_camera = dict(
+            eye=dict(x=-1.5*room_specs['length'], y=-1.5*room_specs['width'], z=1.2*room_specs['ceiling_height']),
+            center=dict(x=room_specs['length']/2, y=room_specs['width']/2, z=room_specs['ceiling_height']/3),
+            up=dict(x=0, y=0, z=1)
+        )
         
         fig.update_layout(
             title=dict(text="Professional Conference Room - 3D Layout", x=0.5, font=dict(size=16, color='#2c3e50')),
@@ -757,12 +1226,12 @@ class EnhancedVisualizationEngine:
                 bgcolor='rgba(255, 255, 255, 0.9)',
                 bordercolor='rgba(0, 0, 0, 0.1)',
                 borderwidth=1,
-                font=dict(size=11, color='black')
+                font=dict(size=11, color='black') # MODIFIED FOR VISIBILITY
             ),
             margin=dict(l=0, r=120, t=50, b=0),
             paper_bgcolor='rgb(255, 255, 255)', plot_bgcolor='rgb(255, 255, 255)',
-            scene_camera=camera_position,
-            uirevision='camera_lock' if 'camera_angles' in st.session_state.session_state['active_features'] else None
+            scene_camera=default_camera,
+            uirevision='True'
         )
 
         return fig
@@ -822,17 +1291,18 @@ class EnhancedVisualizationEngine:
             dict(x=length*0.8, y=width*0.5, text="Audio Coverage", showarrow=False, font=dict(color="blue", size=10))
         ]
         
+        # --- MODIFIED: Enhanced for better visibility and interaction ---
         fig.update_layout(
             title=dict(text="Enhanced Floor Plan with Equipment Layout", y=0.95, x=0.5, xanchor='center'),
             xaxis=dict(title="Length (m)", range=[-1, length+1], scaleanchor="y", scaleratio=1, showspikes=False),
             yaxis=dict(title="Width (m)", range=[-1, width+1], showspikes=False),
-            height=750,
+            height=750,  # Increased height
             showlegend=False,
             annotations=annotations,
             plot_bgcolor='white',
             paper_bgcolor='white',
             margin=dict(t=80, b=50, l=50, r=50),
-            dragmode='pan'
+            dragmode='pan'  # Set default mode to pan for easy movement
         )
         
         return fig
@@ -860,158 +1330,147 @@ class EnhancedVisualizationEngine:
         
         return fig
 
-# --- Main Application Function ---
-def main():
-    # Keep the CSS markdown here
-    st.markdown("""<style> ... </style>""", unsafe_allow_html=True) # Keep your full CSS here
+# --- Configuration Validation Function ---
+def validate_configuration(room_specs, budget_manager):
+    warnings = []
+    errors = []
+    
+    min_area_per_person = 1.5
+    room_area = room_specs['length'] * room_specs['width']
+    required_area = room_specs['capacity'] * min_area_per_person
+    
+    if room_area < required_area:
+        errors.append(f"Room too small for {room_specs['capacity']} people. Minimum {required_area:.1f}m² required.")
+    
+    if room_specs['width'] > 0:
+        aspect_ratio = room_specs['length'] / room_specs['width']
+        if aspect_ratio > 3 or aspect_ratio < 0.33:
+            warnings.append("Room's aspect ratio may be challenging for AV equipment placement and viewing angles.")
+    
+    return warnings, errors
 
+# --- Main Application UI and Logic ---
+def main():
     st.title("🏢 AI Room Configurator Pro Max")
     st.markdown("### Transform Your Space with Intelligent AV Design")
-
-    # Sidebar Configuration
-    with st.sidebar:
-        st.markdown('<div class="premium-card" style="padding: 1.5rem; margin-top: -50px;"><h2>🎛️ Room Configuration</h2></div>', unsafe_allow_html=True)
+    
+    if 'app_state' not in st.session_state:
+        st.session_state.app_state = {
+            'camera_position': None,
+            'current_budget': 0,
+            'active_features': set(['table_space', 'budget_tracking', 'camera_angles']),
+            'table_config': None
+        }
+    if 'recommendations' not in st.session_state:
+        st.session_state.recommendations = None
+    if 'room_specs' not in st.session_state:
+        st.session_state.room_specs = None
         
-        form = st.session_state.session_state.get('form_values', {})
-
-        template = persist_form_value('template', 
-            st.selectbox("Room Template", 
-                         list(EnhancedProductDatabase().room_templates.keys()), 
-                         index=list(EnhancedProductDatabase().room_templates.keys()).index(form.get('template', 'Small Conference (6-12 people)')),
-                         help="Choose a template to start.")
-        )
+    with st.sidebar:
+        st.markdown('<div class="premium-card" style="margin-top: -50px;"><h2>🎛️ Room Configuration</h2></div>', unsafe_allow_html=True)
+        
+        template = st.selectbox("Room Template", list(EnhancedProductDatabase().room_templates.keys()), help="Choose a template to start.")
         template_info = EnhancedProductDatabase().room_templates[template]
-
+        
         st.subheader("📐 Dimensions")
         col1, col2 = st.columns(2)
-        length = persist_form_value('length',
-            col1.slider("Length (m)", 2.0, 20.0, form.get('length', float(template_info['typical_size'][0])), 0.5)
-        )
-        width = persist_form_value('width',
-            col2.slider("Width (m)", 2.0, 20.0, form.get('width', float(template_info['typical_size'][1])), 0.5)
-        )
-        ceiling_height = persist_form_value('ceiling_height',
-            col1.slider("Ceiling Height (m)", 2.4, 6.0, form.get('ceiling_height', 3.0), 0.1)
-        )
-        capacity = persist_form_value('capacity',
-            col2.slider("Capacity", 2, 100, form.get('capacity', template_info['capacity_range'][1]))
-        )
-
+        length = col1.slider("Length (m)", 2.0, 20.0, float(template_info['typical_size'][0]), 0.5)
+        width = col2.slider("Width (m)", 2.0, 20.0, float(template_info['typical_size'][1]), 0.5)
+        ceiling_height = col1.slider("Ceiling Height (m)", 2.4, 6.0, 3.0, 0.1)
+        capacity = col2.slider("Capacity", 2, 100, template_info['capacity_range'][1])
+        
         st.markdown("---")
         st.subheader("🌟 Environment & Atmosphere")
         env_col1, env_col2 = st.columns(2)
         with env_col1:
-            windows = persist_form_value('windows', 
-                st.slider("Windows (%)", 0, 80, form.get('windows', 20), 5)
-            )
-            natural_light = persist_form_value('natural_light', 
-                st.select_slider("Natural Light Level", options=["Very Low", "Low", "Moderate", "High", "Very High"], value=form.get('natural_light', "Moderate"))
-            )
+            windows = st.slider("Windows (%)", 0, 80, 20, 5, help="Percentage of wall space with windows")
+            natural_light = st.select_slider("Natural Light Level", options=["Very Low", "Low", "Moderate", "High", "Very High"], value="Moderate")
         with env_col2:
-            ceiling_type = persist_form_value('ceiling_type',
-                st.selectbox("Ceiling Type", ["Standard", "Drop Ceiling", "Open Plenum", "Acoustic Tiles"], index=["Standard", "Drop Ceiling", "Open Plenum", "Acoustic Tiles"].index(form.get('ceiling_type', 'Standard')))
-            )
-            wall_material = persist_form_value('wall_material',
-                st.selectbox("Wall Material", ["Drywall", "Glass", "Concrete", "Wood Panels", "Acoustic Panels"], index=["Drywall", "Glass", "Concrete", "Wood Panels", "Acoustic Panels"].index(form.get('wall_material', 'Drywall')))
-            )
+            ceiling_type = st.selectbox("Ceiling Type", ["Standard", "Drop Ceiling", "Open Plenum", "Acoustic Tiles"])
+            wall_material = st.selectbox("Wall Material", ["Drywall", "Glass", "Concrete", "Wood Panels", "Acoustic Panels"])
+        st.markdown("##### 🎯 Room Purpose & Acoustics")
+        room_purpose = st.multiselect("Primary Activities", ["Video Conferencing", "Presentations", "Training", "Board Meetings", "Collaborative Work", "Hybrid Meetings"], default=["Video Conferencing", "Presentations"])
+        acoustic_features = st.multiselect("Acoustic Considerations", ["Sound Absorption Needed", "Echo Control Required", "External Noise Issues", "Speech Privacy Important"])
+        st.markdown("##### 🎛️ Environmental Controls")
+        env_controls = st.multiselect("Control Systems", ["Automated Lighting", "Motorized Shades", "Climate Control", "Occupancy Sensors", "Daylight Harvesting"])
+        st.markdown("##### 🎨 Ambiance & Design")
+        color_scheme_temp = st.select_slider("Color Temperature", options=["Warm", "Neutral", "Cool"], value="Neutral")
+        design_style = st.selectbox("Interior Design Style", ["Modern Corporate", "Executive", "Creative/Tech", "Minimalist"])
+        st.markdown("##### ♿ Accessibility Features")
+        accessibility = st.multiselect("Accessibility Requirements", ["Wheelchair Access", "Hearing Loop System", "High Contrast Displays", "Voice Control"])
         
-        room_purpose = persist_form_value('room_purpose',
-            st.multiselect("Primary Activities", ["Video Conferencing", "Presentations", "Training", "Board Meetings", "Collaborative Work", "Hybrid Meetings"], default=form.get('room_purpose', ["Video Conferencing", "Presentations"]))
-        )
-        acoustic_features = persist_form_value('acoustic_features',
-            st.multiselect("Acoustic Considerations", ["Sound Absorption Needed", "Echo Control Required", "External Noise Issues", "Speech Privacy Important"], default=form.get('acoustic_features', []))
-        )
-        env_controls = persist_form_value('env_controls',
-            st.multiselect("Control Systems", ["Automated Lighting", "Motorized Shades", "Climate Control", "Occupancy Sensors", "Daylight Harvesting"], default=form.get('env_controls', []))
-        )
-        color_scheme_temp = persist_form_value('color_scheme',
-            st.select_slider("Color Temperature", options=["Warm", "Neutral", "Cool"], value=form.get('color_scheme', "Neutral"))
-        )
-        design_style = persist_form_value('design_style',
-            st.selectbox("Interior Design Style", ["Modern Corporate", "Executive", "Creative/Tech", "Minimalist"], index=["Modern Corporate", "Executive", "Creative/Tech", "Minimalist"].index(form.get('design_style', 'Modern Corporate')))
-        )
-        accessibility = persist_form_value('accessibility',
-            st.multiselect("Accessibility Requirements", ["Wheelchair Access", "Hearing Loop System", "High Contrast Displays", "Voice Control"], default=form.get('accessibility', []))
-        )
-
         st.markdown("---")
         st.subheader("💰 Budget & Brands")
-        budget_tier = persist_form_value('budget_tier',
-            st.selectbox("Budget Tier", ['Budget', 'Professional', 'Premium'], index=['Budget', 'Professional', 'Premium'].index(form.get('budget_tier', 'Professional')))
-        )
-        preferred_brands = persist_form_value('preferred_brands',
-            st.multiselect("Preferred Brands", ['Samsung', 'LG', 'Sony', 'Crestron', 'Cisco', 'Logitech', 'QSC', 'Shure'], default=form.get('preferred_brands', []))
-        )
-        special_features = persist_form_value('special_features',
-            st.multiselect("Required Features", ['Wireless Presentation', 'Digital Whiteboard', 'Room Scheduling', 'Noise Reduction', 'AI Analytics'], default=form.get('special_features', []))
-        )
+        budget_tier = st.selectbox("Budget Tier", ['Budget', 'Professional', 'Premium'], index=1)
+        preferred_brands = st.multiselect("Preferred Brands", ['Samsung', 'LG', 'Sony', 'Crestron', 'Cisco', 'Logitech', 'QSC', 'Shure'])
         
-        create_feature_controls()
+        st.subheader("✨ Special Features")
+        special_features = st.multiselect("Required Features", ['Wireless Presentation', 'Digital Whiteboard', 'Room Scheduling', 'Noise Reduction', 'AI Analytics'])
+
+        st.markdown("---")
+        
+        st.markdown("### 🎯 Feature Controls")
+        def update_feature_state(feature_name, state):
+            if state:
+                st.session_state.app_state['active_features'].add(feature_name)
+            else:
+                st.session_state.app_state['active_features'].discard(feature_name)
+
+        for feature in ['table_space', 'budget_tracking', 'camera_angles']:
+            is_active = st.toggle(
+                feature.replace('_', ' ').title(), 
+                value=feature in st.session_state.app_state['active_features']
+            )
+            update_feature_state(feature, is_active)
 
     if st.button("🚀 Generate AI Recommendation"):
-        form_values = st.session_state.session_state['form_values']
         environment_config = {
-            'windows': form_values.get('windows'),
-            'natural_light': form_values.get('natural_light'),
-            'ceiling_type': form_values.get('ceiling_type'),
-            'wall_material': form_values.get('wall_material'),
-            'room_purpose': form_values.get('room_purpose'),
-            'acoustic_features': form_values.get('acoustic_features'),
-            'env_controls': form_values.get('env_controls'),
-            'color_scheme': form_values.get('color_scheme'),
-            'design_style': form_values.get('design_style'),
-            'accessibility': form_values.get('accessibility')
+            'windows': windows, 'natural_light': natural_light, 'ceiling_type': ceiling_type,
+            'wall_material': wall_material, 'room_purpose': room_purpose,
+            'acoustic_features': acoustic_features, 'env_controls': env_controls,
+            'color_scheme': color_scheme_temp, 'design_style': design_style, 'accessibility': accessibility
         }
         room_specs = {
-            'template': form_values.get('template'),
-            'length': form_values.get('length'),
-            'width': form_values.get('width'),
-            'ceiling_height': form_values.get('ceiling_height'),
-            'capacity': form_values.get('capacity'),
-            'environment': environment_config,
-            'special_requirements': []
+            'template': template, 'length': length, 'width': width, 'ceiling_height': ceiling_height,
+            'capacity': capacity, 'environment': environment_config, 'special_requirements': [] 
         }
         user_preferences = {
-            'budget_tier': form_values.get('budget_tier'),
-            'preferred_brands': form_values.get('preferred_brands'),
-            'special_features': form_values.get('special_features')
+            'budget_tier': budget_tier, 'preferred_brands': preferred_brands, 'special_features': special_features
         }
-
-        errors, warnings = validate_form_inputs(room_specs, user_preferences)
-
+        
+        budget_manager = BudgetManager(budget_tier)
+        
+        warnings, errors = validate_configuration(room_specs, budget_manager)
+        
         if errors:
             st.error("🚨 Please correct the following errors:\n\n* " + "\n* ".join(errors))
         else:
             if warnings:
-                st.warning("⚠️ Consider these warnings:\n\n* " + "\n* ".join(warnings))
+                st.warning("⚠️ Consider these design warnings:\n\n* " + "\n* ".join(warnings))
             
-            try:
-                recommender = MaximizedAVRecommender()
-                viz_engine = EnhancedVisualizationEngine()
-                
-                table_config = viz_engine.calculate_table_requirements(room_specs)
-                st.session_state.session_state['table_config'] = table_config
-                
-                budget_manager = BudgetManager(user_preferences['budget_tier'])
-                recommendations = recommender.get_comprehensive_recommendations(
-                    room_specs, user_preferences, budget_manager
-                )
-                
-                st.session_state.session_state['last_recommendations'] = recommendations
-                st.session_state.session_state['room_specs'] = room_specs
-                st.session_state.session_state['budget_tier'] = user_preferences['budget_tier']
-                
+            recommender = MaximizedAVRecommender()
+            viz_engine = EnhancedVisualizationEngine()
+            
+            table_config = viz_engine.calculate_table_requirements(room_specs)
+            st.session_state.app_state['table_config'] = table_config
+            
+            recommendations = recommender.get_comprehensive_recommendations(
+                room_specs, user_preferences, budget_manager=budget_manager
+            )
+            
+            if budget_manager.running_total > budget_manager.tier_limits[budget_manager.current_tier]['max']:
+                 st.error(f"Configuration cost of ${budget_manager.running_total:,.0f} exceeds the limit for the {budget_tier} tier (${budget_manager.tier_limits[budget_manager.current_tier]['max']:,}).")
+            else:
+                st.session_state.recommendations = recommendations
+                st.session_state.room_specs = room_specs
+                st.session_state.budget_tier = budget_tier
                 st.success("✅ AI Analysis Complete!")
-                
-            except Exception as e:
-                st.error(f"An error occurred during recommendation generation: {str(e)}")
 
-    if st.session_state.session_state.get('last_recommendations'):
-        recommendations = st.session_state.session_state['last_recommendations']
-        room_specs = st.session_state.session_state['room_specs']
-        budget_tier = st.session_state.session_state['budget_tier']
+    if st.session_state.recommendations:
+        recommendations = st.session_state.recommendations
+        room_specs = st.session_state.room_specs
         recommender = MaximizedAVRecommender()
-
+        
         total_cost = sum(rec['price'] for rec in recommendations.values() if isinstance(rec, dict) and 'price' in rec)
         for acc in recommendations.get('accessories', []):
             total_cost += acc['price']
@@ -1025,20 +1484,117 @@ def main():
         tab1, tab2, tab3, tab4, tab5 = st.tabs(["🎯 Recommendations", "📊 Analysis", "🎨 Visualization", "🔄 Alternatives", "📋 Report"])
         
         with tab1:
-            # ... (Tab 1 display code remains the same)
-            pass
+            st.header("AI-Powered Equipment Recommendations")
+            col1, col2 = st.columns(2)
+            with col1:
+                for cat, icon in [('display', '📺'), ('camera', '🎥'), ('audio', '🔊')]:
+                    rec = recommendations[cat]
+                    st.markdown(f"#### {icon} {cat.title()} System")
+                    st.markdown(f"""<div class="feature-card"><h4>{rec['model']}</h4><p><strong>Price:</strong> ${rec['price']:,} | <strong>Rating:</strong> ⭐ {rec['rating']}/5.0</p><p><strong>Specs:</strong> {rec['specs']}</p></div>""", unsafe_allow_html=True)
+            with col2:
+                for cat, icon in [('control', '🎛️'), ('lighting', '💡')]:
+                    rec = recommendations[cat]
+                    st.markdown(f"#### {icon} {cat.title()} System")
+                    st.markdown(f"""<div class="feature-card"><h4>{rec['model']}</h4><p><strong>Price:</strong> ${rec['price']:,} | <strong>Rating:</strong> ⭐ {rec['rating']}/5.0</p><p><strong>Specs:</strong> {rec['specs']}</p></div>""", unsafe_allow_html=True)
+                if recommendations['accessories']:
+                    st.markdown("#### 🔧 Essential Accessories")
+                    for acc in recommendations['accessories'][:2]:
+                        st.markdown(f"<div class='feature-card'><strong>{acc['item']}</strong> ({acc['model']})<br>Price: ${acc['price']:,} ({acc['necessity']})</div>", unsafe_allow_html=True)
+
         with tab2:
-            # ... (Tab 2 display code remains the same, including the TypeError fix)
-            pass
+            st.header("Room Analysis & Performance Metrics")
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                st.markdown("#### Room Characteristics")
+                analysis = recommendations['room_analysis']
+                st.markdown(f"""<div class="comparison-card">
+                    <p><strong>Category:</strong> {analysis['size_category']}</p>
+                    <p><strong>Shape:</strong> {analysis['shape_analysis']}</p>
+                    <p><strong>Acoustics:</strong> Reverb is {analysis['acoustic_properties']['reverb_category']}, Treatment needed: {'Yes' if analysis['acoustic_properties']['treatment_needed'] else 'No'}</p>
+                    <p><strong>Lighting Challenges:</strong> {', '.join(analysis['lighting_challenges'])}</p>
+                </div>""", unsafe_allow_html=True)
+                
+                if 'table_space' in st.session_state.app_state['active_features']:
+                    st.markdown("#### Table & Seating Analysis")
+                    table_config = st.session_state.app_state.get('table_config')
+                    
+                    if table_config:
+                        st.markdown(f"""<div class="comparison-card">
+                            <p><strong>Recommended Table Size:</strong> {table_config['length']:.1f}m × {table_config['width']:.1f}m</p>
+                            <p><strong>Calculated Seating:</strong> {table_config['seats']} seats</p>
+                        </div>""", unsafe_allow_html=True)
+                    else:
+                        st.info("Table analysis will be shown after generating a recommendation.")
+
+            with col2:
+                st.markdown("#### Investment & Performance")
+                st.plotly_chart(EnhancedVisualizationEngine.create_cost_breakdown_chart(recommendations), use_container_width=True)
+                st.plotly_chart(EnhancedVisualizationEngine.create_feature_comparison_radar(recommendations, recommendations.get('alternatives', {})), use_container_width=True)
+
         with tab3:
-            # ... (Tab 3 display code remains the same)
-            pass
+            st.header("Interactive Room Visualization")
+            viz_config = {}
+            viz_engine = EnhancedVisualizationEngine()
+            fig_3d = viz_engine.create_3d_room_visualization(room_specs, recommendations, viz_config)
+            st.plotly_chart(fig_3d, use_container_width=True)
+            st.plotly_chart(EnhancedVisualizationEngine.create_equipment_layout_2d(room_specs, recommendations), use_container_width=True)
+
         with tab4:
-            # ... (Tab 4 display code remains the same)
-            pass
+            st.header("Alternative Configurations & Smart Upgrade Planner")
+            if recommendations.get('alternatives'):
+                st.markdown("#### Alternative Configurations")
+                for tier_name, alt_config in recommendations['alternatives'].items():
+                    st.markdown(f"<h5>{tier_name} Tier</h5>")
+                    col1, col2, col3 = st.columns(3)
+                    cols = [col1, col2, col3]
+                    for i, cat in enumerate(['displays', 'cameras', 'audio']):
+                        if cat in alt_config:
+                            with cols[i]:
+                                name, info = alt_config[cat]
+                                st.markdown(f"""<div class="comparison-card"><strong>{cat.title()}:</strong> {name}<br>${info['price']:,} | ⭐ {info['rating']}/5.0</div>""", unsafe_allow_html=True)
+            st.markdown("<hr>", unsafe_allow_html=True)
+            if recommendations.get('upgrade_path'):
+                if recommendations['upgrade_path']:
+                    upgrade = recommendations['upgrade_path'][0] 
+                    smart_plan = recommender._generate_smart_upgrade_plan(room_specs, st.session_state.budget_tier, upgrade['estimated_cost'])
+                    st.markdown("""
+                    <div class="premium-card">
+                        <h3>💡 Upgrade Strategy Overview to {up_tier} Tier</h3>
+                        <p>A structured approach to achieving premium AV capabilities while maintaining operational continuity.</p>
+                        <p><strong>Total Add. Investment:</strong> ${total:,.0f} | <strong>Est. Monthly:</strong> ${monthly:,.0f}</p>
+                    </div>
+                    """.format(up_tier=upgrade['tier'], total=smart_plan['total_investment'], monthly=smart_plan['monthly_investment']), unsafe_allow_html=True)
+
+                    cols = st.columns(4)
+                    for i, (phase_name, phase_info) in enumerate(smart_plan['phases'].items()):
+                        with cols[i]:
+                            st.markdown(f"""
+                            <div class="feature-card">
+                                <h4>{phase_name}</h4>
+                                <p><strong>Budget:</strong> ${phase_info['budget']:,.0f}</p>
+                                <p><strong>Focus:</strong> {phase_info['focus']}</p>
+                                <ul style="font-size: 0.9em; padding-left: 15px;">
+                                    {''.join([f'<li>{p}</li>' for p in phase_info['priorities']])}
+                                </ul>
+                            </div>
+                            """, unsafe_allow_html=True)
+
         with tab5:
-            # ... (Tab 5 display code remains the same)
-            pass
+            st.header("Professional Report Summary")
+            st.markdown(f"""<div class="premium-card">
+                <h3>Executive Summary</h3>
+                <p>AI-generated AV solution for a <strong>{room_specs['template']}</strong> ({room_specs['length']}m × {room_specs['width']}m) for <strong>{room_specs['capacity']} people</strong>.</p>
+                <p><strong>Total Investment:</strong> ${total_cost:,} | <strong>Confidence:</strong> {recommendations['confidence_score']:.0%} | <strong>Recommended Tier:</strong> {st.session_state.budget_tier}</p>
+            </div>""", unsafe_allow_html=True)
+            st.markdown("#### Detailed Equipment Specifications")
+            specs_data = [{'Category': cat.title(), 'Model': recommendations[cat]['model'], 'Price': f"${recommendations[cat]['price']:,}", 'Rating': f"{recommendations[cat]['rating']}/5.0", 'Brand': recommendations[cat].get('brand', '')} for cat in ['display', 'camera', 'audio', 'control', 'lighting']]
+            st.dataframe(pd.DataFrame(specs_data), use_container_width=True)
+
+    else:
+        st.markdown('''<div class="premium-card" style="text-align: center; padding: 50px;">
+            <h2>🚀 Welcome to AI Room Configurator Pro Max</h2>
+            <p style="font-size: 18px;">Configure your room in the sidebar to generate an intelligent AV design.</p>
+        </div>''', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
