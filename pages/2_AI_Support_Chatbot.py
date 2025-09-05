@@ -8,8 +8,7 @@ import faiss
 import numpy as np
 import warnings
 import re
-from typing import List, Dict, Any
-import PyPDF2
+from typing import List, Dict, Any, Generator
 import fitz  # PyMuPDF
 from datetime import datetime, timedelta
 import random
@@ -22,7 +21,7 @@ from email.parser import BytesParser
 # --- Basic Configuration ---
 warnings.filterwarnings("ignore")
 st.set_page_config(
-    page_title="AI Support Chatbot",
+    page_title="AI Support Assistant",
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -33,7 +32,7 @@ st.set_page_config(
 class RAGConfig:
     chunk_size: int = 500
     top_k_retrieval: int = 5
-    similarity_threshold: float = 0.4 # Corrected threshold
+    similarity_threshold: float = 0.4
 
 config = RAGConfig()
 
@@ -43,6 +42,7 @@ class MaintenancePipeline:
         self.maintenance_data = self._load_maintenance_data()
 
     def _load_maintenance_data(self) -> Dict:
+        # This is a simulation. In a real scenario, this would connect to a database.
         equipment_data = {}
         equipment_types = ['HVAC', 'IT_EQUIPMENT', 'ELECTRICAL', 'FIRE_SAFETY']
         for i in range(20):
@@ -57,7 +57,7 @@ class MaintenancePipeline:
                 'maintenance_cost': random.randint(200, 5000)
             }
         return equipment_data
-    
+
     def get_equipment_by_risk(self, risk_level: str) -> List[Dict]:
         return [{'id': eid, **edata} for eid, edata in self.maintenance_data.items() if edata['risk_level'] == risk_level.upper()]
 
@@ -66,72 +66,124 @@ class MaintenancePipeline:
         items = [{'id': eid, **edata} for eid, edata in self.maintenance_data.items() if datetime.strptime(edata['next_maintenance'], '%Y-%m-%d') <= target_date]
         return sorted(items, key=lambda x: x['next_maintenance'])
 
-# --- LLM and Response Generation ---
+# --- Tool 1: Data Analysis Tool ---
+def analyze_csv_data(query: str) -> str:
+    """
+    Analyzes CSV files to answer questions about counts and aggregations.
+    Specifically looks for the Jira export file.
+    """
+    # Find the Jira export file
+    try:
+        jira_file = next(f for f in glob.glob("*.csv") if "Closed tickets" in f)
+    except StopIteration:
+        return "The Jira ticket export CSV file was not found."
+
+    try:
+        df = pd.read_csv(jira_file)
+        query_lower = query.lower()
+
+        # Regex to find what the user wants to count, e.g., "Device Faulty"
+        match = re.search(r"count of (.+?) issues|how many (.+?) issues", query_lower)
+        if not match:
+             match = re.search(r"related to a '(.+?)' issue", query_lower)
+        
+        if match:
+            # Find the target value from the query (e.g., "device faulty")
+            target_value = next(g for g in match.groups() if g is not None).strip()
+            
+            # Find the column that likely contains this value (heuristic)
+            target_column = None
+            for col in df.columns:
+                if "rca" in col.lower() or "root cause" in col.lower():
+                    target_column = col
+                    break
+            
+            if not target_column:
+                return "Could not determine the 'Root Cause Analysis' column in the CSV."
+            
+            # Perform the count
+            count = df[df[target_column].str.contains(target_value, case=False, na=False)].shape[0]
+            return f"Found **{count} tickets** related to **'{target_value}'**."
+        
+        return "I can count issues from the Jira file, but I didn't understand what to count. Try 'how many Device Faulty issues?'"
+
+    except Exception as e:
+        return f"An error occurred during CSV analysis: {e}"
+
+# --- Tool 2: Maintenance and RAG Tool ---
+def get_maintenance_context_with_actions(query: str, maintenance_pipeline: MaintenancePipeline, search_func, search_args) -> str:
+    """
+    Gets maintenance data and enriches it with actionable insights from documents.
+    """
+    query_lower = query.lower()
+    context_parts = []
+    
+    if any(kw in query_lower for kw in ['risk', 'failure', 'alert']):
+        high_risk = maintenance_pipeline.get_equipment_by_risk('HIGH')
+        if high_risk:
+            context_parts.append("### High-Risk Equipment Alerts:\n")
+            for eq in high_risk[:3]: # Limit to top 3 for brevity
+                context_parts.append(f"- **ID:** `{eq['id']}` | **Location:** {eq['location']} | **Failure Probability:** {eq['failure_probability']:.1%}")
+                
+                # NEW: Auto-search for actionable solutions
+                action_query = f"troubleshooting procedure for {eq['type']}"
+                action_results = search_func(action_query, **search_args)
+                if action_results:
+                    action_text = action_results[0]['content'].strip().replace('\n', ' ')
+                    source = os.path.basename(action_results[0]['source'])
+                    context_parts.append(f"  - **▶️ Recommended Action:** Based on `{source}`, you should: *\"{action_text[:200]}...\"*")
+                else:
+                    context_parts.append("  - *No specific troubleshooting guide found in the documents.*")
+    
+    elif any(kw in query_lower for kw in ['schedule', 'calendar', 'upcoming']):
+        schedule = maintenance_pipeline.get_maintenance_schedule(30)
+        if schedule:
+            context_parts.append("### Upcoming Maintenance (Next 30 Days):\n")
+            for item in schedule[:5]:
+                context_parts.append(f"- **{item['next_maintenance']}**: `{item['id']}` at {item['location']} (Cost: ${item['maintenance_cost']})")
+
+    return "\n".join(context_parts)
+
+# --- LLM and Response Generation (Upgraded) ---
 try:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
     GEMINI_MODEL = genai.GenerativeModel('gemini-1.5-flash')
 except Exception as e:
-    st.error(f"Failed to configure Gemini API. Please check your API key in secrets.toml: {e}")
+    st.error(f"Error configuring Gemini API: {e}")
     GEMINI_MODEL = None
 
-def get_maintenance_context(query: str, maintenance_pipeline: MaintenancePipeline) -> str:
-    query_lower = query.lower()
-    context_parts = []
-    if any(kw in query_lower for kw in ['risk', 'failure', 'alert']):
-        high_risk = maintenance_pipeline.get_equipment_by_risk('HIGH')
-        if high_risk:
-            context_parts.append("High-Risk Equipment Data:")
-            for eq in high_risk[:5]:
-                context_parts.append(f"- ID: {eq['id']}, Type: {eq['type']}, Location: {eq['location']}, Failure Probability: {eq['failure_probability']:.1%}")
-    elif any(kw in query_lower for kw in ['schedule', 'calendar', 'upcoming']):
-        schedule = maintenance_pipeline.get_maintenance_schedule(30)
-        if schedule:
-            context_parts.append("Upcoming Maintenance Schedule (Next 30 Days):")
-            for item in schedule[:8]:
-                # FIX: Corrected item['date'] to item['next_maintenance']
-                context_parts.append(f"- ID: {item['id']}, Date: {item['next_maintenance']}, Location: {item['location']}, Cost: ${item['maintenance_cost']}")
-    return "\n".join(context_parts)
-
-def generate_llm_response(query: str, search_results: List[Dict], maintenance_pipeline: MaintenancePipeline) -> str:
+def generate_response_stream(query: str, chat_history: List[Dict], context: str) -> Generator:
     if not GEMINI_MODEL:
-        return "The AI model is not configured. Please check your API key."
-    doc_context = ""
-    if search_results:
-        doc_context += "Relevant information from your documents:\n"
-        for result in search_results[:3]:
-            source = os.path.basename(result['source'])
-            content_preview = result['content'].strip().replace('\n', ' ')
-            doc_context += f"- From '{source}': \"{content_preview}\"\n"
-    maintenance_context = get_maintenance_context(query, maintenance_pipeline)
-    if not doc_context and not maintenance_context:
-        high_risk_count = len(maintenance_pipeline.get_equipment_by_risk('HIGH'))
-        upcoming_maintenance = len(maintenance_pipeline.get_maintenance_schedule(7))
-        return f"""🤔 I couldn't find any specific information for "{query}".
-🔍 **You can ask me about:**
-- The maintenance schedule or high-risk items.
-- Information from your uploaded documents (e.g., "troubleshooting guide for cameras").
-📊 **Current System Status:**
-- 🚨 High risk equipment: {high_risk_count}
-- 📅 Maintenance due this week: {upcoming_maintenance}"""
+        yield "The AI model is not configured. Please check your API key."
+        return
 
-    prompt = f"""You are an expert AI assistant. Your goal is to provide clear, concise answers based ONLY on the context provided below.
+    # Create a concise history for the prompt
+    history_prompt = ""
+    for msg in chat_history[-4:-1]: # Use last 3 messages for context
+        history_prompt += f"**{msg['role'].capitalize()}**: {msg['content']}\n"
+
+    prompt = f"""You are an expert AI support assistant. Your goal is to provide clear, concise answers.
+Use the chat history for context but rely ONLY on the 'Context for your answer' to formulate your response. Do not use prior knowledge.
+
+---
+**Chat History:**
+{history_prompt if history_prompt else "This is the start of the conversation."}
+---
+**Context for your answer:**
+{context if context else "No specific context was found for this query."}
+---
 **User's Question:** "{query}"
 ---
-**Context from Documents:**
-{doc_context if doc_context else "No relevant document context found."}
----
-**Context from Predictive Maintenance System:**
-{maintenance_context if maintenance_context else "No relevant maintenance data found for this specific query."}
----
-Based on all the context above, provide a direct and helpful answer."""
-    try:
-        response = GEMINI_MODEL.generate_content(prompt)
-        return response.text
-    except Exception as e:
-        st.error(f"An error occurred while generating the AI response: {e}")
-        return "Sorry, I encountered an issue while trying to answer your question."
+Based on all the information above, provide a direct and helpful answer. If the context is empty, explain what the user can ask about."""
 
-# --- Document Processing and Search ---
+    try:
+        response_stream = GEMINI_MODEL.generate_content(prompt, stream=True)
+        for chunk in response_stream:
+            yield chunk.text
+    except Exception as e:
+        yield f"An error occurred while generating the response: {e}"
+
+# --- Document Processing and Search (Mostly unchanged) ---
 def clean_text(text: str) -> str:
     return re.sub(r'\s+', ' ', text.strip())
 
@@ -152,39 +204,32 @@ def extract_text_from_pdf(file_path: str) -> str:
         with fitz.open(file_path) as doc:
             return "".join(page.get_text() for page in doc)
     except Exception as e:
-        st.warning(f"Could not read {os.path.basename(file_path)} with PyMuPDF. Error: {e}")
+        st.warning(f"Could not read {os.path.basename(file_path)} with PyMuPDF: {e}")
         return ""
 
+# ... (other text extraction functions remain the same) ...
 def extract_text_from_email(msg) -> str:
     if msg.is_multipart():
         for part in msg.walk():
             if part.get_content_type() == "text/plain" and "attachment" not in str(part.get("Content-Disposition")):
-                try:
-                    return part.get_payload(decode=True).decode(part.get_content_charset() or 'utf-8')
+                try: return part.get_payload(decode=True).decode(part.get_content_charset() or 'utf-8')
                 except: continue
     elif msg.get_content_type() == "text/plain":
-        try:
-            return msg.get_payload(decode=True).decode(msg.get_content_charset() or 'utf-8')
+        try: return msg.get_payload(decode=True).decode(msg.get_content_charset() or 'utf-8')
         except: return ""
     return ""
 
 def format_email_for_rag(msg) -> str:
     body = extract_text_from_email(msg)
     if not body: return ""
-    return f"""--- Email ---
-From: {msg['From']}
-To: {msg['To']}
-Subject: {msg['Subject']}
-Date: {msg['Date']}
-{body.strip()}
---- End Email ---"""
+    return f"--- Email ---\nFrom: {msg['From']}\nTo: {msg['To']}\nSubject: {msg['Subject']}\nDate: {msg['Date']}\n{body.strip()}\n--- End Email ---"
 
 @st.cache_resource
 def load_and_process_documents():
+    # ... (function is unchanged) ...
     file_patterns = ["**/*.txt", "**/*.md", "**/*.csv", "**/*.pdf", "**/*.eml", "**/*.mbox"]
     all_files = [f for pattern in file_patterns for f in glob.glob(pattern, recursive=True)]
     docs, file_paths = [], []
-
     progress_bar = st.progress(0, text="Loading documents...")
     for i, file_path in enumerate(all_files):
         file_name = os.path.basename(file_path)
@@ -201,7 +246,6 @@ def load_and_process_documents():
                 with open(file_path, 'r', encoding='utf-8') as f: content = f.read()
             except:
                 with open(file_path, 'r', encoding='latin-1') as f: content = f.read()
-        
         if content and len(content.strip()) > 50:
             docs.append(clean_text(content))
             file_paths.append(file_path)
@@ -211,6 +255,7 @@ def load_and_process_documents():
 
 @st.cache_resource
 def create_search_index(_documents, _file_paths):
+    # ... (function is unchanged) ...
     model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
     all_chunks, chunk_metadata = [], []
     for i, doc in enumerate(_documents):
@@ -226,6 +271,7 @@ def create_search_index(_documents, _file_paths):
     return index, model, all_chunks, chunk_metadata
 
 def search_documents(query: str, index, model, chunks: List[str], metadata: List[Dict]) -> List[Dict]:
+    # ... (function is unchanged) ...
     if not query or index is None: return []
     query_embedding = model.encode([query], normalize_embeddings=True)
     scores, indices = index.search(query_embedding.astype('float32'), config.top_k_retrieval)
@@ -235,29 +281,35 @@ def search_documents(query: str, index, model, chunks: List[str], metadata: List
              results.append({'content': chunks[idx], 'source': metadata[idx]['path'], 'similarity': scores[0][i]})
     return sorted(results, key=lambda x: x['similarity'], reverse=True)
 
-# --- Main App Interface ---
-st.title("🤖 AI Support Chatbot")
-st.markdown("Ask questions about your documents, emails, or maintenance schedules.")
 
+# --- Main App Interface (Upgraded) ---
+st.title("🤖 AI Support Assistant")
+st.markdown("Ask about your documents, get maintenance alerts with solutions, or analyze service ticket data.")
+
+# --- Initialization ---
 try:
     maintenance_pipeline = MaintenancePipeline()
     docs, paths = load_and_process_documents()
     if docs:
         search_index, model, all_chunks, chunk_meta = create_search_index(docs, paths)
+        # Bundle search arguments for easier passing
+        search_args = {'index': search_index, 'model': model, 'chunks': all_chunks, 'metadata': chunk_meta}
     else:
-        search_index, model, all_chunks, chunk_meta = None, None, [], []
-        st.warning("No documents found. The chatbot will only use maintenance data.")
+        search_index, model, all_chunks, chunk_meta, search_args = None, None, [], [], {}
+        st.warning("No documents found. Document search and actionable insights are disabled.")
 except Exception as e:
     st.error(f"An error occurred during initialization: {e}")
-    search_index, maintenance_pipeline = None, None
+    search_index, maintenance_pipeline, search_args = None, None, {}
 
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "Hi! How can I help you today?"}]
 
+# --- Chat History Display ---
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
+# --- Chat Input and Tool Routing ---
 if prompt := st.chat_input("Ask a question..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -265,7 +317,39 @@ if prompt := st.chat_input("Ask a question..."):
 
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            search_results = search_documents(prompt, search_index, model, all_chunks, chunk_meta)
-            response = generate_llm_response(prompt, search_results, maintenance_pipeline)
-            st.markdown(response)
-            st.session_state.messages.append({"role": "assistant", "content": response})
+            context = ""
+            prompt_lower = prompt.lower()
+            
+            # --- Router: Decide which tool to use ---
+            if any(kw in prompt_lower for kw in ["how many", "count", "total tickets"]):
+                context = analyze_csv_data(prompt)
+            elif any(kw in prompt_lower for kw in ['risk', 'failure', 'alert', 'schedule', 'calendar', 'upcoming']):
+                if search_args:
+                    context = get_maintenance_context_with_actions(prompt, maintenance_pipeline, search_documents, search_args)
+                else: # Fallback if no docs are loaded
+                    context = "Maintenance data is available, but I can't provide actionable insights without documents."
+            else:
+                if search_args:
+                    search_results = search_documents(prompt, **search_args)
+                    if search_results:
+                        context += "### Relevant Information from Documents:\n"
+                        for result in search_results[:3]:
+                            source = os.path.basename(result['source'])
+                            content_preview = result['content'].strip().replace('\n', ' ')
+                            context += f"- **From `{source}`**: \"{content_preview}\"\n"
+            
+            # If no tool provided specific context, create a default message
+            if not context:
+                 high_risk_count = len(maintenance_pipeline.get_equipment_by_risk('HIGH'))
+                 upcoming_maintenance = len(maintenance_pipeline.get_maintenance_schedule(7))
+                 context = f"""I couldn't find specific information for that query.
+- You can ask about document contents (e.g., "summarize the INDIS meeting").
+- You can ask for maintenance alerts or schedules.
+- You can ask to count Jira tickets (e.g., "how many Device Faulty issues?").
+
+**Current System Status:** 🚨 {high_risk_count} high risk items | 📅 {upcoming_maintenance} tasks due this week."""
+
+            # --- Generate and Stream Response ---
+            response_stream = generate_response_stream(prompt, st.session_state.messages, context)
+            full_response = st.write_stream(response_stream)
+            st.session_state.messages.append({"role": "assistant", "content": full_response})
