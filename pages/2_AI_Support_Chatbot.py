@@ -177,19 +177,24 @@ def generate_response_stream(query: str, chat_history: List[Dict], context: str)
         return
     
     history_prompt = summarize_history(chat_history)
-    prompt = f"""You are an expert AI support assistant. Your goal is to provide clear, concise answers.
-Use the chat history for context but rely ONLY on the 'Context for your answer' to formulate your response. Cite sources if available.
+    prompt = f"""You are an expert AI support assistant. Provide clear, direct answers in plain text format.
 
----
-**Chat History:**
+IMPORTANT FORMATTING RULES:
+- Use plain text only, no markdown formatting
+- Use simple bullet points (•) for lists, not asterisks or dashes
+- Do not use **bold**, *italic*, `code`, or ### headers
+- Keep responses concise and readable
+- Use emojis sparingly for status indicators only
+
+Chat History:
 {history_prompt if history_prompt else "This is the start of the conversation."}
----
-**Context for your answer:**
+
+Context for your answer:
 {context if context else "No specific context was found for this query."}
----
-**User's Question:** "{query}"
----
-Based on all the information above, provide a direct and helpful answer. If the context is empty, explain what the user can ask about."""
+
+User's Question: "{query}"
+
+Based on the information above, provide a direct and helpful answer in plain text format."""
 
     try:
         response_stream = GEMINI_MODEL.generate_content(prompt, stream=True)
