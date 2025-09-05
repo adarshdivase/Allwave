@@ -545,28 +545,41 @@ if prompt := st.chat_input("Ask a question..."):
 🚨 {high_risk_count} high risk equipment items  
 📅 {upcoming_maintenance} maintenance tasks due this week"""
 
-        # Generate and stream the AI's response
-        response_placeholder = st.empty()
-        full_response = ""
-        
-        try:
-            response_stream = generate_response_stream(prompt, st.session_state.messages, context)
-            for chunk in response_stream:
-                full_response += chunk
-                with response_placeholder.container():
-                    chat_bubble(full_response + " ▌", is_user=False)
+        # Check if we should render interactive content instead of regular AI response
+        if context and ("INTERACTIVE_ALERTS" in context or "INTERACTIVE_SCHEDULE" in context):
+            # Render interactive content directly
+            render_interactive_content(context)
             
-            # Final update to remove cursor
-            with response_placeholder.container():
-                chat_bubble(full_response, is_user=False)
+            # Add a simple message to chat history
+            if "INTERACTIVE_ALERTS" in context:
+                summary_msg = "Displayed interactive high-risk equipment alerts with action buttons."
+            else:
+                summary_msg = "Displayed interactive maintenance schedule with management options."
                 
-        except Exception as e:
-            full_response = f"I apologize, but I encountered an error: {str(e)}"
-            with response_placeholder.container():
-                chat_bubble(full_response, is_user=False)
-        
-        # Add to chat history
-        st.session_state.messages.append({"role": "assistant", "content": full_response})
+            st.session_state.messages.append({"role": "assistant", "content": summary_msg})
+        else:
+            # Regular AI response generation
+            response_placeholder = st.empty()
+            full_response = ""
+            
+            try:
+                response_stream = generate_response_stream(prompt, st.session_state.messages, context)
+                for chunk in response_stream:
+                    full_response += chunk
+                    with response_placeholder.container():
+                        chat_bubble(full_response + " ▌", is_user=False)
+                
+                # Final update to remove cursor
+                with response_placeholder.container():
+                    chat_bubble(full_response, is_user=False)
+                    
+            except Exception as e:
+                full_response = f"I apologize, but I encountered an error: {str(e)}"
+                with response_placeholder.container():
+                    chat_bubble(full_response, is_user=False)
+            
+            # Add to chat history
+            st.session_state.messages.append({"role": "assistant", "content": full_response})
 
 # --- Footer ---
 st.markdown("---")
