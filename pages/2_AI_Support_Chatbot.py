@@ -237,12 +237,13 @@ class RAGConfig:
     top_k_retrieval: int = 5
     similarity_threshold: float = 0.4
 
+# CORRECTED INITIALIZATION BLOCK
 if "settings" not in st.session_state:
     st.session_state.settings = {
-        "chunk_size": 500, 
+        "chunk_size": 500,
         "theme": "light",
         "auto_scroll": True,
-        "show_sources": True,
+        "show_sources": True,  # This key is required to prevent the error
         "animation_enabled": True
     }
 
@@ -279,12 +280,12 @@ class MaintenancePipeline:
         return equipment_data
 
     def get_equipment_by_risk(self, risk_level: str) -> List[Dict]:
-        return [{'id': eid, **edata} for eid, edata in self.maintenance_data.items() 
+        return [{'id': eid, **edata} for eid, edata in self.maintenance_data.items()
                 if edata['risk_level'] == risk_level.upper()]
 
     def get_maintenance_schedule(self, days_ahead: int = 30) -> List[Dict]:
         target_date = datetime.now() + timedelta(days=days_ahead)
-        items = [{'id': eid, **edata} for eid, edata in self.maintenance_data.items() 
+        items = [{'id': eid, **edata} for eid, edata in self.maintenance_data.items()
                 if datetime.strptime(edata['next_maintenance'], '%Y-%m-%d') <= target_date]
         return sorted(items, key=lambda x: x['next_maintenance'])
 
@@ -357,7 +358,7 @@ def analyze_csv_data(query: str) -> str:
             """
         
         # Enhanced column detection
-        analysis_columns = ['root cause analysis', 'rca', 'issue type', 'category', 'problem type', 
+        analysis_columns = ['root cause analysis', 'rca', 'issue type', 'category', 'problem type',
                            'cause', 'classification', 'ticket type', 'incident type']
         target_column = None
         
@@ -385,7 +386,7 @@ def analyze_csv_data(query: str) -> str:
             return f"""
             <div class="alert alert-success">
                 <strong>✅ Analysis Results</strong><br>
-                Found <strong>{count:,} tickets</strong> related to '<strong>{target_value}</strong>' 
+                Found <strong>{count:,} tickets</strong> related to '<strong>{target_value}</strong>'
                 in the '{target_column}' column.<br>
                 This represents <strong>{percentage:.1f}%</strong> of all {total:,} tickets.
             </div>
@@ -409,7 +410,7 @@ def analyze_csv_data(query: str) -> str:
         """
 
 # --- Enhanced Maintenance Context Tool ---
-def get_maintenance_context_with_actions(query: str, maintenance_pipeline: MaintenancePipeline, 
+def get_maintenance_context_with_actions(query: str, maintenance_pipeline: MaintenancePipeline,
                                        search_func=None, search_args=None) -> str:
     query_lower = query.lower()
     context_parts = []
@@ -458,7 +459,7 @@ def get_maintenance_context_with_actions(query: str, maintenance_pipeline: Maint
             context_parts.append("")
             
             # Group by week
-            week_1 = [item for item in schedule[:10] if 
+            week_1 = [item for item in schedule[:10] if
                      (datetime.strptime(item['next_maintenance'], '%Y-%m-%d') - datetime.now()).days <= 7]
             
             if week_1:
@@ -492,7 +493,7 @@ def generate_response_stream(query: str, chat_history: List[Dict], context: str)
     history_summary = ""
     if chat_history:
         recent_history = chat_history[-4:]  # Last 4 messages for context
-        history_summary = "\n".join([f"{msg['role'].title()}: {msg['content'][:200]}..." 
+        history_summary = "\n".join([f"{msg['role'].title()}: {msg['content'][:200]}..."
                                     for msg in recent_history])
     
     enhanced_prompt = f"""You are an expert AI support assistant with deep knowledge of IT systems, maintenance, and data analysis.
@@ -744,7 +745,7 @@ def create_search_index(_documents, _file_paths):
         # Create embeddings
         with st.spinner(f"🧠 Creating embeddings for {len(all_chunks)} text chunks..."):
             embeddings = model.encode(
-                all_chunks, 
+                all_chunks,
                 show_progress_bar=True,
                 normalize_embeddings=True,
                 batch_size=32  # Optimize batch size
@@ -887,8 +888,8 @@ def create_maintenance_timeline(maintenance_pipeline: MaintenancePipeline):
     
     # Create timeline chart
     fig_timeline = px.scatter(
-        df_schedule.head(20), 
-        x='next_maintenance', 
+        df_schedule.head(20),
+        x='next_maintenance',
         y='type',
         size='maintenance_cost',
         color='risk_level',
@@ -896,7 +897,7 @@ def create_maintenance_timeline(maintenance_pipeline: MaintenancePipeline):
         title="Upcoming Maintenance Timeline (Next 60 Days)",
         color_discrete_map={
             'HIGH': '#F44336',
-            'MEDIUM': '#FF9800', 
+            'MEDIUM': '#FF9800',
             'LOW': '#4CAF50'
         }
     )
@@ -1028,7 +1029,7 @@ def main():
                 
                 # Get maintenance context
                 maintenance_context = get_maintenance_context_with_actions(
-                    user_query, maintenance_pipeline, search_documents, 
+                    user_query, maintenance_pipeline, search_documents,
                     {'index': index, 'model': model, 'chunks': chunks, 'metadata': metadata}
                 )
                 
@@ -1127,8 +1128,8 @@ def main():
         # Cost by type
         cost_by_type = df_equipment.groupby('type')['maintenance_cost'].sum().reset_index()
         fig_cost = px.pie(
-            cost_by_type, 
-            values='maintenance_cost', 
+            cost_by_type,
+            values='maintenance_cost',
             names='type',
             title="Maintenance Cost Distribution by Equipment Type"
         )
