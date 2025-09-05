@@ -435,8 +435,13 @@ def search_documents(query: str, index, model, chunks: List[str], metadata: List
         st.error(f"Search error: {e}")
         return []
 
-# --- Equipment Detection from Schema ---
+# --- UPDATED: Equipment Detection from Schema (with Vision) ---
 def detect_equipment_from_schema(filename: str, image_data=None) -> Dict:
+    """
+    Analyzes an uploaded schema using both filename and multimodal vision 
+    to identify equipment type and key components.
+    """
+    # --- Step 1: Initial analysis based on filename (as a fallback) ---
     filename_lower = filename.lower()
     equipment_mapping = {
         'hvac': ['hvac', 'cooling', 'heating', 'air', 'ventilation', 'climate', 'chiller', 'boiler'],
@@ -446,26 +451,59 @@ def detect_equipment_from_schema(filename: str, image_data=None) -> Dict:
         'industrial': ['motor', 'pump', 'valve', 'conveyor', 'machine', 'industrial', 'manufacturing']
     }
     detected_type = 'general'
-    confidence = 50
     for eq_type, keywords in equipment_mapping.items():
-        matches = sum(1 for keyword in keywords if keyword in filename_lower)
-        if matches > 0:
+        if any(keyword in filename_lower for keyword in keywords):
             detected_type = eq_type
-            confidence = min(95, 60 + (matches * 10))
             break
-    
-    equipment_info = EQUIPMENT_KNOWLEDGE.get(detected_type, {
-        'name': 'General Equipment',
-        'components': ['various components'],
-        'common_issues': ['general malfunctions']
-    })
-    
+
+    # --- Step 2: Multimodal analysis if an image is provided ---
+    if image_data and GEMINI_MODEL:
+        try:
+            # Prepare the prompt for the vision model
+            prompt = """
+            You are an expert systems engineer specializing in equipment diagnostics. 
+            Analyze the provided schema image. 
+            
+            1.  Identify the primary type of equipment shown (e.g., HVAC, Electrical Panel, Network Rack).
+            2.  List the key components, instruments, or parts that are visible and are common points of failure.
+            
+            Respond ONLY with a valid JSON object in the following format:
+            {
+              "equipment_type": "The detected equipment type",
+              "identified_components": ["Component 1", "Sensor X", "Valve Y", "Circuit Breaker Z"]
+            }
+            """
+            
+            # Send the prompt and image to the Gemini model
+            response = GEMINI_MODEL.generate_content([prompt, image_data])
+            
+            # Extract and parse the JSON response
+            json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
+            if json_match:
+                vision_analysis = json.loads(json_match.group())
+                
+                # Combine vision analysis with filename analysis
+                final_type = vision_analysis.get('equipment_type', detected_type).lower()
+                equipment_info = EQUIPMENT_KNOWLEDGE.get(final_type, {})
+                
+                return {
+                    'equipment_type': final_type,
+                    'equipment_name': equipment_info.get('name', 'Unknown Equipment'),
+                    'components': vision_analysis.get('identified_components', []),
+                    'common_issues': equipment_info.get('common_issues', []),
+                    'confidence': 95  # High confidence from vision analysis
+                }
+        except Exception as e:
+            st.warning(f"Vision analysis failed: {e}. Falling back to filename analysis.")
+
+    # --- Step 3: Fallback to filename-only analysis if vision fails or no image ---
+    equipment_info = EQUIPMENT_KNOWLEDGE.get(detected_type, {})
     return {
         'equipment_type': detected_type,
-        'equipment_name': equipment_info['name'],
-        'components': equipment_info['components'],
-        'common_issues': equipment_info.get('common_issues', []),
-        'confidence': confidence
+        'equipment_name': equipment_info.get('name', 'General Equipment'),
+        'components': equipment_info.get('components', ['various components']),
+        'common_issues': equipment_info.get('common_issues', ['general malfunctions']),
+        'confidence': 60
     }
 
 # --- Session State Initialization ---
@@ -505,7 +543,7 @@ How can I help you today? 🛠️""",
         if key not in st.session_state:
             st.session_state[key] = value
 
-# --- NEW: Refactored Response Handling Function ---
+# --- Refactored Response Handling Function ---
 def handle_user_prompt(prompt: str):
     """Analyzes a prompt, gets a RAG context, and generates a diagnostic solution."""
     with st.spinner("🤖 Analyzing issue and generating solution..."):
@@ -606,18 +644,28 @@ def main():
         if uploaded_file:
             if uploaded_file.type.startswith('image'):
                 image = Image.open(uploaded_file)
-                st.image(image, caption="Equipment Schema", use_column_width=True)
+                st.image(image, caption="Uploaded Schema", use_column_width=True)
                 if st.button("🔍 Analyze Schema", use_container_width=True):
-                    with st.spinner("Analyzing equipment schema..."):
+                    with st.spinner("Analyzing equipment schema with vision..."):
                         analysis_result = detect_equipment_from_schema(uploaded_file.name, image)
                         st.session_state.current_analysis = analysis_result
-                        analysis_msg = f"""🔍 **Schema Analysis Complete!**
+                        
+                        # Create a more detailed message based on vision analysis
+                        components_list = analysis_result.get('components', [])
+                        if components_list:
+                            components_str = '\n'.join([f"- {comp}" for comp in components_list[:7]])
+                            analysis_msg = f"""🔍 **Vision Analysis Complete!**
 
 **Equipment Detected**: {analysis_result['equipment_name']}
 **Confidence**: {analysis_result['confidence']}%
-**Key Components**: {', '.join(analysis_result['components'][:5])}
 
-**Ready for intelligent diagnostics!** Describe any issues you're experiencing with this equipment."""
+**Key Components Identified from Schema:**
+{components_str}
+
+Describe any issues you're experiencing with these components."""
+                        else:
+                            analysis_msg = "Could not identify specific components from the schema. Please describe the issue."
+
                         st.session_state.messages.append({
                             "role": "assistant",
                             "content": analysis_msg,
@@ -653,28 +701,24 @@ Would you like diagnostic assistance for this issue?"""
             with st.container(border=True):
                 st.metric("Equipment", st.session_state.current_analysis.get('equipment_name', 'N/A'))
                 st.metric("Confidence", f"{st.session_state.current_analysis.get('confidence', 0)}%")
-                with st.expander("Equipment Details"):
+                with st.expander("Identified Components"):
                     st.write("**Components:**")
-                    for comp in st.session_state.current_analysis.get('components', [])[:8]:
+                    for comp in st.session_state.current_analysis.get('components', [])[:10]:
                         st.write(f"• {comp}")
                         
-        # --- MODIFIED: Followup Questions Logic ---
+        # Followup Questions Logic
         if st.session_state.followup_questions:
             st.subheader("🤔 Diagnostic Questions")
             st.write("*Click a question to get a more detailed diagnosis:*")
             for i, question in enumerate(st.session_state.followup_questions):
                 if st.button(f"❓ {question}", key=f"q_{i}", use_container_width=True):
-                    # 1. Add the clicked question as a user message
                     st.session_state.messages.append({
                         "role": "user",
                         "content": question,
                         "timestamp": datetime.now()
                     })
-                    # 2. Call the response generation logic
                     handle_user_prompt(question)
-                    # 3. Clear the old questions for a cleaner UI on rerun
                     st.session_state.followup_questions = []
-                    # 4. Rerun to show the new messages
                     st.rerun()
 
     # Main chat interface
@@ -687,16 +731,14 @@ Would you like diagnostic assistance for this issue?"""
                 if "timestamp" in msg:
                     st.caption(f"_{msg['timestamp'].strftime('%H:%M:%S')}_")
     
-    # --- MODIFIED: Chat Input Logic ---
+    # Chat Input Logic
     if prompt := st.chat_input("Describe your equipment issue or ask any technical question..."):
         st.session_state.messages.append({
             "role": "user",
             "content": prompt,
             "timestamp": datetime.now()
         })
-        # Call the new, refactored function
         handle_user_prompt(prompt)
-        # Rerun to update the chat display
         st.rerun()
 
 if __name__ == "__main__":
