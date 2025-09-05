@@ -1063,22 +1063,14 @@ class MaximizedAVRecommender:
 class EnhancedVisualizationEngine:
     def calculate_table_requirements(self, room_specs):
         capacity = room_specs['capacity']
-        # Standard space per person (in meters) along the perimeter
         space_per_person_perimeter = 0.75 
-        
-        # Calculate minimum table dimensions based on capacity
         min_table_length = max(capacity * 0.6, 2.0)
         min_table_width = max(capacity * 0.3, 1.0)
-        
-        # Adjust for room constraints (leave clearance around the table)
         max_length = room_specs['length'] * 0.7
         max_width = room_specs['width'] * 0.4
-        
         table_length = min(min_table_length, max_length)
         table_width = min(min_table_width, max_width)
-        
         perimeter_seats = int((table_length * 2 + table_width * 2) / space_per_person_perimeter)
-
         return {
             'length': table_length,
             'width': table_width,
@@ -1234,8 +1226,7 @@ class EnhancedVisualizationEngine:
                 bgcolor='rgba(255, 255, 255, 0.9)',
                 bordercolor='rgba(0, 0, 0, 0.1)',
                 borderwidth=1,
-                # --- MODIFIED: Added color to font for visibility ---
-                font=dict(size=11, color='black')
+                font=dict(size=11, color='black') # MODIFIED FOR VISIBILITY
             ),
             margin=dict(l=0, r=120, t=50, b=0),
             paper_bgcolor='rgb(255, 255, 255)', plot_bgcolor='rgb(255, 255, 255)',
@@ -1251,9 +1242,11 @@ class EnhancedVisualizationEngine:
         
         length, width = room_specs['length'], room_specs['width']
         
+        # Room Outline and Background
         fig.add_shape(type="rect", x0=-0.2, y0=-0.2, x1=length+0.2, y1=width+0.2, line=dict(color="rgba(200,200,200,0.5)", width=2), fillcolor="rgba(240,240,240,0.3)", layer='below')
         fig.add_shape(type="rect", x0=0, y0=0, x1=length, y1=width, line=dict(color="rgb(70,70,70)", width=3), fillcolor="rgba(250,250,250,1)")
         
+        # Windows
         if room_specs.get('environment', {}).get('windows', 0) > 0:
             window_sections = int(room_specs.get('environment', {}).get('windows', 0) / 20)
             if window_sections > 0:
@@ -1262,16 +1255,16 @@ class EnhancedVisualizationEngine:
                     y_start = (width / 2) - (window_sections * window_width_section / 2) + (i * window_width_section * 2)
                     fig.add_shape(type="rect", x0=length-0.1, y0=y_start, x1=length, y1=y_start + window_width_section, line=dict(color="rgb(150,200,255)", width=2), fillcolor="rgba(200,230,255,0.7)")
 
+        # Equipment Shapes
         screen_width_2d = min(width * 0.6, 3.5)
         screen_start = (width - screen_width_2d) / 2
         fig.add_shape(type="rect", x0=0, y0=screen_start, x1=0.15, y1=screen_start + screen_width_2d, line=dict(color="rgb(50,50,50)", width=2), fillcolor="rgb(80,80,80)")
         
         table_length, table_width = min(length * 0.7, 4.5), min(width * 0.4, 1.5)
         table_x, table_y = length * 0.6, width * 0.5
-        
-        fig.add_shape(type="rect", x0=table_x - table_length/2 + 0.1, y0=table_y - table_width/2 + 0.1, x1=table_x + table_length/2 + 0.1, y1=table_y + table_width/2 + 0.1, line=dict(color="rgba(0,0,0,0)"), fillcolor="rgba(0,0,0,0.1)")
         fig.add_shape(type="rect", x0=table_x - table_length/2, y0=table_y - table_width/2, x1=table_x + table_length/2, y1=table_y + table_width/2, line=dict(color="rgb(120,85,60)", width=2), fillcolor="rgb(139,115,85)")
         
+        # Chairs
         capacity = min(room_specs['capacity'], 12)
         chairs_per_side = min(6, capacity // 2)
         chair_positions = []
@@ -1281,30 +1274,36 @@ class EnhancedVisualizationEngine:
                 chair_positions.extend([(x_pos, table_y - table_width/2 - 0.4), (x_pos, table_y + table_width/2 + 0.4)])
         
         for x, y in chair_positions[:capacity]:
-            fig.add_shape(type="circle", x0=x-0.25+0.05, y0=y-0.25+0.05, x1=x+0.25+0.05, y1=y+0.25+0.05, line=dict(color="rgba(0,0,0,0)"), fillcolor="rgba(0,0,0,0.1)")
             fig.add_shape(type="circle", x0=x-0.25, y0=y-0.25, x1=x+0.25, y1=y+0.25, line=dict(color="rgb(70,130,180)"), fillcolor="rgb(100,149,237)")
         
-        fig.add_shape(type="rect", x0=0, y0=width*0.2, x1=0.8, y1=width*0.8, line=dict(color="rgba(255,100,100,0.3)", width=2), fillcolor="rgba(255,100,100,0.1)")
-        
+        # Coverage Zones
         camera_points = [[0.1, width*0.45], [0.1, width*0.55], [length*0.8, width*0.2], [length*0.8, width*0.8]]
         fig.add_shape(type="path", path=f"M {camera_points[0][0]},{camera_points[0][1]} L {camera_points[1][0]},{camera_points[1][1]} L {camera_points[3][0]},{camera_points[3][1]} L {camera_points[2][0]},{camera_points[2][1]} Z", line=dict(color="rgba(100,200,100,0.3)", width=1), fillcolor="rgba(100,200,100,0.1)")
         
         speaker_positions = [(length*0.25, width*0.25), (length*0.75, width*0.25), (length*0.25, width*0.75), (length*0.75, width*0.75)]
         for x, y in speaker_positions:
-            fig.add_shape(type="circle", x0=x-0.15, y0=y-0.15, x1=x+0.15, y1=y+0.15, line=dict(color="rgba(100,100,255,0.3)"), fillcolor="rgba(100,100,255,0.1)")
             fig.add_shape(type="circle", x0=x-1.5, y0=y-1.5, x1=x+1.5, y1=y+1.5, line=dict(color="rgba(100,100,255,0.1)"), fillcolor="rgba(100,100,255,0.05)")
         
-        fig.add_annotation(x=length/2, y=-0.5, text=f"{length:.1f}m", showarrow=False, font=dict(size=10))
-        fig.add_annotation(x=-0.5, y=width/2, text=f"{width:.1f}m", textangle=-90, showarrow=False, font=dict(size=10))
-        
+        # Annotations
         annotations = [
-            dict(x=0.1, y=width*0.5, text="Display System", showarrow=True, arrowcolor="rgb(255,100,100)", bgcolor="white", bordercolor="rgb(255,100,100)", borderwidth=2),
-            dict(x=length-0.3, y=width*0.85, text="Control Panel", showarrow=True, arrowcolor="rgb(100,100,100)", bgcolor="white", bordercolor="rgb(100,100,100)", borderwidth=2),
-            dict(x=length*0.5, y=width*0.1, text="Camera Coverage Zone", showarrow=False, font=dict(size=10, color="rgb(100,200,100)")),
-            dict(x=length*0.8, y=width*0.5, text="Speaker Coverage", showarrow=False, font=dict(size=10, color="rgb(100,100,255)"))
+            dict(x=0.1, y=width*0.5, text="Display", showarrow=True, arrowhead=2, ax=40, ay=-30),
+            dict(x=length*0.5, y=width*0.1, text="Camera Coverage", showarrow=False, font=dict(color="green", size=10)),
+            dict(x=length*0.8, y=width*0.5, text="Audio Coverage", showarrow=False, font=dict(color="blue", size=10))
         ]
         
-        fig.update_layout(title=dict(text="Enhanced Floor Plan with Equipment Layout", y=0.95, x=0.5, xanchor='center', yanchor='top', font=dict(size=16, color='rgb(50,50,50)')), xaxis=dict(title="Length (m)", range=[-1, length+1], showgrid=False, zeroline=False, scaleanchor="y", scaleratio=1), yaxis=dict(title="Width (m)", range=[-1, width+1], showgrid=False, zeroline=False), height=600, showlegend=False, annotations=annotations, plot_bgcolor='white', paper_bgcolor='white', margin=dict(t=100, b=50, l=50, r=50))
+        # --- MODIFIED: Enhanced for better visibility and interaction ---
+        fig.update_layout(
+            title=dict(text="Enhanced Floor Plan with Equipment Layout", y=0.95, x=0.5, xanchor='center'),
+            xaxis=dict(title="Length (m)", range=[-1, length+1], scaleanchor="y", scaleratio=1, showspikes=False),
+            yaxis=dict(title="Width (m)", range=[-1, width+1], showspikes=False),
+            height=750,  # Increased height
+            showlegend=False,
+            annotations=annotations,
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            margin=dict(t=80, b=50, l=50, r=50),
+            dragmode='pan'  # Set default mode to pan for easy movement
+        )
         
         return fig
     
@@ -1336,7 +1335,6 @@ def validate_configuration(room_specs, budget_manager):
     warnings = []
     errors = []
     
-    # Check room dimensions for capacity
     min_area_per_person = 1.5
     room_area = room_specs['length'] * room_specs['width']
     required_area = room_specs['capacity'] * min_area_per_person
@@ -1344,7 +1342,6 @@ def validate_configuration(room_specs, budget_manager):
     if room_area < required_area:
         errors.append(f"Room too small for {room_specs['capacity']} people. Minimum {required_area:.1f}m² required.")
     
-    # Check aspect ratio for usability
     if room_specs['width'] > 0:
         aspect_ratio = room_specs['length'] / room_specs['width']
         if aspect_ratio > 3 or aspect_ratio < 0.33:
