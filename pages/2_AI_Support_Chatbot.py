@@ -79,7 +79,7 @@ class SmartDiagnosticEngine:
         """Intelligently analyze user query to understand the problem and equipment type"""
         system_prompt = """You are an expert equipment diagnostic AI. Analyze the user's query and extract:
 
-1. Equipment type (HVAC, electrical, network, server, industrial, etc.)
+1. Equipment type (hvac, electrical, network, server, industrial, etc.)
 2. Specific component mentioned (if any)
 3. Problem description
 4. Urgency level (low, medium, high, critical)
@@ -249,13 +249,16 @@ def analyze_csv_data(query: str) -> str:
         csv_files = glob.glob("*.csv")
         if not csv_files:
             return "No CSV files found in the current directory."
+        
         ticket_file = None
         for file in csv_files:
             if any(keyword in file.lower() for keyword in ['ticket', 'maintenance', 'issue', 'problem']):
                 ticket_file = file
                 break
+        
         if not ticket_file:
             ticket_file = csv_files[0]
+
         df = pd.read_csv(ticket_file)
         if 'GEMINI_MODEL' in globals() and GEMINI_MODEL:
             analysis_prompt = f"""Analyze this CSV data query: "{query}"
@@ -352,6 +355,7 @@ def load_and_process_documents():
     all_files = []
     for pattern in file_patterns:
         all_files.extend(glob.glob(os.path.join(docs_path, pattern), recursive=True))
+    
     docs, file_paths = [], []
     if all_files:
         progress_bar = st.progress(0, text="Loading knowledge base...")
@@ -374,10 +378,12 @@ def load_and_process_documents():
             except Exception as e:
                 st.warning(f"Could not process {file_name}: {e}")
                 continue
+            
             if content and len(content.strip()) > 50:
                 docs.append(clean_text(content))
                 file_paths.append(file_path)
         progress_bar.empty()
+
     if docs:
         st.success(f"📚 Knowledge base loaded: {len(docs)} documents")
     else:
@@ -395,10 +401,13 @@ def create_search_index(_documents, _file_paths):
             chunks = smart_chunking(doc, config.chunk_size)
             all_chunks.extend(chunks)
             chunk_metadata.extend([{'path': _file_paths[i]}] * len(chunks))
+        
         if not all_chunks: 
             return None, None, [], []
+        
         with st.spinner("🔍 Creating search embeddings..."):
             embeddings = model.encode(all_chunks, show_progress_bar=False, normalize_embeddings=True)
+        
         index = faiss.IndexFlatIP(embeddings.shape[1])
         index.add(embeddings.astype('float32'))
         st.success(f"✅ Search index ready: {len(all_chunks)} chunks")
@@ -444,11 +453,13 @@ def detect_equipment_from_schema(filename: str, image_data=None) -> Dict:
             detected_type = eq_type
             confidence = min(95, 60 + (matches * 10))
             break
+    
     equipment_info = EQUIPMENT_KNOWLEDGE.get(detected_type, {
         'name': 'General Equipment',
         'components': ['various components'],
         'common_issues': ['general malfunctions']
     })
+    
     return {
         'equipment_type': detected_type,
         'equipment_name': equipment_info['name'],
@@ -494,14 +505,73 @@ How can I help you today? 🛠️""",
         if key not in st.session_state:
             st.session_state[key] = value
 
+# --- NEW: Refactored Response Handling Function ---
+def handle_user_prompt(prompt: str):
+    """Analyzes a prompt, gets a RAG context, and generates a diagnostic solution."""
+    with st.spinner("🤖 Analyzing issue and generating solution..."):
+        try:
+            response_content = ""
+            if st.session_state.diagnostic_engine:
+                analysis = st.session_state.diagnostic_engine.analyze_user_query(
+                    prompt,
+                    st.session_state.current_analysis
+                )
+                
+                # Update current analysis based on the new prompt
+                if analysis.get('equipment_type') != 'general':
+                     st.session_state.current_analysis = {
+                        'equipment_name': EQUIPMENT_KNOWLEDGE.get(analysis['equipment_type'], {}).get('name', 'Unknown'),
+                        'confidence': analysis.get('confidence', 75),
+                        'components': EQUIPMENT_KNOWLEDGE.get(analysis['equipment_type'], {}).get('components', [])
+                    }
+
+                rag_context = ""
+                if st.session_state.search_args:
+                    search_results = search_documents(prompt, **st.session_state.search_args)
+                    if search_results:
+                        rag_context = "\n\n".join([
+                            f"From {os.path.basename(r['source'])}:\n{r['content']}" 
+                            for r in search_results[:2]
+                        ])
+                
+                response_content = st.session_state.diagnostic_engine.generate_diagnostic_solution(
+                    prompt, analysis, rag_context
+                )
+                
+                st.session_state.followup_questions = st.session_state.diagnostic_engine.generate_followup_questions(
+                    prompt, analysis
+                )
+            
+            # This is a simplified fallback if the diagnostic engine isn't ready
+            else:
+                response_content = analyze_csv_data(prompt)
+                if "No CSV files found" in response_content:
+                    response_content = "The diagnostic engine is not available. Please check the Gemini API configuration."
+
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": response_content,
+                "timestamp": datetime.now()
+            })
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": f"❌ An error occurred while processing your request: {e}",
+                "timestamp": datetime.now()
+            })
+
 # --- Main Application ---
 def main():
     st.title("🔧 Smart Equipment Diagnostic AI")
     st.markdown("*Intelligent troubleshooting for any equipment - powered by Gemini AI & RAG*")
+    
     initialize_session_state()
+
     # Initialize diagnostic engine
     if GEMINI_MODEL and not st.session_state.diagnostic_engine:
         st.session_state.diagnostic_engine = SmartDiagnosticEngine(GEMINI_MODEL)
+
     # Initialize systems
     if "init_done" not in st.session_state:
         with st.spinner("🚀 Initializing Smart Diagnostic AI..."):
@@ -521,9 +591,11 @@ def main():
                 st.session_state.init_done = True
             except Exception as e:
                 st.error(f"Initialization error: {e}")
+
     # Sidebar
     with st.sidebar:
         st.header("🛠️ Diagnostic Tools")
+        
         # Schema Upload
         st.subheader("📋 Schema Analysis")
         uploaded_file = st.file_uploader(
@@ -545,8 +617,7 @@ def main():
 **Confidence**: {analysis_result['confidence']}%
 **Key Components**: {', '.join(analysis_result['components'][:5])}
 
-**Ready for intelligent diagnostics!** 
-Describe any issues you're experiencing with this equipment."""
+**Ready for intelligent diagnostics!** Describe any issues you're experiencing with this equipment."""
                         st.session_state.messages.append({
                             "role": "assistant",
                             "content": analysis_msg,
@@ -554,6 +625,7 @@ Describe any issues you're experiencing with this equipment."""
                             "type": "analysis"
                         })
                         st.rerun()
+
         # Real-time Alerts
         st.subheader("🚨 Equipment Monitoring")
         if st.button("Generate Alert", use_container_width=True):
@@ -574,101 +646,58 @@ Would you like diagnostic assistance for this issue?"""
                     "type": "alert"
                 })
                 st.rerun()
+
         # Current Analysis Display
         if st.session_state.current_analysis:
             st.subheader("📊 Current Analysis")
-            with st.container():
-                st.metric("Equipment", st.session_state.current_analysis['equipment_name'])
-                st.metric("Confidence", f"{st.session_state.current_analysis['confidence']}%")
+            with st.container(border=True):
+                st.metric("Equipment", st.session_state.current_analysis.get('equipment_name', 'N/A'))
+                st.metric("Confidence", f"{st.session_state.current_analysis.get('confidence', 0)}%")
                 with st.expander("Equipment Details"):
                     st.write("**Components:**")
-                    for comp in st.session_state.current_analysis['components'][:8]:
+                    for comp in st.session_state.current_analysis.get('components', [])[:8]:
                         st.write(f"• {comp}")
-        # Followup Questions
+                        
+        # --- MODIFIED: Followup Questions Logic ---
         if st.session_state.followup_questions:
             st.subheader("🤔 Diagnostic Questions")
-            st.write("*These questions can help provide better diagnosis:*")
+            st.write("*Click a question to get a more detailed diagnosis:*")
             for i, question in enumerate(st.session_state.followup_questions):
                 if st.button(f"❓ {question}", key=f"q_{i}", use_container_width=True):
+                    # 1. Add the clicked question as a user message
                     st.session_state.messages.append({
                         "role": "user",
                         "content": question,
                         "timestamp": datetime.now()
                     })
+                    # 2. Call the response generation logic
+                    handle_user_prompt(question)
+                    # 3. Clear the old questions for a cleaner UI on rerun
+                    st.session_state.followup_questions = []
+                    # 4. Rerun to show the new messages
                     st.rerun()
+
     # Main chat interface
     st.subheader("💬 Smart Diagnostic Chat")
-    chat_container = st.container(height=400)
+    chat_container = st.container(height=500)
     with chat_container:
         for msg in st.session_state.messages:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
                 if "timestamp" in msg:
                     st.caption(f"_{msg['timestamp'].strftime('%H:%M:%S')}_")
-    # Chat input
+    
+    # --- MODIFIED: Chat Input Logic ---
     if prompt := st.chat_input("Describe your equipment issue or ask any technical question..."):
         st.session_state.messages.append({
             "role": "user",
             "content": prompt,
             "timestamp": datetime.now()
         })
-        with st.spinner("🤖 Analyzing issue and generating solution..."):
-            try:
-                response_content = ""
-                if st.session_state.diagnostic_engine:
-                    analysis = st.session_state.diagnostic_engine.analyze_user_query(
-                        prompt, 
-                        st.session_state.current_analysis
-                    )
-                    rag_context = ""
-                    if st.session_state.search_args:
-                        search_results = search_documents(prompt, **st.session_state.search_args)
-                        if search_results:
-                            rag_context = "\n\n".join([
-                                f"From {os.path.basename(r['source'])}:\n{r['content']}" 
-                                for r in search_results[:2]
-                            ])
-                    response_content = st.session_state.diagnostic_engine.generate_diagnostic_solution(
-                        prompt, analysis, rag_context
-                    )
-                    st.session_state.followup_questions = st.session_state.diagnostic_engine.generate_followup_questions(
-                        prompt, analysis
-                    )
-                else:
-                    response_content = ""
-                    if st.session_state.search_args:
-                        search_results = search_documents(prompt, **st.session_state.search_args)
-                        if search_results:
-                            rag_context = "\n\n".join([
-                                f"From {os.path.basename(r['source'])}:\n{r['content']}" 
-                                for r in search_results[:2]
-                            ])
-                            summary_prompt = f"""Based on the following context, answer the user's query:
-
-Context:
-{rag_context}
-
-User Query:
-{prompt}
-"""
-                            response_content = "".join(generate_response_stream(summary_prompt))
-                        else:
-                            response_content = analyze_csv_data(prompt)
-                    else:
-                        response_content = analyze_csv_data(prompt)
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": response_content,
-                    "timestamp": datetime.now()
-                })
-                st.rerun()
-            except Exception as e:
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": f"❌ Error: {e}",
-                    "timestamp": datetime.now()
-                })
-                st.rerun()
+        # Call the new, refactored function
+        handle_user_prompt(prompt)
+        # Rerun to update the chat display
+        st.rerun()
 
 if __name__ == "__main__":
     main()
