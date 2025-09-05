@@ -1,0 +1,539 @@
+Received: by 2002:a05:7010:6aa2:b0:445:9a8c:7b54 with SMTP id co34csp7864057mdb;
+        Wed, 9 Apr 2025 00:54:37 -0700 (PDT)
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id af79cd13be357-7c7a10bb310sor59227385a.7.2025.04.09.00.54.37
+        for <sachin.bhosale@allwavegs.com>
+        (Google Transport Security);
+        Wed, 09 Apr 2025 00:54:37 -0700 (PDT)
+From: "Balasubramanian Selvam/AWAV/Bangalore" <bala.s@allwaveav.com>
+To: "Sachin Bhosale" <sachin.bhosale@allwavegs.com>
+References: <c90316e434574bf5f9c64aceec13dd03@allwaveav.co.in> <CAGqyisVBwzK10+TFqzsiF7wAKxAk3XLtLAgQscA1Wh5R7f8-cQ@mail.gmail.com>
+In-Reply-To: <CAGqyisVBwzK10+TFqzsiF7wAKxAk3XLtLAgQscA1Wh5R7f8-cQ@mail.gmail.com>
+Subject: Fwd: MOM OF 26-10-2021 Meeting with SMART WORKS
+Date: Wed, 9 Apr 2025 13:23:59 +0530
+Message-ID: <CAG-w=u7tVmaGrU++OFJ1cnWw1czfVLsq1785PLGmxQ1HrYrBZQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/mixed;
+	boundary="----=_NextPart_000_0A44_01DC1917.598C9580"
+X-Mailer: Microsoft Outlook 16.0
+X-Google-Smtp-Source: AGHT+IExNjz21tpAGhnBcixh+xh3z0bDNSytGuj2NVUwhDEjnku93H88S6FkRNYJzdOBOz+SUuCJEbYWVI1DBRfnDYs=
+X-Received: by 2002:a05:620a:4001:b0:7c5:99f9:6ada with SMTP id af79cd13be357-7c79dea5d16mr208592485a.50.1744185277281;
+        Wed, 09 Apr 2025 00:54:37 -0700 (PDT)
+X-Received: by 2002:a05:6214:1ccb:b0:6e8:f672:ace9 with SMTP id
+ 6a1803df08f44-6f0dd10f058mr18922496d6.29.1744185276494; Wed, 09 Apr 2025
+ 00:54:36 -0700 (PDT)
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@allwaveav.com header.s=allwaveav header.b=NPAmY2UK;
+       spf=pass (google.com: domain of bala.s@allwaveav.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=bala.s@allwaveav.com;
+       dmarc=pass (p=QUARANTINE sp=NONE dis=NONE) header.from=allwaveav.com;
+       dara=neutral header.i=@allwavegs.com
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1744185277; x=1744790077;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=2kCL0otJ4GhPZwVdu58NLNo/4c6q4w31nXILLfey+9g=;
+        b=NTXtGE+lxte8ykpCw/Y7qur2o1OO88LZCV/am9xvUWoDiTfDrF1c6EKDghKldq0TCa
+         h36irZe46tfKlGZbefAUiqsx/3A26PmMmYCxxYl00yxCSFrN+y/SAY2LOyyN0OTdXqqj
+         uZWP1ldJR/PUHUbgqZfyvBB1daQ9jGTbAnxZdYH7uCRXGGSutL59hykOKKlw9lDX4NPv
+         GrsG8q71lRTe8assGtMvx/063P+vdfuolXeHwmnGWqVcWfKYZjlxmi7Dw13oRAM218j0
+         ZLzQW8D3CoTOocmUzdYWGwTCZgoIVaDkyA0NwbG1E6IV9AqZuwfXWGpCw6Wg6C+uka1l
+         U09w==
+X-Gm-Message-State: AOJu0YxM32QAk4LJMgZehNEEfJSRi/fiy/mBdJuO1B8HJLREIDrW8Tg9
+	e9vLoLBSfcziG8F6kP20Bc2YTlpWt4dLbkWx7lWIQ8ZCV5E7CiM6KGMhyGntBMFjQrvUgr2X1In
+	qffXNV7RTBnOpvIj4mLATl5EH/OT8GZr1Mi336dzKQpwuz0hxNg==
+X-Gm-Gg: ASbGncu2N0FEqpvoOCSxVUcYiXQfQIttm0Lp6eQHojtK/cRWR3gJrrQHtuhPKjemRxG
+	2y+aEkJwzkspEGVrkibPnKufBPoynot/zcUZPUTmSrNGUkELySEmJamCbDresIJmMFVQ5uWaxSc
+	g4sn4rSjjTfrs4gjCYZe4G82SQylpT981E
+X-Gm-Features: ATxdqUHFUiBPfDqzXIlY0mhhWVSsHmJiPrQchGGXK-Q9PPJnDda7SwG9FnMSyqI
+Thread-Index: AQKDS42kHUrvmr0lsmdFhiH4oFp3uwG/59FTAYNt5cQ=
+
+This is a multipart message in MIME format.
+
+------=_NextPart_000_0A44_01DC1917.598C9580
+Content-Type: multipart/alternative;
+	boundary="----=_NextPart_001_0A45_01DC1917.598C9580"
+
+
+------=_NextPart_001_0A45_01DC1917.598C9580
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+Hi Sachin,
+
+Below MoM mail for your ready reference.
+
+
+Warm Regards,=20
+
+
+
+
+
+  =
+<https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJdvuvdw-X6B-FMhdYVnerb=
+14gh13vI1f0z28PzwpbxvwgWVGSJ_zo_CL9HoGfbS-pB66P2WAdPD59KuhjG-sJB9dj7IFGLM=
+4-LEeFHoIx540CWOWal5_djf3fpJwV4TGqiXls?key=3D25EjYfqXXzGOrd5RdjmiL5AG>=20
+
+
+
+
+Balasubramanian S
+
+Manager - Design & Estimation
+
+
+
+
+Classic Arena, 4th Floor, Hosur Rd, AECS Layout - A Block, Singasandra, =
+Bengaluru, Karnataka 560068
+
+Phone: +91-9597300207
+
+Email ID:  <mailto:bala.s@allwaveav.com> bala.s@allwaveav.com
+
+
+MUMBAI  |  PUNE  |  NCR  |  BENGALURU  |  HYDERABAD  |  CHENNAI  |  =
+KOLKATA
+
+
+ <https://www.linkedin.com/company/allwave-av>    =
+<https://www.instagram.com/allwaveav>    =
+<https://www.facebook.com/Allwave.AV.Systems/>=20
+
+
+ <http://www.allwaveav.com>=20
+
+
+
+---------- Forwarded message ---------
+From: Kuldip Kamat <kuldip.kamat@allwaveav.com =
+<mailto:kuldip.kamat@allwaveav.com> >
+Date: Wed, Oct 27, 2021 at 9:23=E2=80=AFAM
+Subject: Fwd: MOM OF 26-10-2021 Meeting with SMART WORKS
+To: RAVI KIRAN MADDUR <ravi.maddur@allwaveav.co.in =
+<mailto:ravi.maddur@allwaveav.co.in> >, Selwyn Lobo/redcherry.io =
+<http://redcherry.io>  <lobo.s@redcherry.io <mailto:lobo.s@redcherry.io> =
+>
+Cc: Nilesh Kamat/AWAV <nilesh.kamat@allwaveav.com =
+<mailto:nilesh.kamat@allwaveav.com> >, Balasubramanian =
+Selvam/AWAV/Bangalore <bala.s@allwaveav.com =
+<mailto:bala.s@allwaveav.com> >
+
+
+
+Ravi - please talk to Selwyn (+91-8433946655). This is for Redcherry. =
+Selwyn and you can get on a call with the client today.=20
+
+
+Best, Kuldip
+PS see attached
+
+------=_NextPart_001_0A45_01DC1917.598C9580
+Content-Type: text/html;
+	boundary="000000000000d44afb063253c7c5";
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div><div>Hi Sachin,</div><div><br></div><div>Below MoM =
+mail for your ready reference.</div></div><div><br></div><div><div =
+dir=3D"ltr" class=3D"gmail_signature" =
+data-smartmail=3D"gmail_signature"><div dir=3D"ltr"><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Arial,sans-serif;color:#000000;backgr=
+ound-color:transparent;font-weight:400;font-style:normal;font-variant:nor=
+mal;text-decoration:none;vertical-align:baseline;white-space:pre;white-sp=
+ace:pre-wrap">Warm Regards,=C2=A0</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.38;margin-top:0pt;margin-bottom:0pt"><span><br></s=
+pan></p><div dir=3D"ltr" style=3D"margin-left:0pt" align=3D"left"><table =
+style=3D"border:none;border-collapse:collapse"><colgroup><col =
+width=3D"203"><col width=3D"459"></colgroup><tbody><tr =
+style=3D"height:164.46386718749997pt"><td style=3D"border-left:solid =
+#ffffff 1pt;border-right:solid #ffffff 1pt;border-bottom:solid #ffffff =
+1pt;border-top:solid #ffffff 1pt;vertical-align:top;padding:5pt 5pt 5pt =
+5pt;overflow:hidden"><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:8pt;font-family:Arial,sans-serif;color:#000000;backgro=
+und-color:transparent;font-weight:400;font-style:normal;font-variant:norm=
+al;text-decoration:none;vertical-align:baseline;white-space:pre;white-spa=
+ce:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:163px;hei=
+ght:159px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJdvuvdw-X6B-FMhd=
+YVnerb14gh13vI1f0z28PzwpbxvwgWVGSJ_zo_CL9HoGfbS-pB66P2WAdPD59KuhjG-sJB9dj=
+7IFGLM4-LEeFHoIx540CWOWal5_djf3fpJwV4TGqiXls?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"163" height=3D"159" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></p></td><td =
+style=3D"border-left:solid #ffffff 1pt;border-right:solid #ffffff =
+1pt;border-bottom:solid #ffffff 1pt;border-top:solid #ffffff =
+1pt;vertical-align:top;padding:5pt 5pt 5pt 5pt;overflow:hidden"><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:700;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Balasubramanian S</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Manager - Design &amp; Estimation</span></p><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap"><br></span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><font =
+color=3D"#000000" face=3D"Roboto, sans-serif"><span =
+style=3D"font-size:13.3333px">Classic Arena, 4th Floor, Hosur Rd, AECS =
+Layout - A Block, Singasandra, Bengaluru, Karnataka =
+560068</span></font></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Phone: +91-9597300207</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Email ID: </span><a href=3D"mailto:bala.s@allwaveav.com" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap">bala.s@allwaveav.com</span></a></p><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:8pt;font-family:Roboto,sans-serif;color:#000000;backgr=
+ound-color:transparent;font-weight:400;font-style:normal;font-variant:nor=
+mal;text-decoration:none;vertical-align:baseline;white-space:pre;white-sp=
+ace:pre-wrap">MUMBAI=C2=A0 |=C2=A0 PUNE=C2=A0 |=C2=A0 NCR=C2=A0 |=C2=A0 =
+BENGALURU=C2=A0 |=C2=A0 HYDERABAD=C2=A0 |=C2=A0 CHENNAI=C2=A0 |=C2=A0 =
+KOLKATA</span></p><br><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><a =
+href=3D"https://www.linkedin.com/company/allwave-av" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:32px;heig=
+ht:31px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcGQZ1JVmPqfbCj4xN=
+QZPHrY_3ZM6e_0xbjID4UdDS0Lm7v6z9864QXMrKESZ8vC4A-RIGNJEvvTxIefrv-SpUY4FIn=
+v5foJwc0M84tQibq27an7fXbnJctByiLP8A38_u6x3rD?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"32" height=3D"31" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">=C2=A0 </span><a =
+href=3D"https://www.instagram.com/allwaveav" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:32px;heig=
+ht:32px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdAL4n3JgPc01QE_3v=
+-pfMctMtxcBM98T5L4vk-zuyY22IM8fJWkYUdbA4EpyhTBVaGklog_ryIP8DDrt_wetoQj_D7=
+ai7BypIYaScKbdUn5n23bEwkF7RgKccoGDGelzpoWsXraw?key=3D25EjYfqXXzGOrd5Rdjmi=
+L5AG" width=3D"32" height=3D"32" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">=C2=A0 </span><a =
+href=3D"https://www.facebook.com/Allwave.AV.Systems/" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:30px;heig=
+ht:29px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXflfIj7rdcGlSyPHml=
+t1G13q9Z54Kf0xiPml_NyRpb0UkPNMI2XfL6pMAFTEFxIh8LLPIa8IfJ8AXpBQfIBUi7XYMLC=
+LDa1TWlalG50CqNoIFNfgbt0F7y7y7cJFWkmlilkQWMj9Q?key=3D25EjYfqXXzGOrd5Rdjmi=
+L5AG" width=3D"30" height=3D"29" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a></p><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><a =
+href=3D"http://www.allwaveav.com" style=3D"text-decoration:none" =
+target=3D"_blank"><span =
+style=3D"font-size:8pt;font-family:Arial,sans-serif;color:#1155cc;backgro=
+und-color:transparent;font-weight:400;font-style:normal;font-variant:norm=
+al;text-decoration:underline;vertical-align:baseline;white-space:pre;whit=
+e-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:445px;hei=
+ght:67px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdqPdtfcRVlDqqP6im=
+nKEPV7PPzGBB_FGKx5ejpPcNegfexZq2mk0c5dZwqIiCkdM0LT5CVe8s_1IZdr5EqDOUFf6yL=
+8y3nLs_aZ7z9cKrUhEZevQv_OrGzK94HHhALVG7BokNb?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"445" height=3D"67" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a></p></td></tr>=
+</tbody></table></div></div></div></div><br><br><div =
+class=3D"gmail_quote gmail_quote_container"><div dir=3D"ltr" =
+class=3D"gmail_attr">---------- Forwarded message ---------<br>From: =
+<strong class=3D"gmail_sendername" dir=3D"auto">Kuldip Kamat</strong> =
+<span dir=3D"auto">&lt;<a =
+href=3D"mailto:kuldip.kamat@allwaveav.com">kuldip.kamat@allwaveav.com</a>=
+&gt;</span><br>Date: Wed, Oct 27, 2021 at 9:23=E2=80=AFAM<br>Subject: =
+Fwd: MOM OF 26-10-2021 Meeting with SMART WORKS<br>To: RAVI KIRAN MADDUR =
+&lt;<a =
+href=3D"mailto:ravi.maddur@allwaveav.co.in">ravi.maddur@allwaveav.co.in</=
+a>&gt;, Selwyn Lobo/<a href=3D"http://redcherry.io">redcherry.io</a> =
+&lt;<a =
+href=3D"mailto:lobo.s@redcherry.io">lobo.s@redcherry.io</a>&gt;<br>Cc: =
+Nilesh Kamat/AWAV &lt;<a =
+href=3D"mailto:nilesh.kamat@allwaveav.com">nilesh.kamat@allwaveav.com</a>=
+&gt;, Balasubramanian Selvam/AWAV/Bangalore &lt;<a =
+href=3D"mailto:bala.s@allwaveav.com">bala.s@allwaveav.com</a>&gt;<br></di=
+v><br><br><div dir=3D"ltr"><div style=3D"font-family:trebuchet =
+ms,sans-serif"><font color=3D"#0000ff">Ravi - please talk to Selwyn =
+(+91-8433946655). This is for Redcherry. Selwyn and you can get on a =
+call with the client today.=C2=A0</font></div><div =
+style=3D"font-family:trebuchet ms,sans-serif"><font =
+color=3D"#0000ff"><br></font></div><div style=3D"font-family:trebuchet =
+ms,sans-serif"><font color=3D"#0000ff">Best, Kuldip</font></div><div =
+style=3D"font-family:trebuchet ms,sans-serif"><font color=3D"#0000ff">PS =
+see attached</font></div><div class=3D"gmail_quote"><div =
+style=3D"font-size:10pt;font-family:Verdana,Geneva,sans-serif"><div =
+id=3D"m_7778985763015308744m_160732681040295544signature">
+</div>
+</div>
+</div></div>
+</div></div>
+
+------=_NextPart_001_0A45_01DC1917.598C9580--
+
+------=_NextPart_000_0A44_01DC1917.598C9580
+Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document;
+	name="26-10-2021 MINUTES OF MEETING WITH SMART WORKS.docx"
+Content-Transfer-Encoding: base64
+Content-ID: <17cbfe00869d57a97ae2>
+Content-Disposition: attachment;
+	filename="26-10-2021 MINUTES OF MEETING WITH SMART WORKS.docx"
+
+UEsDBBQABgAIAAAAIQDfpNJsWgEAACAFAAATAAgCW0NvbnRlbnRfVHlwZXNdLnhtbCCiBAIooAAC
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC0
+lMtuwjAQRfeV+g+Rt1Vi6KKqKgKLPpYtUukHGHsCVv2Sx7z+vhMCUVUBkQpsIiUz994zVsaD0dqa
+bAkRtXcl6xc9loGTXmk3K9nX5C1/ZBkm4ZQw3kHJNoBsNLy9GUw2ATAjtcOSzVMKT5yjnIMVWPgA
+jiqVj1Ykeo0zHoT8FjPg973eA5feJXApT7UHGw5eoBILk7LXNX1uSCIYZNlz01hnlUyEYLQUiep8
+6dSflHyXUJBy24NzHfCOGhg/mFBXjgfsdB90NFEryMYipndhqYuvfFRcebmwpCxO2xzg9FWlJbT6
+2i1ELwGRztyaoq1Yod2e/ygHpo0BvDxF49sdDymR4BoAO+dOhBVMP69G8cu8E6Si3ImYGrg8Rmvd
+CZFoA6F59s/m2NqciqTOcfQBaaPjP8ber2ytzmngADHp039dm0jWZ88H9W2gQB3I5tv7bfgDAAD/
+/wMAUEsDBBQABgAIAAAAIQAekRq37wAAAE4CAAALAAgCX3JlbHMvLnJlbHMgogQCKKAAAgAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAArJLBasMw
+DEDvg/2D0b1R2sEYo04vY9DbGNkHCFtJTBPb2GrX/v082NgCXelhR8vS05PQenOcRnXglF3wGpZV
+DYq9Cdb5XsNb+7x4AJWFvKUxeNZw4gyb5vZm/cojSSnKg4tZFYrPGgaR+IiYzcAT5SpE9uWnC2ki
+Kc/UYySzo55xVdf3mH4zoJkx1dZqSFt7B6o9Rb6GHbrOGX4KZj+xlzMtkI/C3rJdxFTqk7gyjWop
+9SwabDAvJZyRYqwKGvC80ep6o7+nxYmFLAmhCYkv+3xmXBJa/ueK5hk/Nu8hWbRf4W8bnF1B8wEA
+AP//AwBQSwMEFAAGAAgAAAAhANZks1H0AAAAMQMAABwACAF3b3JkL19yZWxzL2RvY3VtZW50Lnht
+bC5yZWxzIKIEASigAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+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
+AABJLQAAAAA=
+
+------=_NextPart_000_0A44_01DC1917.598C9580--

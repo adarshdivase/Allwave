@@ -1,0 +1,1597 @@
+Received: by 2002:a05:7010:6aa2:b0:445:9a8c:7b54 with SMTP id co34csp7862120mdb;
+        Wed, 9 Apr 2025 00:48:17 -0700 (PDT)
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id af79cd13be357-7c7a11cf2d8sor55984785a.14.2025.04.09.00.48.17
+        for <sachin.bhosale@allwavegs.com>
+        (Google Transport Security);
+        Wed, 09 Apr 2025 00:48:17 -0700 (PDT)
+From: "Balasubramanian Selvam/AWAV/Bangalore" <bala.s@allwaveav.com>
+To: "Sachin Bhosale" <sachin.bhosale@allwavegs.com>
+References: <AM0PR03MB475578F87723EFD636026CF9ED8E2@AM0PR03MB4755.eurprd03.prod.outlook.com>
+In-Reply-To: <AM0PR03MB475578F87723EFD636026CF9ED8E2@AM0PR03MB4755.eurprd03.prod.outlook.com>
+Subject: Fwd: Minutes of Meeting - 7 Additional Rooms
+Date: Wed, 9 Apr 2025 13:17:40 +0530
+Message-ID: <CAG-w=u4Nbb6fbEWOa=0psBmbn0dhFLyCtaohsYk-nwFXx4gehw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	boundary="----=_NextPart_000_0A5B_01DC1917.59BF6550"
+X-Mailer: Microsoft Outlook 16.0
+X-Google-Smtp-Source: AGHT+IFy3o5EWPD0ODe/XSCeek8K3c4QcVdbP+uyTM049+XwQ7iRGlajX3UUJCfuHlSXa4G3MV7t4NcvSZXO/BjaynY=
+X-Received: by 2002:a05:620a:2956:b0:7c5:4d2e:4d2d with SMTP id af79cd13be357-7c79cc49901mr328019885a.50.1744184897560;
+        Wed, 09 Apr 2025 00:48:17 -0700 (PDT)
+X-Received: by 2002:a05:6214:4019:b0:6e6:6252:ad1a with SMTP id
+ 6a1803df08f44-6f0dbc59fa7mr40572126d6.28.1744184896808; Wed, 09 Apr 2025
+ 00:48:16 -0700 (PDT)
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@allwaveav.com header.s=allwaveav header.b="NOe+Ksz/";
+       spf=pass (google.com: domain of bala.s@allwaveav.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=bala.s@allwaveav.com;
+       dmarc=pass (p=QUARANTINE sp=NONE dis=NONE) header.from=allwaveav.com;
+       dara=neutral header.i=@allwavegs.com
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1744184897; x=1744789697;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=L4xe98wh5X6/1Zx89xVFFW4hRLOY8gbBOjYqBGTmIGA=;
+        b=R2PP5O8Z5ugK0+BsJHsIeVp4TxiBadeo1hXSmfTz2QwaYFOOmcmjJW37DWmhWKANuX
+         N0/HoXdkuihjKDsk8esE1h4a3qjTWXEhwm/nkE9tEsRMiDiNx+7t8FVymWoHX+EmGA0o
+         cQY6Hf5J1NWAvOLoQP8bVUrRahwbc9nuuCwl8uhr3bDtE726aPMnT9L8fktKJi16pF7c
+         ZkMR7JxKdJ2pLOZCVB1svj6gNzXjG9Y8aV8AzE19b3AX42mKugNocy/nJaJA56KCkhrt
+         lWE6ZRBrSJ2kXY/lXrJAxhUYL9ax3/Feq3xN8lCKDRU1nnkyo1Y5mO3zoKJ9EfUGFDCx
+         1nbA==
+X-Gm-Message-State: AOJu0YyYxJub0RSB4eNkh0KwvLxlhNUo5bpiUhxPZDwzemfJuDpVqAHW
+	XIA1fdx49+MIKWIxh1JJEfLMwwj2bYmjsQ8Hszpiwjt6ZCLmriXVJYJzjNfAI/UXtqQOmS0bvY3
+	kiKjXwOIUzz2RwNPGvuSX3b2v9VB7kK3HyzZigdXSO+P0SB9NFQ==
+X-Gm-Gg: ASbGncui+MJBvvef5ZgwirjdpV6UlXYk1H27/9+06k9tiNVQQ5Uikl3a/20QsgwuwOG
+	3clw6LlivNdG6AU+Jh86YoxjaJg5E6iBb6NeDMdcWg04mPXHPsj2NkZIsw4E6ridsQAM8wLt4Nb
+	L/Q5KAuPPk8jIOoQahxYnOxw==
+X-Gm-Features: ATxdqUGLrnqOjdOCZc-girfsn-exSZVTa-0uh4UAiBvcjwqEL3Vgk8X-WiXzjcA
+Thread-Index: AQLP2y152IVHJINQ9ITp6HSoHHpcWgKwW3k/
+
+This is a multipart message in MIME format.
+
+------=_NextPart_000_0A5B_01DC1917.59BF6550
+Content-Type: multipart/alternative;
+	boundary="----=_NextPart_001_0A5C_01DC1917.59BF8C60"
+
+
+------=_NextPart_001_0A5C_01DC1917.59BF8C60
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+Hi Sachin,
+
+Below MoM mail for your ready reference.
+
+
+Warm Regards,=20
+
+
+
+
+
+  =
+<https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJdvuvdw-X6B-FMhdYVnerb=
+14gh13vI1f0z28PzwpbxvwgWVGSJ_zo_CL9HoGfbS-pB66P2WAdPD59KuhjG-sJB9dj7IFGLM=
+4-LEeFHoIx540CWOWal5_djf3fpJwV4TGqiXls?key=3D25EjYfqXXzGOrd5RdjmiL5AG>=20
+
+
+
+
+Balasubramanian S
+
+Manager - Design & Estimation
+
+
+
+
+Classic Arena, 4th Floor, Hosur Rd, AECS Layout - A Block, Singasandra, =
+Bengaluru, Karnataka 560068
+
+Phone: +91-9597300207
+
+Email ID:  <mailto:bala.s@allwaveav.com> bala.s@allwaveav.com
+
+
+MUMBAI  |  PUNE  |  NCR  |  BENGALURU  |  HYDERABAD  |  CHENNAI  |  =
+KOLKATA
+
+
+ <https://www.linkedin.com/company/allwave-av>    =
+<https://www.instagram.com/allwaveav>    =
+<https://www.facebook.com/Allwave.AV.Systems/>=20
+
+
+ <http://www.allwaveav.com>=20
+
+
+
+---------- Forwarded message ---------
+From: Kumar, Binit <Binit.Kumar@tesco.com <mailto:Binit.Kumar@tesco.com> =
+>
+Date: Wed, Aug 21, 2024 at 8:30=E2=80=AFPM
+Subject: Minutes of Meeting - 7 Additional Rooms
+To: Narayana, Ashwatha <Ashwatha.Narayana@tesco.com =
+<mailto:Ashwatha.Narayana@tesco.com> >, Menon, Rajesh =
+<Rajesh.Menon1@tesco.com <mailto:Rajesh.Menon1@tesco.com> >, =
+Balasubramanian Selvam/AWAV/Bangalore <bala.s@allwaveav.com =
+<mailto:bala.s@allwaveav.com> >, P. M.O. @Allwave <pmo@allwaveav.com =
+<mailto:pmo@allwaveav.com> >, Selladurai, Anbudurai =
+<Anbudurai.Selladurai@tesco.com <mailto:Anbudurai.Selladurai@tesco.com> =
+>
+Cc: Bhatia, Gurpreet <Gurpreet.Bhatia@tesco.com =
+<mailto:Gurpreet.Bhatia@tesco.com> >, Murthy, Krishna =
+<Krishna.X.Murthy@tesco.com <mailto:Krishna.X.Murthy@tesco.com> >, =
+Venktesh, Vishwamanjunath <Vishwamanjunath.Venktesh@tesco.com =
+<mailto:Vishwamanjunath.Venktesh@tesco.com> >, Nandy Majumdar, Joydeep =
+<Joydeep.NandyMajumdar@tesco.com =
+<mailto:Joydeep.NandyMajumdar@tesco.com> >
+
+
+
+
+Hi All,=20
+
+=20
+
+Thank you for joining the call and discussing the below points for the =
+additional 7 rooms. Please find the MoM for the same=20
+
+=20
+
+Date: 21-08-2024
+Time: 05:00 PM =E2=80=93 06:00 PM=20
+Attendees: Ashwatha, Rajesh, Bala, Ciba, Anbu, Binit.
+
+=20
+
+
+S.No
+
+Topic
+
+Details
+
+Owner
+
+Timeline
+
+
+1
+
+Room Configurations -=20
+
+=20
+
+=20
+
+=20
+
+
+a
+
+Sonic 2nd Floor Command Centre
+
+Medium room - 65" TV, Rally Bar, 2 mics, 6-seater rectangular table.
+
+Facilities, Allwave
+
+28th Aug - 15th Sept=20
+
+
+b
+
+Sonic 2nd Floor (Opp. Command Centre)
+
+Small room - 55" TV, Rally Bar, 1 mic, 4-seater large oval or existing =
+rectangular table.
+
+Facilities, Allwave
+
+28th Aug - 15th Sept=20
+
+
+c
+
+Sonic Ground Floor & 2nd Floor (Pantry)
+
+Small rooms - 55" TV, Rally Bar Mini, 1 mic, 3=E2=80=934-seater oval =
+table.
+
+Facilities, Allwave
+
+28th Aug - 15th Sept=20
+
+
+d
+
+Sonic 2nd Floor (3 rooms together)
+
+Small rooms - 55" TV, Rally Bar Mini, 1 mic, 3=E2=80=934-seater oval =
+table.
+
+Facilities, Allwave
+
+28th Aug - 15th Sept=20
+
+
+e
+
+Stargate Ground Floor
+
+Site survey completed; AV partner suggestions to be provided and =
+discussion to be taken.
+
+Allwave, All
+
+28th Aug - 15th Sept=20
+
+
+2
+
+TV Marking for 7 Rooms
+
+Provide TV marking details for wall adjustments.
+
+Allwave=20
+
+By 22nd Aug=20
+
+
+3
+
+Oval Table Dimensions
+
+Share dimensions of the oval-shaped table.
+
+Ashwatha
+
+By 22nd Aug
+
+
+4
+
+Roofing Confirmation
+
+Verify the sturdiness of the roofs in the new meeting rooms and confirm =
+no water leakage; provide sign-off.
+
+Ashwatha
+
+N/A
+
+
+5
+
+Room Names for Condeco
+
+Provide room names for setup.
+
+Ashwatha
+
+N/A
+
+
+6
+
+Condeco Panels
+
+Repurpose panels from existing quiet rooms to the 7 new rooms.
+
+Rajesh
+
+N/A
+
+
+7
+
+Condeco Panel Marking
+
+Follow existing marking; coordinate with Anbu/Rajesh if needed.
+
+Facilities
+
+N/A
+
+
+8
+
+LAN Ports for Condeco Panels
+
+Ensure 2 LAN ports are provided per Condeco panel (1 for backup).
+
+Facilities
+
+N/A
+
+
+9
+
+Commercials for 7 Rooms
+
+Submit detailed commercials for the 7 rooms.=20
+
+Bala
+
+By 22nd Aug
+
+=20
+
+
+Milestones
+
+Deadline
+
+
+Civil Work Completion
+
+28th Aug - 30th Aug=20
+
+
+AV Work Completion
+
+31st Aug - 15th Sept=20
+
+
+Complete Testing
+
+9th Sept - 13th Sept=20
+
+=20
+
+
+Sign Off=20
+
+Owner=20
+
+
+Voice & Video=20
+
+Anbu & Joydeep
+
+
+Facilities=20
+
+Ashwatha=20
+
+
+SD=20
+
+Raghu & Rajesh=20
+
+=20
+
+Upon receiving signoffs from V&V, Facilities, and Service Desk teams, =
+procurement can proceed with purchasing the kits.
+
+=20
+
+Regards,
+
+Binit Kumar
+
+Tesco Technology
+
+9789902813
+
+# 81 & 82,  EPIP Area, Whitefield, Bangalore, Karnataka, 560 066.
+
+ <http://www.tescoplc.com/> www.tescoplc.com | @tesconews
+
+=20
+
+
+
+=20
+
+This is a confidential email. Tesco may monitor and record all emails. =
+The views expressed in this email are those of the sender and not Tesco. =
+Tesco Stores Limited Company Number: 519500 Registered in England =
+Registered Office: Tesco House, Shire Park, Kestrel Way, Welwyn Garden =
+City, AL7 1GA VAT Registration Number: GB 220 4302 31=20
+
+------=_NextPart_001_0A5C_01DC1917.59BF8C60
+Content-Type: text/html;
+	boundary="00000000000032fcfd063253b11c";
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div><div>Hi Sachin,</div><div><br></div><div>Below MoM =
+mail for your ready reference.</div></div><div><br></div><div><div =
+dir=3D"ltr" class=3D"gmail_signature" =
+data-smartmail=3D"gmail_signature"><div dir=3D"ltr"><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Arial,sans-serif;color:#000000;backgr=
+ound-color:transparent;font-weight:400;font-style:normal;font-variant:nor=
+mal;text-decoration:none;vertical-align:baseline;white-space:pre;white-sp=
+ace:pre-wrap">Warm Regards,=C2=A0</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.38;margin-top:0pt;margin-bottom:0pt"><span><br></s=
+pan></p><div dir=3D"ltr" style=3D"margin-left:0pt" align=3D"left"><table =
+style=3D"border:none;border-collapse:collapse"><colgroup><col =
+width=3D"203"><col width=3D"459"></colgroup><tbody><tr =
+style=3D"height:164.46386718749997pt"><td style=3D"border-left:solid =
+#ffffff 1pt;border-right:solid #ffffff 1pt;border-bottom:solid #ffffff =
+1pt;border-top:solid #ffffff 1pt;vertical-align:top;padding:5pt 5pt 5pt =
+5pt;overflow:hidden"><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:8pt;font-family:Arial,sans-serif;color:#000000;backgro=
+und-color:transparent;font-weight:400;font-style:normal;font-variant:norm=
+al;text-decoration:none;vertical-align:baseline;white-space:pre;white-spa=
+ce:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:163px;hei=
+ght:159px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJdvuvdw-X6B-FMhd=
+YVnerb14gh13vI1f0z28PzwpbxvwgWVGSJ_zo_CL9HoGfbS-pB66P2WAdPD59KuhjG-sJB9dj=
+7IFGLM4-LEeFHoIx540CWOWal5_djf3fpJwV4TGqiXls?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"163" height=3D"159" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></p></td><td =
+style=3D"border-left:solid #ffffff 1pt;border-right:solid #ffffff =
+1pt;border-bottom:solid #ffffff 1pt;border-top:solid #ffffff =
+1pt;vertical-align:top;padding:5pt 5pt 5pt 5pt;overflow:hidden"><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:700;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Balasubramanian S</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Manager - Design &amp; Estimation</span></p><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap"><br></span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><font =
+color=3D"#000000" face=3D"Roboto, sans-serif"><span =
+style=3D"font-size:13.3333px">Classic Arena, 4th Floor, Hosur Rd, AECS =
+Layout - A Block, Singasandra, Bengaluru, Karnataka =
+560068</span></font></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Phone: +91-9597300207</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Email ID: </span><a href=3D"mailto:bala.s@allwaveav.com" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap">bala.s@allwaveav.com</span></a></p><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:8pt;font-family:Roboto,sans-serif;color:#000000;backgr=
+ound-color:transparent;font-weight:400;font-style:normal;font-variant:nor=
+mal;text-decoration:none;vertical-align:baseline;white-space:pre;white-sp=
+ace:pre-wrap">MUMBAI=C2=A0 |=C2=A0 PUNE=C2=A0 |=C2=A0 NCR=C2=A0 |=C2=A0 =
+BENGALURU=C2=A0 |=C2=A0 HYDERABAD=C2=A0 |=C2=A0 CHENNAI=C2=A0 |=C2=A0 =
+KOLKATA</span></p><br><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><a =
+href=3D"https://www.linkedin.com/company/allwave-av" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:32px;heig=
+ht:31px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcGQZ1JVmPqfbCj4xN=
+QZPHrY_3ZM6e_0xbjID4UdDS0Lm7v6z9864QXMrKESZ8vC4A-RIGNJEvvTxIefrv-SpUY4FIn=
+v5foJwc0M84tQibq27an7fXbnJctByiLP8A38_u6x3rD?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"32" height=3D"31" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">=C2=A0 </span><a =
+href=3D"https://www.instagram.com/allwaveav" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:32px;heig=
+ht:32px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdAL4n3JgPc01QE_3v=
+-pfMctMtxcBM98T5L4vk-zuyY22IM8fJWkYUdbA4EpyhTBVaGklog_ryIP8DDrt_wetoQj_D7=
+ai7BypIYaScKbdUn5n23bEwkF7RgKccoGDGelzpoWsXraw?key=3D25EjYfqXXzGOrd5Rdjmi=
+L5AG" width=3D"32" height=3D"32" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">=C2=A0 </span><a =
+href=3D"https://www.facebook.com/Allwave.AV.Systems/" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:30px;heig=
+ht:29px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXflfIj7rdcGlSyPHml=
+t1G13q9Z54Kf0xiPml_NyRpb0UkPNMI2XfL6pMAFTEFxIh8LLPIa8IfJ8AXpBQfIBUi7XYMLC=
+LDa1TWlalG50CqNoIFNfgbt0F7y7y7cJFWkmlilkQWMj9Q?key=3D25EjYfqXXzGOrd5Rdjmi=
+L5AG" width=3D"30" height=3D"29" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a></p><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><a =
+href=3D"http://www.allwaveav.com" style=3D"text-decoration:none" =
+target=3D"_blank"><span =
+style=3D"font-size:8pt;font-family:Arial,sans-serif;color:#1155cc;backgro=
+und-color:transparent;font-weight:400;font-style:normal;font-variant:norm=
+al;text-decoration:underline;vertical-align:baseline;white-space:pre;whit=
+e-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:445px;hei=
+ght:67px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdqPdtfcRVlDqqP6im=
+nKEPV7PPzGBB_FGKx5ejpPcNegfexZq2mk0c5dZwqIiCkdM0LT5CVe8s_1IZdr5EqDOUFf6yL=
+8y3nLs_aZ7z9cKrUhEZevQv_OrGzK94HHhALVG7BokNb?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"445" height=3D"67" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a></p></td></tr>=
+</tbody></table></div></div></div></div><br><br><div =
+class=3D"gmail_quote gmail_quote_container"><div dir=3D"ltr" =
+class=3D"gmail_attr">---------- Forwarded message ---------<br>From: =
+<strong class=3D"gmail_sendername" dir=3D"auto">Kumar, Binit</strong> =
+<span dir=3D"auto">&lt;<a =
+href=3D"mailto:Binit.Kumar@tesco.com">Binit.Kumar@tesco.com</a>&gt;</span=
+><br>Date: Wed, Aug 21, 2024 at 8:30=E2=80=AFPM<br>Subject: Minutes of =
+Meeting - 7 Additional Rooms<br>To: Narayana, Ashwatha &lt;<a =
+href=3D"mailto:Ashwatha.Narayana@tesco.com">Ashwatha.Narayana@tesco.com</=
+a>&gt;, Menon, Rajesh &lt;<a =
+href=3D"mailto:Rajesh.Menon1@tesco.com">Rajesh.Menon1@tesco.com</a>&gt;, =
+Balasubramanian Selvam/AWAV/Bangalore &lt;<a =
+href=3D"mailto:bala.s@allwaveav.com">bala.s@allwaveav.com</a>&gt;, P. =
+M.O. @Allwave &lt;<a =
+href=3D"mailto:pmo@allwaveav.com">pmo@allwaveav.com</a>&gt;, Selladurai, =
+Anbudurai &lt;<a =
+href=3D"mailto:Anbudurai.Selladurai@tesco.com">Anbudurai.Selladurai@tesco=
+.com</a>&gt;<br>Cc: Bhatia, Gurpreet &lt;<a =
+href=3D"mailto:Gurpreet.Bhatia@tesco.com">Gurpreet.Bhatia@tesco.com</a>&g=
+t;, Murthy, Krishna &lt;<a =
+href=3D"mailto:Krishna.X.Murthy@tesco.com">Krishna.X.Murthy@tesco.com</a>=
+&gt;, Venktesh, Vishwamanjunath &lt;<a =
+href=3D"mailto:Vishwamanjunath.Venktesh@tesco.com">Vishwamanjunath.Venkte=
+sh@tesco.com</a>&gt;, Nandy Majumdar, Joydeep &lt;<a =
+href=3D"mailto:Joydeep.NandyMajumdar@tesco.com">Joydeep.NandyMajumdar@tes=
+co.com</a>&gt;<br></div><br><br><div class=3D"msg-1619890842061730274">
+
+
+
+
+
+<div lang=3D"EN-IN" link=3D"#0563C1" vlink=3D"#954F72" =
+style=3D"word-wrap:break-word">
+<div class=3D"m_-1619890842061730274WordSection1">
+<p class=3D"MsoNormal">Hi All, <u></u><u></u></p>
+<p class=3D"MsoNormal"><u></u>=C2=A0<u></u></p>
+<p class=3D"MsoNormal">Thank you for joining the call and discussing the =
+below points for the additional 7 rooms. Please find the MoM for the =
+same
+<u></u><u></u></p>
+<p class=3D"MsoNormal"><strong><span =
+style=3D"font-family:&quot;Calibri&quot;,sans-serif"><u></u>=C2=A0<u></u>=
+</span></strong></p>
+<p class=3D"MsoNormal"><strong><span =
+style=3D"font-family:&quot;Calibri&quot;,sans-serif">Date:</span></strong=
+> 21-08-2024<br>
+<strong><span =
+style=3D"font-family:&quot;Calibri&quot;,sans-serif">Time:</span></strong=
+> 05:00 PM =E2=80=93 06:00 PM
+<br>
+<strong><span =
+style=3D"font-family:&quot;Calibri&quot;,sans-serif">Attendees:</span></s=
+trong> Ashwatha, Rajesh, Bala, Ciba, Anbu, Binit.<u></u><u></u></p>
+<p class=3D"MsoNormal"><u></u>=C2=A0<u></u></p>
+<table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" width=3D"1595" =
+style=3D"width:1196.0pt;border-collapse:collapse">
+<tbody>
+<tr style=3D"height:15.0pt">
+<td width=3D"48" style=3D"width:35.85pt;border:solid windowtext =
+1.0pt;padding:0cm 5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><b><span =
+style=3D"font-size:12.0pt;font-family:&quot;Arial&quot;,sans-serif;color:=
+black">S.No<u></u><u></u></span></b></p>
+</td>
+<td width=3D"320" style=3D"width:240.35pt;border:solid windowtext =
+1.0pt;border-left:none;padding:0cm 5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal" align=3D"center" =
+style=3D"text-align:center"><b><span =
+style=3D"font-size:12.0pt;font-family:&quot;Arial&quot;,sans-serif;color:=
+black">Topic<u></u><u></u></span></b></p>
+</td>
+<td width=3D"744" style=3D"width:558.15pt;border:solid windowtext =
+1.0pt;border-left:none;padding:0cm 5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal" align=3D"center" =
+style=3D"text-align:center"><b><span =
+style=3D"font-size:12.0pt;font-family:&quot;Arial&quot;,sans-serif;color:=
+black">Details<u></u><u></u></span></b></p>
+</td>
+<td width=3D"217" style=3D"width:162.45pt;border:solid windowtext =
+1.0pt;border-left:none;padding:0cm 5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal" align=3D"center" =
+style=3D"text-align:center"><b><span =
+style=3D"font-size:12.0pt;font-family:&quot;Arial&quot;,sans-serif;color:=
+black">Owner<u></u><u></u></span></b></p>
+</td>
+<td width=3D"266" style=3D"width:199.2pt;border:solid windowtext =
+1.0pt;border-left:none;padding:0cm 5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal" align=3D"center" =
+style=3D"text-align:center"><b><span =
+style=3D"font-size:12.0pt;font-family:&quot;Arial&quot;,sans-serif;color:=
+black">Timeline<u></u><u></u></span></b></p>
+</td>
+</tr>
+<tr style=3D"height:15.0pt">
+<td width=3D"48" nowrap valign=3D"bottom" =
+style=3D"width:35.85pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">1<u></u><u=
+></u></span></p>
+</td>
+<td width=3D"320" =
+style=3D"width:240.35pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><b><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Room =
+Configurations -
+<u></u><u></u></span></b></p>
+</td>
+<td width=3D"744" =
+style=3D"width:558.15pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">=C2=A0<u><=
+/u><u></u></span></p>
+</td>
+<td width=3D"217" =
+style=3D"width:162.45pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">=C2=A0<u><=
+/u><u></u></span></p>
+</td>
+<td width=3D"266" =
+style=3D"width:199.2pt;border-top:none;border-left:none;border-bottom:sol=
+id windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">=C2=A0<u><=
+/u><u></u></span></p>
+</td>
+</tr>
+<tr style=3D"height:14.25pt">
+<td width=3D"48" nowrap valign=3D"bottom" =
+style=3D"width:35.85pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal" align=3D"right" style=3D"text-align:right"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">a<u></u><u=
+></u></span></p>
+</td>
+<td width=3D"320" =
+style=3D"width:240.35pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Sonic 2nd =
+Floor Command Centre<u></u><u></u></span></p>
+</td>
+<td width=3D"744" =
+style=3D"width:558.15pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Medium =
+room - 65&quot; TV, Rally Bar, 2 mics, 6-seater rectangular =
+table.<u></u><u></u></span></p>
+</td>
+<td width=3D"217" =
+style=3D"width:162.45pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Facilities=
+, Allwave<u></u><u></u></span></p>
+</td>
+<td width=3D"266" =
+style=3D"width:199.2pt;border-top:none;border-left:none;border-bottom:sol=
+id windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">28th Aug =
+- 15th Sept
+<u></u><u></u></span></p>
+</td>
+</tr>
+<tr style=3D"height:14.25pt">
+<td width=3D"48" nowrap valign=3D"bottom" =
+style=3D"width:35.85pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal" align=3D"right" style=3D"text-align:right"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">b<u></u><u=
+></u></span></p>
+</td>
+<td width=3D"320" =
+style=3D"width:240.35pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Sonic 2nd =
+Floor (Opp. Command Centre)<u></u><u></u></span></p>
+</td>
+<td width=3D"744" =
+style=3D"width:558.15pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Small =
+room - 55&quot; TV, Rally Bar, 1 mic, 4-seater large oval or existing =
+rectangular table.<u></u><u></u></span></p>
+</td>
+<td width=3D"217" =
+style=3D"width:162.45pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Facilities=
+, Allwave<u></u><u></u></span></p>
+</td>
+<td width=3D"266" =
+style=3D"width:199.2pt;border-top:none;border-left:none;border-bottom:sol=
+id windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">28th Aug =
+- 15th Sept
+<u></u><u></u></span></p>
+</td>
+</tr>
+<tr style=3D"height:14.25pt">
+<td width=3D"48" nowrap valign=3D"bottom" =
+style=3D"width:35.85pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal" align=3D"right" style=3D"text-align:right"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">c<u></u><u=
+></u></span></p>
+</td>
+<td width=3D"320" =
+style=3D"width:240.35pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Sonic =
+Ground Floor &amp; 2nd Floor (Pantry)<u></u><u></u></span></p>
+</td>
+<td width=3D"744" =
+style=3D"width:558.15pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Small =
+rooms - 55&quot; TV, Rally Bar Mini, 1 mic, 3=E2=80=934-seater oval =
+table.<u></u><u></u></span></p>
+</td>
+<td width=3D"217" =
+style=3D"width:162.45pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Facilities=
+, Allwave<u></u><u></u></span></p>
+</td>
+<td width=3D"266" =
+style=3D"width:199.2pt;border-top:none;border-left:none;border-bottom:sol=
+id windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">28th Aug =
+- 15th Sept
+<u></u><u></u></span></p>
+</td>
+</tr>
+<tr style=3D"height:14.25pt">
+<td width=3D"48" nowrap valign=3D"bottom" =
+style=3D"width:35.85pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal" align=3D"right" style=3D"text-align:right"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">d<u></u><u=
+></u></span></p>
+</td>
+<td width=3D"320" =
+style=3D"width:240.35pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Sonic 2nd =
+Floor (3 rooms together)<u></u><u></u></span></p>
+</td>
+<td width=3D"744" =
+style=3D"width:558.15pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Small =
+rooms - 55&quot; TV, Rally Bar Mini, 1 mic, 3=E2=80=934-seater oval =
+table.<u></u><u></u></span></p>
+</td>
+<td width=3D"217" =
+style=3D"width:162.45pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Facilities=
+, Allwave<u></u><u></u></span></p>
+</td>
+<td width=3D"266" =
+style=3D"width:199.2pt;border-top:none;border-left:none;border-bottom:sol=
+id windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">28th Aug =
+- 15th Sept
+<u></u><u></u></span></p>
+</td>
+</tr>
+<tr style=3D"height:14.25pt">
+<td width=3D"48" nowrap valign=3D"bottom" =
+style=3D"width:35.85pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal" align=3D"right" style=3D"text-align:right"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">e<u></u><u=
+></u></span></p>
+</td>
+<td width=3D"320" =
+style=3D"width:240.35pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Stargate =
+Ground Floor<u></u><u></u></span></p>
+</td>
+<td width=3D"744" =
+style=3D"width:558.15pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Site =
+survey completed; AV partner suggestions to be provided and discussion =
+to be taken.<u></u><u></u></span></p>
+</td>
+<td width=3D"217" =
+style=3D"width:162.45pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Allwave, =
+All<u></u><u></u></span></p>
+</td>
+<td width=3D"266" =
+style=3D"width:199.2pt;border-top:none;border-left:none;border-bottom:sol=
+id windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:14.25pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">28th Aug =
+- 15th Sept
+<u></u><u></u></span></p>
+</td>
+</tr>
+<tr style=3D"height:15.0pt">
+<td width=3D"48" nowrap valign=3D"bottom" =
+style=3D"width:35.85pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">2<u></u><u=
+></u></span></p>
+</td>
+<td width=3D"320" =
+style=3D"width:240.35pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><b><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">TV =
+Marking for 7 Rooms<u></u><u></u></span></b></p>
+</td>
+<td width=3D"744" =
+style=3D"width:558.15pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Provide =
+TV marking details for wall adjustments.<u></u><u></u></span></p>
+</td>
+<td width=3D"217" =
+style=3D"width:162.45pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Allwave
+<u></u><u></u></span></p>
+</td>
+<td width=3D"266" =
+style=3D"width:199.2pt;border-top:none;border-left:none;border-bottom:sol=
+id windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">By 22nd =
+Aug
+<u></u><u></u></span></p>
+</td>
+</tr>
+<tr style=3D"height:15.0pt">
+<td width=3D"48" nowrap valign=3D"bottom" =
+style=3D"width:35.85pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">3<u></u><u=
+></u></span></p>
+</td>
+<td width=3D"320" =
+style=3D"width:240.35pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><b><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Oval =
+Table Dimensions<u></u><u></u></span></b></p>
+</td>
+<td width=3D"744" =
+style=3D"width:558.15pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Share =
+dimensions of the oval-shaped table.<u></u><u></u></span></p>
+</td>
+<td width=3D"217" =
+style=3D"width:162.45pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Ashwatha<u=
+></u><u></u></span></p>
+</td>
+<td width=3D"266" =
+style=3D"width:199.2pt;border-top:none;border-left:none;border-bottom:sol=
+id windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">By 22nd =
+Aug<u></u><u></u></span></p>
+</td>
+</tr>
+<tr style=3D"height:15.0pt">
+<td width=3D"48" nowrap valign=3D"bottom" =
+style=3D"width:35.85pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">4<u></u><u=
+></u></span></p>
+</td>
+<td width=3D"320" =
+style=3D"width:240.35pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><b><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Roofing =
+Confirmation<u></u><u></u></span></b></p>
+</td>
+<td width=3D"744" =
+style=3D"width:558.15pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Verify =
+the sturdiness of the roofs in the new meeting rooms and confirm no =
+water leakage; provide sign-off.<u></u><u></u></span></p>
+</td>
+<td width=3D"217" =
+style=3D"width:162.45pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Ashwatha<u=
+></u><u></u></span></p>
+</td>
+<td width=3D"266" =
+style=3D"width:199.2pt;border-top:none;border-left:none;border-bottom:sol=
+id windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">N/A<u></u>=
+<u></u></span></p>
+</td>
+</tr>
+<tr style=3D"height:15.0pt">
+<td width=3D"48" nowrap valign=3D"bottom" =
+style=3D"width:35.85pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">5<u></u><u=
+></u></span></p>
+</td>
+<td width=3D"320" =
+style=3D"width:240.35pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><b><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Room =
+Names for Condeco<u></u><u></u></span></b></p>
+</td>
+<td width=3D"744" =
+style=3D"width:558.15pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Provide =
+room names for setup.<u></u><u></u></span></p>
+</td>
+<td width=3D"217" =
+style=3D"width:162.45pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Ashwatha<u=
+></u><u></u></span></p>
+</td>
+<td width=3D"266" =
+style=3D"width:199.2pt;border-top:none;border-left:none;border-bottom:sol=
+id windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">N/A<u></u>=
+<u></u></span></p>
+</td>
+</tr>
+<tr style=3D"height:15.0pt">
+<td width=3D"48" nowrap valign=3D"bottom" =
+style=3D"width:35.85pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">6<u></u><u=
+></u></span></p>
+</td>
+<td width=3D"320" =
+style=3D"width:240.35pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><b><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Condeco =
+Panels<u></u><u></u></span></b></p>
+</td>
+<td width=3D"744" =
+style=3D"width:558.15pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Repurpose =
+panels from existing quiet rooms to the 7 new =
+rooms.<u></u><u></u></span></p>
+</td>
+<td width=3D"217" =
+style=3D"width:162.45pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Rajesh<u><=
+/u><u></u></span></p>
+</td>
+<td width=3D"266" =
+style=3D"width:199.2pt;border-top:none;border-left:none;border-bottom:sol=
+id windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">N/A<u></u>=
+<u></u></span></p>
+</td>
+</tr>
+<tr style=3D"height:15.0pt">
+<td width=3D"48" nowrap valign=3D"bottom" =
+style=3D"width:35.85pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">7<u></u><u=
+></u></span></p>
+</td>
+<td width=3D"320" =
+style=3D"width:240.35pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><b><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Condeco =
+Panel Marking<u></u><u></u></span></b></p>
+</td>
+<td width=3D"744" =
+style=3D"width:558.15pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Follow =
+existing marking; coordinate with Anbu/Rajesh if =
+needed.<u></u><u></u></span></p>
+</td>
+<td width=3D"217" =
+style=3D"width:162.45pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Facilities=
+<u></u><u></u></span></p>
+</td>
+<td width=3D"266" =
+style=3D"width:199.2pt;border-top:none;border-left:none;border-bottom:sol=
+id windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">N/A<u></u>=
+<u></u></span></p>
+</td>
+</tr>
+<tr style=3D"height:15.0pt">
+<td width=3D"48" nowrap valign=3D"bottom" =
+style=3D"width:35.85pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">8<u></u><u=
+></u></span></p>
+</td>
+<td width=3D"320" =
+style=3D"width:240.35pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><b><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">LAN Ports =
+for Condeco Panels<u></u><u></u></span></b></p>
+</td>
+<td width=3D"744" =
+style=3D"width:558.15pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Ensure 2 =
+LAN ports are provided per Condeco panel (1 for =
+backup).<u></u><u></u></span></p>
+</td>
+<td width=3D"217" =
+style=3D"width:162.45pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Facilities=
+<u></u><u></u></span></p>
+</td>
+<td width=3D"266" =
+style=3D"width:199.2pt;border-top:none;border-left:none;border-bottom:sol=
+id windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">N/A<u></u>=
+<u></u></span></p>
+</td>
+</tr>
+<tr style=3D"height:15.0pt">
+<td width=3D"48" nowrap valign=3D"bottom" =
+style=3D"width:35.85pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">9<u></u><u=
+></u></span></p>
+</td>
+<td width=3D"320" =
+style=3D"width:240.35pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><b><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Commercial=
+s for 7 Rooms<u></u><u></u></span></b></p>
+</td>
+<td width=3D"744" =
+style=3D"width:558.15pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Submit =
+detailed commercials for the 7 rooms.
+<u></u><u></u></span></p>
+</td>
+<td width=3D"217" =
+style=3D"width:162.45pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Bala<u></u=
+><u></u></span></p>
+</td>
+<td width=3D"266" =
+style=3D"width:199.2pt;border-top:none;border-left:none;border-bottom:sol=
+id windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:15.0pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">By 22nd =
+Aug<u></u><u></u></span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class=3D"MsoNormal"><u></u>=C2=A0<u></u></p>
+<table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" width=3D"340" =
+style=3D"width:254.9pt;border-collapse:collapse">
+<tbody>
+<tr style=3D"height:12.75pt">
+<td width=3D"160" style=3D"width:120.25pt;border:solid windowtext =
+1.0pt;padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt">
+<p class=3D"MsoNormal" align=3D"center" =
+style=3D"text-align:center"><b><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Milestones=
+<u></u><u></u></span></b></p>
+</td>
+<td width=3D"180" style=3D"width:134.65pt;border:solid windowtext =
+1.0pt;border-left:none;padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt">
+<p class=3D"MsoNormal" align=3D"center" =
+style=3D"text-align:center"><b><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Deadline<u=
+></u><u></u></span></b></p>
+</td>
+</tr>
+<tr style=3D"height:12.75pt">
+<td width=3D"160" style=3D"width:120.25pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-size:10.0pt;font-family:&quot;Arial&quot;,sans-serif;color:=
+black">Civil Work Completion<u></u><u></u></span></p>
+</td>
+<td width=3D"180" =
+style=3D"width:134.65pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:12.75pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-size:10.0pt;font-family:&quot;Arial&quot;,sans-serif;color:=
+black">28th Aug - 30th Aug
+<u></u><u></u></span></p>
+</td>
+</tr>
+<tr style=3D"height:12.75pt">
+<td width=3D"160" style=3D"width:120.25pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-size:10.0pt;font-family:&quot;Arial&quot;,sans-serif;color:=
+black">AV Work Completion<u></u><u></u></span></p>
+</td>
+<td width=3D"180" =
+style=3D"width:134.65pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:12.75pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-size:10.0pt;font-family:&quot;Arial&quot;,sans-serif;color:=
+black">31st Aug - 15th Sept
+<u></u><u></u></span></p>
+</td>
+</tr>
+<tr style=3D"height:12.75pt">
+<td width=3D"160" style=3D"width:120.25pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-size:10.0pt;font-family:&quot;Arial&quot;,sans-serif;color:=
+black">Complete Testing<u></u><u></u></span></p>
+</td>
+<td width=3D"180" nowrap valign=3D"bottom" =
+style=3D"width:134.65pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:12.75pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-size:10.0pt;font-family:&quot;Arial&quot;,sans-serif;color:=
+black">9th Sept - 13th Sept
+<u></u><u></u></span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class=3D"MsoNormal"><u></u>=C2=A0<u></u></p>
+<table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" width=3D"340" =
+style=3D"width:254.9pt;border-collapse:collapse">
+<tbody>
+<tr style=3D"height:12.75pt">
+<td width=3D"160" style=3D"width:120.25pt;border:solid windowtext =
+1.0pt;padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt">
+<p class=3D"MsoNormal" align=3D"center" =
+style=3D"text-align:center"><b><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Sign Off
+<u></u><u></u></span></b></p>
+</td>
+<td width=3D"180" style=3D"width:134.65pt;border:solid windowtext =
+1.0pt;border-left:none;padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt">
+<p class=3D"MsoNormal" align=3D"center" =
+style=3D"text-align:center"><b><span =
+style=3D"font-family:&quot;Arial&quot;,sans-serif;color:black">Owner
+<u></u><u></u></span></b></p>
+</td>
+</tr>
+<tr style=3D"height:12.75pt">
+<td width=3D"160" style=3D"width:120.25pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-size:10.0pt;font-family:&quot;Arial&quot;,sans-serif;color:=
+black">Voice &amp; Video
+<u></u><u></u></span></p>
+</td>
+<td width=3D"180" =
+style=3D"width:134.65pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:12.75pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-size:10.0pt;font-family:&quot;Arial&quot;,sans-serif;color:=
+black">Anbu &amp; Joydeep<u></u><u></u></span></p>
+</td>
+</tr>
+<tr style=3D"height:12.75pt">
+<td width=3D"160" style=3D"width:120.25pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-size:10.0pt;font-family:&quot;Arial&quot;,sans-serif;color:=
+black">Facilities
+<u></u><u></u></span></p>
+</td>
+<td width=3D"180" =
+style=3D"width:134.65pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:12.75pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-size:10.0pt;font-family:&quot;Arial&quot;,sans-serif;color:=
+black">Ashwatha
+<u></u><u></u></span></p>
+</td>
+</tr>
+<tr style=3D"height:12.75pt">
+<td width=3D"160" style=3D"width:120.25pt;border:solid windowtext =
+1.0pt;border-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-size:10.0pt;font-family:&quot;Arial&quot;,sans-serif;color:=
+black">SD
+<u></u><u></u></span></p>
+</td>
+<td width=3D"180" =
+style=3D"width:134.65pt;border-top:none;border-left:none;border-bottom:so=
+lid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padding:0cm =
+5.4pt 0cm 5.4pt;height:12.75pt">
+<p class=3D"MsoNormal"><span =
+style=3D"font-size:10.0pt;font-family:&quot;Arial&quot;,sans-serif;color:=
+black">Raghu &amp; Rajesh
+<u></u><u></u></span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class=3D"MsoNormal"><u></u>=C2=A0<u></u></p>
+<p class=3D"MsoNormal">Upon receiving signoffs from V&amp;V, Facilities, =
+and Service Desk teams, procurement can proceed with purchasing the =
+kits.<u></u><u></u></p>
+<p class=3D"MsoNormal"><u></u>=C2=A0<u></u></p>
+<p class=3D"MsoNormal"><span =
+style=3D"color:black">Regards,<span><u></u><u></u></span></span></p>
+<p class=3D"MsoNormal"><b><span style=3D"color:black">Binit =
+Kumar<u></u><u></u></span></b></p>
+<p class=3D"MsoNormal"><b><span style=3D"color:black">Tesco =
+Technology<u></u><u></u></span></b></p>
+<p class=3D"MsoNormal"><b><span =
+style=3D"color:black">9789902813<u></u><u></u></span></b></p>
+<p class=3D"MsoNormal"><span style=3D"color:black"># 81 &amp; 82, =
+=C2=A0EPIP Area, Whitefield, Bangalore, Karnataka, 560 =
+066.<u></u><u></u></span></p>
+<p class=3D"MsoNormal"><span><a href=3D"http://www.tescoplc.com/" =
+target=3D"_blank"><span =
+style=3D"color:black">www.tescoplc.com</span></a><span =
+style=3D"color:black"> | @tesconews<u></u><u></u></span></span></p>
+<p class=3D"MsoNormal"><span =
+style=3D"color:black"><u></u>=C2=A0<u></u></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:black"><img border=3D"0" =
+width=3D"125" height=3D"36" style=3D"width:1.302in;height:.375in" =
+id=3D"m_-1619890842061730274Picture_x0020_1" =
+src=3D"cid:ii_1961984ba884cff311"><u></u><u></u></span></p>
+<p class=3D"MsoNormal"><u></u>=C2=A0<u></u></p>
+</div>
+This is a confidential email. Tesco may monitor and record all emails. =
+The views expressed in this email are those of the sender and not Tesco. =
+Tesco Stores Limited Company Number: 519500 Registered in England =
+Registered Office: Tesco House, Shire Park, Kestrel
+ Way, Welwyn Garden City, AL7 1GA VAT Registration Number: GB 220 4302 =
+31
+</div>
+
+</div></div></div>
+
+------=_NextPart_001_0A5C_01DC1917.59BF8C60--
+
+------=_NextPart_000_0A5B_01DC1917.59BF6550
+Content-Type: image/png;
+	name="image001.png"
+Content-Transfer-Encoding: base64
+Content-ID: <ii_1961984ba884cff311>
+
+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
+8x7bAAAAAElFTkSuQmCC
+
+------=_NextPart_000_0A5B_01DC1917.59BF6550--

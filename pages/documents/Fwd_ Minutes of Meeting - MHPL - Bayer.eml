@@ -1,0 +1,590 @@
+Received: by 2002:a05:7010:6aa2:b0:445:9a8c:7b54 with SMTP id co34csp7864316mdb;
+        Wed, 9 Apr 2025 00:55:30 -0700 (PDT)
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id af79cd13be357-7c7a10c43c9sor69358085a.7.2025.04.09.00.55.30
+        for <sachin.bhosale@allwavegs.com>
+        (Google Transport Security);
+        Wed, 09 Apr 2025 00:55:30 -0700 (PDT)
+From: "Balasubramanian Selvam/AWAV/Bangalore" <bala.s@allwaveav.com>
+To: "Sachin Bhosale" <sachin.bhosale@allwavegs.com>
+References: <CAH0G8Q5MSamLdng9sJh36WpTBsDWs9CXmhYKah-=VmQ+oAbTaw@mail.gmail.com> <CAH0G8Q5pVrrTgVQom9ChDP71vMM++OvBigTu7bgW0S58yikSoQ@mail.gmail.com> <CAGqyisVVXXxT6Rt1_i-2iT1D5u0vqZ3y6L8uB6KaOqwz4cimXw@mail.gmail.com> <CAGqyisVgedDPr6QrVaUNFOh9h2fj6D3J=PKdRL4w0ee_VfPrYQ@mail.gmail.com>
+In-Reply-To: <CAGqyisVgedDPr6QrVaUNFOh9h2fj6D3J=PKdRL4w0ee_VfPrYQ@mail.gmail.com>
+Subject: Fwd: Minutes of Meeting - MHPL - Bayer
+Date: Wed, 9 Apr 2025 13:24:53 +0530
+Message-ID: <CAG-w=u6U1S==hDW8oUzT4KzZf1aq-1n0crkNg4Uq3bB40Kabug@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+	boundary="----=_NextPart_000_0A3B_01DC1917.596CD880"
+X-Mailer: Microsoft Outlook 16.0
+X-Google-Smtp-Source: AGHT+IHwhBWB4ozqhJCFsRJYlVWt4D588YxpPscWRTUiJXpK2d+KTRA6s2Z4nhTRdkl34x/UwxyjJuHHYXciXifPhdA=
+X-Received: by 2002:a05:620a:4308:b0:7c7:93ae:fe56 with SMTP id af79cd13be357-7c79cc4b356mr247881085a.51.1744185330254;
+        Wed, 09 Apr 2025 00:55:30 -0700 (PDT)
+X-Received: by 2002:a05:6214:dc6:b0:6e8:f433:20a8 with SMTP id
+ 6a1803df08f44-6f0dbb80e51mr38701886d6.9.1744185329786; Wed, 09 Apr 2025
+ 00:55:29 -0700 (PDT)
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@allwaveav.com header.s=allwaveav header.b=ewa7LIwS;
+       spf=pass (google.com: domain of bala.s@allwaveav.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=bala.s@allwaveav.com;
+       dmarc=pass (p=QUARANTINE sp=NONE dis=NONE) header.from=allwaveav.com;
+       dara=neutral header.i=@allwavegs.com
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1744185330; x=1744790130;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=gp/jNT5ZB7o1ys/wzmIPLAQR94Y1KTdaRUUaiBYFty4=;
+        b=hNnNn7tOFUcIJ6o0MArXVSF3Ejd0wqdulOCQ2c8ZUdAfM6wqxOiHtM/tYXnHGmFrWq
+         WR71U28ja59wqqga+O2TjIONk0E6TruSoZHSinb7hQPBt7+KtM9vfRb30xfITzLwk4r0
+         LGgtzLk51QYmFqRFRn/jcjObU9bNxgCOTIQ9ShqlKqWthEKLFCb2ysV5LeFuUqepED+t
+         d4fk5G+vN2zWJGEY1tFIJEpxBXsEWy1QW81dYYO6L7lq3T4CEJkrDMmhUw3hEKtPrKjx
+         AyQbBQ7LOAe+y+LLTwtkEv5EkCNObxfeF2mBuKSTF20lSYrbIbdvM0aGsZDib8vh5ubZ
+         gtwg==
+X-Gm-Message-State: AOJu0YyXqBQyccM8Xz8mPt7MUvQe4qmFOZi1kHpf+OhMlsWqA6qVibYK
+	+dSjG0S0R787p4Wqhk9h3AjhFs1gBfHN+jZaj+W7htWyM3zBpFkhg1BZ0SQkdLeOZR1IzGPG85H
+	3QV5L8ai52Ddf/WstvL0Xq5REvGfqAp+BZsTfxnD0i+KAgEvueg==
+X-Gm-Gg: ASbGncvEGVYAWQTexWbTBTubfVdH4kMgZ9Tx8zQAKYo/iVJubNrW4inDAkIkCI5FU2w
+	rsoRpAzvW8bH87q6Bb6LVBwqVY2zFD6odKa9ag0kKXHbf0+yeJG4kD+mJGS3v88dkesGi7dUyfx
+	zTEl3nyf8ontIvJ6s3uRovBw==
+X-Gm-Features: ATxdqUG97gguA9PTTQQtT0tLyVQJjZ4X-7JZECFSRoX8tEfLJK84q52vHClVpks
+Thread-Index: AQK0lrGnn0zMghg06bPfinazEkIgeAN3JekvAcbDOXoDWhXGtwFo1v45
+
+This is a multipart message in MIME format.
+
+------=_NextPart_000_0A3B_01DC1917.596CD880
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+Hi Sachin,
+
+Below MoM mail for your ready reference.
+
+
+Warm Regards,=20
+
+
+
+
+
+  =
+<https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJdvuvdw-X6B-FMhdYVnerb=
+14gh13vI1f0z28PzwpbxvwgWVGSJ_zo_CL9HoGfbS-pB66P2WAdPD59KuhjG-sJB9dj7IFGLM=
+4-LEeFHoIx540CWOWal5_djf3fpJwV4TGqiXls?key=3D25EjYfqXXzGOrd5RdjmiL5AG>=20
+
+
+
+
+Balasubramanian S
+
+Manager - Design & Estimation
+
+
+
+
+Classic Arena, 4th Floor, Hosur Rd, AECS Layout - A Block, Singasandra, =
+Bengaluru, Karnataka 560068
+
+Phone: +91-9597300207
+
+Email ID:  <mailto:bala.s@allwaveav.com> bala.s@allwaveav.com
+
+
+MUMBAI  |  PUNE  |  NCR  |  BENGALURU  |  HYDERABAD  |  CHENNAI  |  =
+KOLKATA
+
+
+ <https://www.linkedin.com/company/allwave-av>    =
+<https://www.instagram.com/allwaveav>    =
+<https://www.facebook.com/Allwave.AV.Systems/>=20
+
+
+ <http://www.allwaveav.com>=20
+
+
+
+---------- Forwarded message ---------
+From: Kuldip Kamat <kuldip.kamat@allwaveav.com =
+<mailto:kuldip.kamat@allwaveav.com> >
+Date: Thu, Aug 19, 2021 at 9:50=E2=80=AFAM
+Subject: Re: Minutes of Meeting - MHPL - Bayer
+To: Pravesh Agrawal/AWAV <pravesh.agrawal@allwaveav.com =
+<mailto:pravesh.agrawal@allwaveav.com> >, Ashutosh Shukla =
+<ashutosh.shukla@allwaveav.com <mailto:ashutosh.shukla@allwaveav.com> >, =
+Tanaji Dange <tanaji.dange@allwaveav.com =
+<mailto:tanaji.dange@allwaveav.com> >, Balasubramanian =
+Selvam/AWAV/Bangalore <bala.s@allwaveav.com =
+<mailto:bala.s@allwaveav.com> >
+Cc: Nilesh Kamat/AWAV <nilesh.kamat@allwaveav.com =
+<mailto:nilesh.kamat@allwaveav.com> >
+
+
+
+++ Bala
+
+As he had made the BoQ
+
+On Thu, Aug 19, 2021 at 9:48 AM Kuldip Kamat <kuldip.kamat@allwaveav.com =
+<mailto:kuldip.kamat@allwaveav.com> > wrote:
+
+
+Hi Pravesh:
+
+
+we can create a  local lan and share the data from one PC to another.
+
+
+https://kb.globalscape.com/Knowledgebase/10407/Can-I-use-a-Windows-Comman=
+d-Prompt-to-send-FTP-Commands-to-a-server
+
+
+
+Please confirm with them we can do it.=20
+
+
+Ashutosh: see the link above, talk to Pravesh and test it. You can take =
+help from Viren (Tanaji sir knows him well).
+
+
+Best, Kuldip
+
+
+On Thu, Aug 19, 2021 at 12:13 AM Pravesh Agrawal/AWAV =
+<pravesh.agrawal@allwaveav.com <mailto:pravesh.agrawal@allwaveav.com> > =
+wrote:
+
+
+Dear Sir,
+
+
+Please find below the Minutes of Meeting for MHPL - Bayer.
+
+Area - Factory Site
+
+1)Overall Solution is fine with the Bayer team.
+
+
+2)They are looking for the execution of this project by 1st week of =
+September. Sudipta has asked to revert to the solution by this week for =
+closure.
+
+
+3)They need a solution on Data transfer from Bayer Laptop to =
+presentation dedicated laptop.
+
+
+As per Bayer, they are restricted to use the Internet, USB, Bluetooth, =
+Gmail access, or any third party transfer such as transfer, etc.
+
+
+Suggestions were made by the client asking for creating an FTTP Server =
+for transferring data from the Bayer laptop to the signage laptop.
+
+
+
+Regards,
+
+Pravesh Agrawal
+
+Regional Manager - South
+
+
+
+
+E-mail : pravesh <mailto:pravesh.agrawal@allwaveav.com> =
+.agrawal@allwaveav.com
+
+
+Web : www.allwaveav.com <http://www.allwaveav.com/>=20
+
+Cell : (+91) 9819904655        =20
+
+          (+91) 9014416348
+
+
+
+
+Regional office Address :=20
+
+1-89/A/24, Kalyan Nagar, Nr Dugam Cheruvu, Madhapur - Hyderabad.
+
+
+               =20
+
+Head Office:
+
+14/A Onlooker Building, Sir PM Road, Fort, Mumbai 400 001
+
+Tel : (
+
++91) 22 2266 4937 / (+91) 22 2265 4567 / (+91) 22 2270 3653
+
+
+
+
+
+ <https://www.facebook.com/Allwave.AV.Systems/> 	 =
+<https://twitter.com/allwaveav> 	 =
+<https://www.linkedin.com/company/13404167/> 	 =
+<https://www.instagram.com/allwaveav/> =09
+
+MUMBAI | PUNE | NCR | BANGALORE | HYDERABAD | CHENNAI | KOLKATA
+
+Technology Integration | Unified Collaboration | IoT | Asset Management
+
+
+
+------=_NextPart_000_0A3B_01DC1917.596CD880
+Content-Type: text/html;
+	boundary="000000000000012fd4063253cbab";
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div><div>Hi Sachin,</div><div><br></div><div>Below MoM =
+mail for your ready reference.</div></div><div><br></div><div><div =
+dir=3D"ltr" class=3D"gmail_signature" =
+data-smartmail=3D"gmail_signature"><div dir=3D"ltr"><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Arial,sans-serif;color:#000000;backgr=
+ound-color:transparent;font-weight:400;font-style:normal;font-variant:nor=
+mal;text-decoration:none;vertical-align:baseline;white-space:pre;white-sp=
+ace:pre-wrap">Warm Regards,=C2=A0</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.38;margin-top:0pt;margin-bottom:0pt"><span><br></s=
+pan></p><div dir=3D"ltr" style=3D"margin-left:0pt" align=3D"left"><table =
+style=3D"border:none;border-collapse:collapse"><colgroup><col =
+width=3D"203"><col width=3D"459"></colgroup><tbody><tr =
+style=3D"height:164.46386718749997pt"><td style=3D"border-left:solid =
+#ffffff 1pt;border-right:solid #ffffff 1pt;border-bottom:solid #ffffff =
+1pt;border-top:solid #ffffff 1pt;vertical-align:top;padding:5pt 5pt 5pt =
+5pt;overflow:hidden"><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:8pt;font-family:Arial,sans-serif;color:#000000;backgro=
+und-color:transparent;font-weight:400;font-style:normal;font-variant:norm=
+al;text-decoration:none;vertical-align:baseline;white-space:pre;white-spa=
+ce:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:163px;hei=
+ght:159px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJdvuvdw-X6B-FMhd=
+YVnerb14gh13vI1f0z28PzwpbxvwgWVGSJ_zo_CL9HoGfbS-pB66P2WAdPD59KuhjG-sJB9dj=
+7IFGLM4-LEeFHoIx540CWOWal5_djf3fpJwV4TGqiXls?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"163" height=3D"159" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></p></td><td =
+style=3D"border-left:solid #ffffff 1pt;border-right:solid #ffffff =
+1pt;border-bottom:solid #ffffff 1pt;border-top:solid #ffffff =
+1pt;vertical-align:top;padding:5pt 5pt 5pt 5pt;overflow:hidden"><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:700;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Balasubramanian S</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Manager - Design &amp; Estimation</span></p><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap"><br></span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><font =
+color=3D"#000000" face=3D"Roboto, sans-serif"><span =
+style=3D"font-size:13.3333px">Classic Arena, 4th Floor, Hosur Rd, AECS =
+Layout - A Block, Singasandra, Bengaluru, Karnataka =
+560068</span></font></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Phone: +91-9597300207</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Email ID: </span><a href=3D"mailto:bala.s@allwaveav.com" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap">bala.s@allwaveav.com</span></a></p><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:8pt;font-family:Roboto,sans-serif;color:#000000;backgr=
+ound-color:transparent;font-weight:400;font-style:normal;font-variant:nor=
+mal;text-decoration:none;vertical-align:baseline;white-space:pre;white-sp=
+ace:pre-wrap">MUMBAI=C2=A0 |=C2=A0 PUNE=C2=A0 |=C2=A0 NCR=C2=A0 |=C2=A0 =
+BENGALURU=C2=A0 |=C2=A0 HYDERABAD=C2=A0 |=C2=A0 CHENNAI=C2=A0 |=C2=A0 =
+KOLKATA</span></p><br><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><a =
+href=3D"https://www.linkedin.com/company/allwave-av" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:32px;heig=
+ht:31px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcGQZ1JVmPqfbCj4xN=
+QZPHrY_3ZM6e_0xbjID4UdDS0Lm7v6z9864QXMrKESZ8vC4A-RIGNJEvvTxIefrv-SpUY4FIn=
+v5foJwc0M84tQibq27an7fXbnJctByiLP8A38_u6x3rD?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"32" height=3D"31" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">=C2=A0 </span><a =
+href=3D"https://www.instagram.com/allwaveav" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:32px;heig=
+ht:32px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdAL4n3JgPc01QE_3v=
+-pfMctMtxcBM98T5L4vk-zuyY22IM8fJWkYUdbA4EpyhTBVaGklog_ryIP8DDrt_wetoQj_D7=
+ai7BypIYaScKbdUn5n23bEwkF7RgKccoGDGelzpoWsXraw?key=3D25EjYfqXXzGOrd5Rdjmi=
+L5AG" width=3D"32" height=3D"32" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">=C2=A0 </span><a =
+href=3D"https://www.facebook.com/Allwave.AV.Systems/" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:30px;heig=
+ht:29px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXflfIj7rdcGlSyPHml=
+t1G13q9Z54Kf0xiPml_NyRpb0UkPNMI2XfL6pMAFTEFxIh8LLPIa8IfJ8AXpBQfIBUi7XYMLC=
+LDa1TWlalG50CqNoIFNfgbt0F7y7y7cJFWkmlilkQWMj9Q?key=3D25EjYfqXXzGOrd5Rdjmi=
+L5AG" width=3D"30" height=3D"29" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a></p><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><a =
+href=3D"http://www.allwaveav.com" style=3D"text-decoration:none" =
+target=3D"_blank"><span =
+style=3D"font-size:8pt;font-family:Arial,sans-serif;color:#1155cc;backgro=
+und-color:transparent;font-weight:400;font-style:normal;font-variant:norm=
+al;text-decoration:underline;vertical-align:baseline;white-space:pre;whit=
+e-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:445px;hei=
+ght:67px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdqPdtfcRVlDqqP6im=
+nKEPV7PPzGBB_FGKx5ejpPcNegfexZq2mk0c5dZwqIiCkdM0LT5CVe8s_1IZdr5EqDOUFf6yL=
+8y3nLs_aZ7z9cKrUhEZevQv_OrGzK94HHhALVG7BokNb?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"445" height=3D"67" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a></p></td></tr>=
+</tbody></table></div></div></div></div><br><br><div =
+class=3D"gmail_quote gmail_quote_container"><div dir=3D"ltr" =
+class=3D"gmail_attr">---------- Forwarded message ---------<br>From: =
+<strong class=3D"gmail_sendername" dir=3D"auto">Kuldip Kamat</strong> =
+<span dir=3D"auto">&lt;<a =
+href=3D"mailto:kuldip.kamat@allwaveav.com">kuldip.kamat@allwaveav.com</a>=
+&gt;</span><br>Date: Thu, Aug 19, 2021 at 9:50=E2=80=AFAM<br>Subject: =
+Re: Minutes of Meeting - MHPL - Bayer<br>To: Pravesh Agrawal/AWAV &lt;<a =
+href=3D"mailto:pravesh.agrawal@allwaveav.com">pravesh.agrawal@allwaveav.c=
+om</a>&gt;, Ashutosh Shukla &lt;<a =
+href=3D"mailto:ashutosh.shukla@allwaveav.com">ashutosh.shukla@allwaveav.c=
+om</a>&gt;, Tanaji Dange &lt;<a =
+href=3D"mailto:tanaji.dange@allwaveav.com">tanaji.dange@allwaveav.com</a>=
+&gt;, Balasubramanian Selvam/AWAV/Bangalore &lt;<a =
+href=3D"mailto:bala.s@allwaveav.com">bala.s@allwaveav.com</a>&gt;<br>Cc: =
+Nilesh Kamat/AWAV &lt;<a =
+href=3D"mailto:nilesh.kamat@allwaveav.com">nilesh.kamat@allwaveav.com</a>=
+&gt;<br></div><br><br><div dir=3D"ltr"><div =
+style=3D"font-family:trebuchet ms,sans-serif">++ Bala</div><div =
+style=3D"font-family:trebuchet ms,sans-serif"><br></div><div =
+style=3D"font-family:trebuchet ms,sans-serif">As he had made the =
+BoQ</div></div><br><div class=3D"gmail_quote"><div dir=3D"ltr" =
+class=3D"gmail_attr">On Thu, Aug 19, 2021 at 9:48 AM Kuldip Kamat &lt;<a =
+href=3D"mailto:kuldip.kamat@allwaveav.com" =
+target=3D"_blank">kuldip.kamat@allwaveav.com</a>&gt; =
+wrote:<br></div><blockquote class=3D"gmail_quote" style=3D"margin:0px =
+0px 0px 0.8ex;border-left:1px solid =
+rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><div =
+style=3D"font-family:&quot;trebuchet ms&quot;,sans-serif"><font =
+color=3D"#0000ff">Hi Pravesh:</font></div><div =
+style=3D"font-family:&quot;trebuchet ms&quot;,sans-serif"><font =
+color=3D"#0000ff"><br></font></div><div =
+style=3D"font-family:&quot;trebuchet ms&quot;,sans-serif"><font =
+color=3D"#0000ff">we can create a=C2=A0 local lan and share=C2=A0the =
+data from one PC to another.</font></div><div =
+style=3D"font-family:&quot;trebuchet ms&quot;,sans-serif"><font =
+color=3D"#0000ff"><br></font></div><div =
+style=3D"font-family:&quot;trebuchet ms&quot;,sans-serif"><font =
+color=3D"#0000ff"><a =
+href=3D"https://kb.globalscape.com/Knowledgebase/10407/Can-I-use-a-Window=
+s-Command-Prompt-to-send-FTP-Commands-to-a-server" =
+target=3D"_blank">https://kb.globalscape.com/Knowledgebase/10407/Can-I-us=
+e-a-Windows-Command-Prompt-to-send-FTP-Commands-to-a-server</a><br></font=
+></div><div style=3D"font-family:&quot;trebuchet =
+ms&quot;,sans-serif"><font color=3D"#0000ff"><br></font></div><div =
+style=3D"font-family:&quot;trebuchet ms&quot;,sans-serif"><font =
+color=3D"#0000ff">Please confirm with them we can do =
+it.=C2=A0</font></div><div style=3D"font-family:&quot;trebuchet =
+ms&quot;,sans-serif"><font color=3D"#0000ff"><br></font></div><div =
+style=3D"font-family:&quot;trebuchet ms&quot;,sans-serif"><font =
+color=3D"#0000ff">Ashutosh: see the link above, talk to Pravesh and test =
+it. You can take help from Viren (Tanaji sir knows him =
+well).</font></div><div style=3D"font-family:&quot;trebuchet =
+ms&quot;,sans-serif"><font color=3D"#0000ff"><br></font></div><div =
+style=3D"font-family:&quot;trebuchet ms&quot;,sans-serif"><font =
+color=3D"#0000ff">Best, Kuldip</font></div><div =
+style=3D"font-family:&quot;trebuchet =
+ms&quot;,sans-serif"><br></div></div><br><div class=3D"gmail_quote"><div =
+dir=3D"ltr" class=3D"gmail_attr">On Thu, Aug 19, 2021 at 12:13 AM =
+Pravesh Agrawal/AWAV &lt;<a =
+href=3D"mailto:pravesh.agrawal@allwaveav.com" =
+target=3D"_blank">pravesh.agrawal@allwaveav.com</a>&gt; =
+wrote:<br></div><blockquote class=3D"gmail_quote" style=3D"margin:0px =
+0px 0px 0.8ex;border-left:1px solid =
+rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><div =
+style=3D"color:rgb(0,0,0)">Dear <span =
+class=3D"gmail_default">Sir,</span><br></div><div =
+class=3D"gmail_quote"><div dir=3D"ltr"><div =
+style=3D"color:rgb(0,0,0)"><br></div><div =
+style=3D"color:rgb(0,0,0)">Please find below the Minutes of Meeting =
+for=C2=A0<span class=3D"gmail_default" style=3D"color:rgb(0,0,0)">MHPL - =
+Bayer.</span></div><div style=3D"color:rgb(0,0,0)"><br></div><div =
+style=3D"color:rgb(0,0,0)"><u>Area -<span class=3D"gmail_default" =
+style=3D"color:rgb(0,0,0)"> Factory Site</span></u></div><div =
+style=3D"color:rgb(0,0,0)"><br></div><div =
+style=3D"color:rgb(0,0,0)">1)<span class=3D"gmail_default" =
+style=3D"color:rgb(0,0,0)">Overall Solution is fine with the Bayer =
+team.</span></div><div style=3D"color:rgb(0,0,0)"><span =
+class=3D"gmail_default" style=3D"color:rgb(0,0,0)"><br></span></div><div =
+style=3D"color:rgb(0,0,0)">2)<span class=3D"gmail_default" =
+style=3D"color:rgb(0,0,0)">They are looking for the execution of this =
+project by 1st week of September. Sudipta has asked to revert=C2=A0to =
+the solution by this week for closure.</span></div><div =
+style=3D"color:rgb(0,0,0)"><span class=3D"gmail_default" =
+style=3D"color:rgb(0,0,0)"><br></span></div><div =
+style=3D"color:rgb(0,0,0)"><span class=3D"gmail_default" =
+style=3D"color:rgb(0,0,0)">3)They need a solution on Data transfer from =
+Bayer Laptop to presentation dedicated laptop.</span></div><div =
+style=3D"color:rgb(0,0,0)"><span class=3D"gmail_default" =
+style=3D"color:rgb(0,0,0)"><br></span></div><div =
+style=3D"color:rgb(0,0,0)"><span class=3D"gmail_default" =
+style=3D"color:rgb(0,0,0)">As per Bayer, they are restricted to use the =
+Internet, USB, Bluetooth, Gmail access, or any third party transfer such =
+as transfer, etc.</span></div><div style=3D"color:rgb(0,0,0)"><span =
+class=3D"gmail_default" style=3D"color:rgb(0,0,0)"><br></span></div><div =
+style=3D"color:rgb(0,0,0)"><span class=3D"gmail_default" =
+style=3D"color:rgb(0,0,0)">Suggestions were made by the client asking =
+for creating an FTTP Server for transferring data from the Bayer laptop =
+to the signage laptop.</span></div><div =
+style=3D"color:rgb(0,0,0)"><br></div><div =
+style=3D"color:rgb(0,0,0)"><br></div><div><div dir=3D"ltr"><div =
+dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div =
+dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div =
+dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div><div dir=3D"ltr"><div =
+dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div =
+dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div =
+dir=3D"ltr"><p style=3D"margin-top:4pt;font-size:12.8px"><span =
+lang=3D"EN-IN" style=3D"font-size:10.5pt;color:rgb(68,84,106)"><font =
+face=3D"arial, helvetica, =
+sans-serif">Regards,<u></u><u></u></font></span></p><div =
+style=3D"font-size:12.8px"><span style=3D"font-size:12.8px"><span =
+style=3D"font-family:verdana,sans-serif"><span =
+style=3D"font-family:arial,sans-serif;font-size:12.8px"><p =
+style=3D"font-family:arial,helvetica,sans-serif;margin:0px"><font =
+color=3D"#ed7d31"><b>Pravesh Agrawal</b></font></p><p =
+style=3D"font-family:arial,helvetica,sans-serif;margin:0px"><font =
+color=3D"#2f5496"><b>Regional Manager - =
+South</b></font></p></span></span></span></div><div =
+style=3D"font-size:12.8px"><font color=3D"#2f5496" face=3D"arial, =
+helvetica, =
+sans-serif"><b><br></b></font></div></div></div></div></div></div></div><=
+/div></div></div></div></div><div><div dir=3D"ltr"><div dir=3D"ltr"><div =
+dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div =
+dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div =
+dir=3D"ltr"><p style=3D"color:rgb(0,0,0);margin:0px"><font><span =
+style=3D"font-size:12.8px"><b>E-mail </b>:=C2=A0</span><a =
+href=3D"mailto:pravesh.agrawal@allwaveav.com" =
+style=3D"font-weight:normal;font-size:12.8px" =
+target=3D"_blank">pravesh<font color=3D"#1155cc">.agrawal@</font><font =
+color=3D"#1155cc">allwaveav.com</font></a><br></font></p><p =
+style=3D"color:rgb(0,0,0);margin:0px"><font><b>Web </b>:=C2=A0<a =
+href=3D"http://www.allwaveav.com/" =
+style=3D"font-weight:normal;color:rgb(17,85,204)" =
+target=3D"_blank">www.allwaveav.com</a><u></u><u></u></font></p><p =
+style=3D"color:rgb(0,0,0);margin:0px"><font><b>Cell</b> : (+91) =
+9819904655=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0</font></p><p =
+style=3D"color:rgb(0,0,0);margin:0px"><font>=C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0=C2=A0</font>(+91) 9014416348</p><p =
+style=3D"color:rgb(0,0,0);margin:0px"><br></p><p =
+style=3D"color:rgb(0,0,0);margin:0px"><font><span =
+style=3D"color:rgb(34,34,34);font-family:arial,helvetica,sans-serif;font-=
+size:small;font-weight:700">Regional office Address</span><span =
+style=3D"color:rgb(34,34,34);font-family:arial,helvetica,sans-serif;font-=
+size:small">=C2=A0:=C2=A0</span></font></p><p =
+style=3D"color:rgb(0,0,0);margin:0px"><font><span =
+style=3D"font-size:12.8px">1-89/A/24, Kalyan Nagar, Nr Dugam Cheruvu, =
+Madhapur - Hyderabad.</span><br></font></p><p =
+style=3D"color:rgb(0,0,0);margin:0px"><font>=C2=A0=C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0</font></p><p =
+style=3D"color:rgb(0,0,0);margin:0px"><font><b =
+style=3D"color:rgb(34,34,34);font-family:Calibri,sans-serif;font-size:14.=
+6667px"><span style=3D"color:black">Head Office</span></b><span =
+style=3D"font-family:Calibri,sans-serif;font-size:14.6667px">:</span></fo=
+nt></p><p style=3D"color:rgb(0,0,0);margin:0px"><span =
+style=3D"color:rgb(34,34,34);font-size:12.8px">14/A Onlooker =
+Building,=C2=A0Sir PM Road, Fort, Mumbai 400 001</span></p><p =
+style=3D"font-size:12.8px;margin:0px;display:inline"><span =
+style=3D"color:rgb(0,0,0);font-size:12.8px">Tel</span><span =
+style=3D"color:rgb(0,0,0);font-size:12.8px"> :=C2=A0</span><font =
+color=3D"#000000">(</font></p><p =
+style=3D"font-size:12.8px;margin:0px;display:inline"><font =
+color=3D"#000000">+91) 22 2266 4937<b>=C2=A0</b>/=C2=A0(+91) 22 2265 =
+4567=C2=A0/=C2=A0(+91) 22 2270 3653</font></p><div =
+style=3D"font-size:12.8px;color:rgb(0,0,0);display:inline"></div></div><d=
+iv dir=3D"ltr"><div style=3D"display:inline"><p =
+style=3D"color:rgb(0,0,0);font-size:12.8px;font-family:arial,sans-serif;m=
+argin:0in 0in 0.0001pt"></p><font color=3D"#ed7d31" face=3D"Arial, =
+sans-serif"><span =
+style=3D"font-size:13.3333px"><b><br></b></span></font><table =
+width=3D"100" border=3D"0" cellspacing=3D"0" cellpadding=3D"0" =
+style=3D"color:rgb(0,0,0);font-size:medium;font-family:Roboto,RobotoDraft=
+,Helvetica,Arial,sans-serif"><tbody><tr><td =
+style=3D"padding-right:5px"><a =
+href=3D"https://www.facebook.com/Allwave.AV.Systems/" =
+style=3D"color:rgb(0,0,0)" target=3D"_blank"><img =
+src=3D"http://cdn.synclarity.in/4Sync8y/Facebook%20Icon.png" =
+width=3D"24" height=3D"24" alt=3D"" =
+style=3D"outline:none;border:none"></a></td><td =
+style=3D"padding-right:5px"><a href=3D"https://twitter.com/allwaveav" =
+style=3D"color:rgb(0,0,0)" target=3D"_blank"><img =
+src=3D"http://cdn.synclarity.in/4Sync8y/Twitter%20Icon.png" width=3D"24" =
+height=3D"24" alt=3D"" style=3D"outline:none;border:none"></a></td><td =
+style=3D"padding-right:5px"><a =
+href=3D"https://www.linkedin.com/company/13404167/" =
+style=3D"color:rgb(0,0,0)" target=3D"_blank"><img =
+src=3D"http://cdn.synclarity.in/4Sync8y/Linkedin%20Icon.png" =
+width=3D"24" height=3D"24" =
+alt=3D"https://www.linkedin.com/company/13404167/" =
+style=3D"outline:none;border:none"></a></td><td><a =
+href=3D"https://www.instagram.com/allwaveav/" style=3D"color:rgb(0,0,0)" =
+target=3D"_blank"><img =
+src=3D"http://cdn.synclarity.in/4Sync8y/Instagram%20Icon.png" =
+width=3D"24" height=3D"24" alt=3D"" =
+style=3D"outline:none;border:none"></a></td></tr></tbody></table><p =
+style=3D"color:rgb(0,0,0);font-size:12.8px;margin:0in 0in =
+0.0001pt"><b><font color=3D"#0b5394" face=3D"Arial, sans-serif">MUMBAI | =
+PUNE | NCR | BANGALORE | HYDERABAD | CHENNAI | KOLKATA</font></b></p><p =
+style=3D"color:rgb(0,0,0);font-size:12.8px;margin:0in 0in 0.0001pt"><b =
+style=3D"font-family:arial,sans-serif;color:rgb(237,125,49)">Technology =
+Integration=C2=A0| Unified Collaboration | IoT | Asset =
+Management</b></p></div></div><div dir=3D"ltr"><br></div><div =
+dir=3D"ltr"></div></div></div></div></div></div></div></div></div></div><=
+/div></div></div></div></div></div></div></div></div></div></div></div></=
+div></div></div></div>
+</div></div>
+</blockquote></div>
+</blockquote></div>
+</div></div>
+
+------=_NextPart_000_0A3B_01DC1917.596CD880--

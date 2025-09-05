@@ -1,0 +1,714 @@
+Received: by 2002:a05:7010:6aa2:b0:445:9a8c:7b54 with SMTP id co34csp7864936mdb;
+        Wed, 9 Apr 2025 00:57:24 -0700 (PDT)
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id af79cd13be357-7c7a10c77besor50346185a.8.2025.04.09.00.57.23
+        for <sachin.bhosale@allwavegs.com>
+        (Google Transport Security);
+        Wed, 09 Apr 2025 00:57:23 -0700 (PDT)
+From: "Balasubramanian Selvam/AWAV/Bangalore" <bala.s@allwaveav.com>
+To: "Sachin Bhosale" <sachin.bhosale@allwavegs.com>
+References: <0ef501d710fe$76e78160$64b68420$@dsatech.co.in>
+In-Reply-To: <0ef501d710fe$76e78160$64b68420$@dsatech.co.in>
+Subject: Fwd: Minutes of Meet with Sushil Yadav HPCL and changes required
+Date: Wed, 9 Apr 2025 13:26:46 +0530
+Message-ID: <CAG-w=u6md9ZYbm+eHGhna+94r2wNXdHuhoi_zugCidBzXzv3oA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/mixed;
+	boundary="----=_NextPart_000_0A2C_01DC1917.593AA4F0"
+X-Mailer: Microsoft Outlook 16.0
+X-Google-Smtp-Source: AGHT+IF85mJEOc25MMNWnMlYsjZxSz7jBZGSp8PaS5/Mm3ml0nEkUjKkUO7rqlwCFoywDqdhAJMVP9pyVT3FgrUuWUk=
+X-Received: by 2002:a05:620a:8212:b0:7c7:a356:105d with SMTP id af79cd13be357-7c7a3561094mr31651785a.4.1744185443791;
+        Wed, 09 Apr 2025 00:57:23 -0700 (PDT)
+X-Received: by 2002:a05:6214:403:b0:6d8:80e8:d567 with SMTP id
+ 6a1803df08f44-6f0dbbc4f45mr38287576d6.18.1744185443096; Wed, 09 Apr 2025
+ 00:57:23 -0700 (PDT)
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@allwaveav.com header.s=allwaveav header.b=Hbogp6ht;
+       spf=pass (google.com: domain of bala.s@allwaveav.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=bala.s@allwaveav.com;
+       dmarc=pass (p=QUARANTINE sp=NONE dis=NONE) header.from=allwaveav.com;
+       dara=neutral header.i=@allwavegs.com
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1744185443; x=1744790243;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=CKo8UHrJXH6tFTWhyTrwF8X/f/Yf59DT1y+jsLioB8Q=;
+        b=S7ZsfPUTtD+1wx80jhEnGojaPwbVm991dojUbtlMWKNFV6v1hEGz+ZdhL2i3yqrgai
+         ztU8e3rPFgrl3WL8lrFLNpD15AC1hXxcMkG4fGAJTtTSdHgDX47gaVwWWDmfPu4yNubF
+         lgDa7Cd+gclz2A9DKew3S+VAJJtfu4+LTr5jqIcIv2CJakNjftDHn7ahxMv4QLHa8ecK
+         9udAwhpVqf5+diCr003eslKmpFAzr2xu+4TM7NkpQ8Ejzm3gnSCFTsKP4jG7DIrNyQGS
+         TfqwdzVUQdpe5l+hJ7Sx7rwflhyFfTDtTR5kesId18AOgCU1NPG+8yow1Qbj2l7LjzPo
+         wvsw==
+X-Gm-Message-State: AOJu0YxUqag91Lg+/Cigin5f09Ryt8BsPf4xlDieWfF08qnRpQJw7jB/
+	hA7eeJh25JN/gH509VQ5QzmghL1eXHshLxQYevOe6dfu0Bo6G6h1pv3ypfFt0YvFJdpmoB5batE
+	oUrFkCRrW4+pkkAwgukkVGprzI4/DBrIr7tw+mMejfo83KyZMNw==
+X-Gm-Gg: ASbGncvWQV4WFYNvZtTFPzGcRBhcuY1yS8Q1Xc9GTLjrQqIl1W74fPjJ+w99voENslb
+	xssvpsQTUIUi3MTHfl5gnDSPbnEVAzLXZpb+DNujvpNOQWAz6Y/XQezl+RLTtGrjVHb29RpSJSF
+	/b48mbXlpqttW4aCTmkuj+ZkPPriXirDn1
+X-Gm-Features: ATxdqUGbtP1aDiUbTyRSbjqFpmkySFOWs1Ro3-JsqHp-jAoh0IsWL-w0bYyOWRE
+Thread-Index: AQJEhNMQQcMJ4fJ1wSI67qmLgOj0tQHGwuYg
+
+This is a multipart message in MIME format.
+
+------=_NextPart_000_0A2C_01DC1917.593AA4F0
+Content-Type: multipart/alternative;
+	boundary="----=_NextPart_001_0A2D_01DC1917.593AA4F0"
+
+
+------=_NextPart_001_0A2D_01DC1917.593AA4F0
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+Hi Sachin,
+
+Below MoM mail for your ready reference.
+
+
+Warm Regards,=20
+
+
+
+
+
+  =
+<https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJdvuvdw-X6B-FMhdYVnerb=
+14gh13vI1f0z28PzwpbxvwgWVGSJ_zo_CL9HoGfbS-pB66P2WAdPD59KuhjG-sJB9dj7IFGLM=
+4-LEeFHoIx540CWOWal5_djf3fpJwV4TGqiXls?key=3D25EjYfqXXzGOrd5RdjmiL5AG>=20
+
+
+
+
+Balasubramanian S
+
+Manager - Design & Estimation
+
+
+
+
+Classic Arena, 4th Floor, Hosur Rd, AECS Layout - A Block, Singasandra, =
+Bengaluru, Karnataka 560068
+
+Phone: +91-9597300207
+
+Email ID:  <mailto:bala.s@allwaveav.com> bala.s@allwaveav.com
+
+
+MUMBAI  |  PUNE  |  NCR  |  BENGALURU  |  HYDERABAD  |  CHENNAI  |  =
+KOLKATA
+
+
+ <https://www.linkedin.com/company/allwave-av>    =
+<https://www.instagram.com/allwaveav>    =
+<https://www.facebook.com/Allwave.AV.Systems/>=20
+
+
+ <http://www.allwaveav.com>=20
+
+
+
+---------- Forwarded message ---------
+From: Godfrey Dsa <godfrey@dsatech.co.in <mailto:godfrey@dsatech.co.in> =
+>
+Date: Thu, Mar 4, 2021 at 7:29=E2=80=AFPM
+Subject: Minutes of Meet with Sushil Yadav HPCL and changes required
+To: Kuldip Kamat <kuldip.kamat@allwaveav.com =
+<mailto:kuldip.kamat@allwaveav.com> >, Nilesh Kamat/AWAV =
+<nilesh.kamat@allwaveav.com <mailto:nilesh.kamat@allwaveav.com> >
+Cc: <bala.s@allwaveav.com <mailto:bala.s@allwaveav.com> >
+
+
+
+
+Dear Kuldip,
+
+=20
+
+As our discussion, please find the point to work on for the changes.=20
+
+=20
+
+They have had bad install in their other site with ceiling microphone, =
+so are not comfortable.=20
+
+=20
+
+Share the 2nd option with table boundary microphones installed, and then =
+we will try convincing them.=20
+
+=20
+
+For the main conference room, in individual mode, they need display/ =
+screen at the sliding partition.  They have height upto 4 mtrs but =
+motorising lift for large display ?????
+
+Alternately suggest projector screen. Go for Laser projector only both =
+side.=20
+
+=20
+
+LED wall for main combined presentation.=20
+
+=20
+
+Any new technology that can be presented, they are open. Suggest.=20
+
+=20
+
+Conf room 2 and Meeting room 2, can have same conf.=20
+
+=20
+
+Other meeting rooms need just a connectivity from table to display.  =
+Huddle room scenario.
+
+=20
+
+Call me any time if any queries in this regards.=20
+
+=20
+
+Kind Regards
+
+=20
+
+Godfrey D=E2=80=99Sa   CTS-I
+
+=20
+
+DSA Tech
+
+Design your Imagination beyond limits
+
+=20
+
+2-C-603, Ashok Nagar Bldg, Off Military Road, Marol, Andheri (East), =
+Mumbai- 400072. INDIA=20
+
+.
+
+ Tel: +91-22-2920 1207  | Mobile: +91 9820709183 | Email:  =
+<mailto:godfrey@dsatech.co.in> godfrey@dsatech.co.in  | Web:  =
+<http://www.dsatech.co.in/> www.dsatech.co.in | Skype : Godfrey.d
+
+=20
+
+=20
+
+=20
+
+=20
+
+DISCLAIMER:
+
+The information contained in this electronic message and in any =
+attachments to this message is intended only for the person or entity to =
+which this electronic message is addressed. If you are not the intended =
+recipient, you are hereby notified that any distribution, copying, =
+review, re-transmission, dissemination or other use of this electronic =
+transmission or the information contained in it is strictly prohibited. =
+This message has been scanned for viruses and dangerous content, and is =
+believed to be clean. DSA Tech will not be liable for any damage caused =
+by any virus transmitted by this email. The contents of this email do =
+not necessarily represent the views or policies of DSA Tech.
+
+=20
+
+
+------=_NextPart_001_0A2D_01DC1917.593AA4F0
+Content-Type: text/html;
+	boundary="000000000000c246f9063253d172";
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div><div>Hi Sachin,</div><div><br></div><div>Below MoM =
+mail for your ready reference.</div></div><div><br></div><div><div =
+dir=3D"ltr" class=3D"gmail_signature" =
+data-smartmail=3D"gmail_signature"><div dir=3D"ltr"><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Arial,sans-serif;color:#000000;backgr=
+ound-color:transparent;font-weight:400;font-style:normal;font-variant:nor=
+mal;text-decoration:none;vertical-align:baseline;white-space:pre;white-sp=
+ace:pre-wrap">Warm Regards,=C2=A0</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.38;margin-top:0pt;margin-bottom:0pt"><span><br></s=
+pan></p><div dir=3D"ltr" style=3D"margin-left:0pt" align=3D"left"><table =
+style=3D"border:none;border-collapse:collapse"><colgroup><col =
+width=3D"203"><col width=3D"459"></colgroup><tbody><tr =
+style=3D"height:164.46386718749997pt"><td style=3D"border-left:solid =
+#ffffff 1pt;border-right:solid #ffffff 1pt;border-bottom:solid #ffffff =
+1pt;border-top:solid #ffffff 1pt;vertical-align:top;padding:5pt 5pt 5pt =
+5pt;overflow:hidden"><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:8pt;font-family:Arial,sans-serif;color:#000000;backgro=
+und-color:transparent;font-weight:400;font-style:normal;font-variant:norm=
+al;text-decoration:none;vertical-align:baseline;white-space:pre;white-spa=
+ce:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:163px;hei=
+ght:159px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJdvuvdw-X6B-FMhd=
+YVnerb14gh13vI1f0z28PzwpbxvwgWVGSJ_zo_CL9HoGfbS-pB66P2WAdPD59KuhjG-sJB9dj=
+7IFGLM4-LEeFHoIx540CWOWal5_djf3fpJwV4TGqiXls?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"163" height=3D"159" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></p></td><td =
+style=3D"border-left:solid #ffffff 1pt;border-right:solid #ffffff =
+1pt;border-bottom:solid #ffffff 1pt;border-top:solid #ffffff =
+1pt;vertical-align:top;padding:5pt 5pt 5pt 5pt;overflow:hidden"><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:700;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Balasubramanian S</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Manager - Design &amp; Estimation</span></p><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap"><br></span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><font =
+color=3D"#000000" face=3D"Roboto, sans-serif"><span =
+style=3D"font-size:13.3333px">Classic Arena, 4th Floor, Hosur Rd, AECS =
+Layout - A Block, Singasandra, Bengaluru, Karnataka =
+560068</span></font></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Phone: +91-9597300207</span></p><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">Email ID: </span><a href=3D"mailto:bala.s@allwaveav.com" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap">bala.s@allwaveav.com</span></a></p><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:8pt;font-family:Roboto,sans-serif;color:#000000;backgr=
+ound-color:transparent;font-weight:400;font-style:normal;font-variant:nor=
+mal;text-decoration:none;vertical-align:baseline;white-space:pre;white-sp=
+ace:pre-wrap">MUMBAI=C2=A0 |=C2=A0 PUNE=C2=A0 |=C2=A0 NCR=C2=A0 |=C2=A0 =
+BENGALURU=C2=A0 |=C2=A0 HYDERABAD=C2=A0 |=C2=A0 CHENNAI=C2=A0 |=C2=A0 =
+KOLKATA</span></p><br><p dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><a =
+href=3D"https://www.linkedin.com/company/allwave-av" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:32px;heig=
+ht:31px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcGQZ1JVmPqfbCj4xN=
+QZPHrY_3ZM6e_0xbjID4UdDS0Lm7v6z9864QXMrKESZ8vC4A-RIGNJEvvTxIefrv-SpUY4FIn=
+v5foJwc0M84tQibq27an7fXbnJctByiLP8A38_u6x3rD?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"32" height=3D"31" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">=C2=A0 </span><a =
+href=3D"https://www.instagram.com/allwaveav" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:32px;heig=
+ht:32px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdAL4n3JgPc01QE_3v=
+-pfMctMtxcBM98T5L4vk-zuyY22IM8fJWkYUdbA4EpyhTBVaGklog_ryIP8DDrt_wetoQj_D7=
+ai7BypIYaScKbdUn5n23bEwkF7RgKccoGDGelzpoWsXraw?key=3D25EjYfqXXzGOrd5Rdjmi=
+L5AG" width=3D"32" height=3D"32" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#000000;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:none;vertical-align:baseline;white-space:pre;white-s=
+pace:pre-wrap">=C2=A0 </span><a =
+href=3D"https://www.facebook.com/Allwave.AV.Systems/" =
+style=3D"text-decoration:none" target=3D"_blank"><span =
+style=3D"font-size:10pt;font-family:Roboto,sans-serif;color:#1155cc;backg=
+round-color:transparent;font-weight:400;font-style:normal;font-variant:no=
+rmal;text-decoration:underline;vertical-align:baseline;white-space:pre;wh=
+ite-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:30px;heig=
+ht:29px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXflfIj7rdcGlSyPHml=
+t1G13q9Z54Kf0xiPml_NyRpb0UkPNMI2XfL6pMAFTEFxIh8LLPIa8IfJ8AXpBQfIBUi7XYMLC=
+LDa1TWlalG50CqNoIFNfgbt0F7y7y7cJFWkmlilkQWMj9Q?key=3D25EjYfqXXzGOrd5Rdjmi=
+L5AG" width=3D"30" height=3D"29" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a></p><br><p =
+dir=3D"ltr" =
+style=3D"line-height:1.2;margin-top:0pt;margin-bottom:0pt"><a =
+href=3D"http://www.allwaveav.com" style=3D"text-decoration:none" =
+target=3D"_blank"><span =
+style=3D"font-size:8pt;font-family:Arial,sans-serif;color:#1155cc;backgro=
+und-color:transparent;font-weight:400;font-style:normal;font-variant:norm=
+al;text-decoration:underline;vertical-align:baseline;white-space:pre;whit=
+e-space:pre-wrap"><span =
+style=3D"border:none;display:inline-block;overflow:hidden;width:445px;hei=
+ght:67px"><img =
+src=3D"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdqPdtfcRVlDqqP6im=
+nKEPV7PPzGBB_FGKx5ejpPcNegfexZq2mk0c5dZwqIiCkdM0LT5CVe8s_1IZdr5EqDOUFf6yL=
+8y3nLs_aZ7z9cKrUhEZevQv_OrGzK94HHhALVG7BokNb?key=3D25EjYfqXXzGOrd5RdjmiL5=
+AG" width=3D"445" height=3D"67" =
+style=3D"margin-left:0px;margin-top:0px"></span></span></a></p></td></tr>=
+</tbody></table></div></div></div></div><br><br><div =
+class=3D"gmail_quote gmail_quote_container"><div dir=3D"ltr" =
+class=3D"gmail_attr">---------- Forwarded message ---------<br>From: =
+<strong class=3D"gmail_sendername" dir=3D"auto">Godfrey Dsa</strong> =
+<span dir=3D"auto">&lt;<a =
+href=3D"mailto:godfrey@dsatech.co.in">godfrey@dsatech.co.in</a>&gt;</span=
+><br>Date: Thu, Mar 4, 2021 at 7:29=E2=80=AFPM<br>Subject: Minutes of =
+Meet with Sushil Yadav HPCL and changes required<br>To: Kuldip Kamat =
+&lt;<a =
+href=3D"mailto:kuldip.kamat@allwaveav.com">kuldip.kamat@allwaveav.com</a>=
+&gt;, Nilesh Kamat/AWAV &lt;<a =
+href=3D"mailto:nilesh.kamat@allwaveav.com">nilesh.kamat@allwaveav.com</a>=
+&gt;<br>Cc:  &lt;<a =
+href=3D"mailto:bala.s@allwaveav.com">bala.s@allwaveav.com</a>&gt;<br></di=
+v><br><br><div class=3D"msg7619667799645120332"><div lang=3D"EN-IN" =
+link=3D"#0563C1" vlink=3D"#954F72" style=3D"word-wrap:break-word"><div =
+class=3D"m_7619667799645120332WordSection1"><p class=3D"MsoNormal">Dear =
+Kuldip,<u></u><u></u></p><p =
+class=3D"MsoNormal"><u></u>=C2=A0<u></u></p><p class=3D"MsoNormal">As =
+our discussion, please find the point to work on for the changes. =
+<u></u><u></u></p><p class=3D"MsoNormal"><u></u>=C2=A0<u></u></p><p =
+class=3D"MsoNormal">They have had bad install in their other site with =
+ceiling microphone, so are not comfortable. <u></u><u></u></p><p =
+class=3D"MsoNormal"><u></u>=C2=A0<u></u></p><p class=3D"MsoNormal">Share =
+the 2<sup>nd</sup> option with table boundary microphones installed, and =
+then we will try convincing them. <u></u><u></u></p><p =
+class=3D"MsoNormal"><u></u>=C2=A0<u></u></p><p class=3D"MsoNormal">For =
+the main conference room, in individual mode, they need display/ screen =
+at the sliding partition.=C2=A0 They have height upto 4 mtrs but =
+motorising lift for large display ?????<u></u><u></u></p><p =
+class=3D"MsoNormal">Alternately suggest projector screen. Go for Laser =
+projector only both side. <u></u><u></u></p><p =
+class=3D"MsoNormal"><u></u>=C2=A0<u></u></p><p class=3D"MsoNormal">LED =
+wall for main combined presentation. <u></u><u></u></p><p =
+class=3D"MsoNormal"><u></u>=C2=A0<u></u></p><p class=3D"MsoNormal">Any =
+new technology that can be presented, they are open. Suggest. =
+<u></u><u></u></p><p class=3D"MsoNormal"><u></u>=C2=A0<u></u></p><p =
+class=3D"MsoNormal">Conf room 2 and Meeting room 2, can have same conf. =
+<u></u><u></u></p><p class=3D"MsoNormal"><u></u>=C2=A0<u></u></p><p =
+class=3D"MsoNormal">Other meeting rooms need just a connectivity from =
+table to display.=C2=A0 Huddle room scenario.<u></u><u></u></p><p =
+class=3D"MsoNormal"><u></u>=C2=A0<u></u></p><p class=3D"MsoNormal">Call =
+me any time if any queries in this regards. <u></u><u></u></p><p =
+class=3D"MsoNormal"><u></u>=C2=A0<u></u></p><p class=3D"MsoNormal"><span =
+style=3D"font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif">Kind=
+ Regards<u></u><u></u></span></p><p class=3D"MsoNormal"><span =
+style=3D"font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif"><u><=
+/u>=C2=A0<u></u></span></p><p class=3D"MsoNormal"><span =
+style=3D"font-size:14.0pt">Godfrey D=E2=80=99Sa=C2=A0=C2=A0 =
+CTS-I<u></u><u></u></span></p><p =
+class=3D"MsoNormal"><span><u></u>=C2=A0<u></u></span></p><p =
+class=3D"MsoNormal"><span =
+style=3D"font-size:24.0pt;font-family:&quot;Verdana&quot;,sans-serif;colo=
+r:#0c4f9f">DSA Tech</span><span =
+style=3D"font-size:24.0pt;font-family:&quot;Verdana&quot;,sans-serif;colo=
+r:#08356a"><u></u><u></u></span></p><p class=3D"MsoNormal"><span>Design =
+your Imagination beyond limits<u></u><u></u></span></p><p =
+class=3D"MsoNormal"><span><u></u>=C2=A0<u></u></span></p><p =
+class=3D"MsoNormal"><span =
+style=3D"font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif">2-C-=
+603, Ashok Nagar Bldg, Off Military Road, Marol, Andheri (East), Mumbai- =
+400072. INDIA <u></u><u></u></span></p><p class=3D"MsoNormal" =
+style=3D"background:white"><span =
+style=3D"font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color=
+:black">.</span><span =
+style=3D"font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif"><u><=
+/u><u></u></span></p><p class=3D"MsoNormal" =
+style=3D"background:white"><span =
+style=3D"font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color=
+:black">=C2=A0Tel:=C2=A0+91-22-2920 1207=C2=A0=C2=A0| Mobile: +91 =
+9820709183 |=C2=A0Email</span><span =
+style=3D"font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color=
+:#0099ff">:</span><span =
+style=3D"font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color=
+:navy">=C2=A0<a href=3D"mailto:godfrey@dsatech.co.in" =
+target=3D"_blank"><span =
+style=3D"color:blue">godfrey@dsatech.co.in</span></a>=C2=A0 </span><span =
+style=3D"font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color=
+:#1f497d">| </span><span =
+style=3D"font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color=
+:black">Web</span><span =
+style=3D"font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color=
+:navy">:=C2=A0</span><span =
+style=3D"font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color=
+:#1f497d"><a href=3D"http://www.dsatech.co.in/" target=3D"_blank"><span =
+style=3D"color:blue">www.dsatech.co.in</span></a> | </span><span =
+style=3D"font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color=
+:black">Skype</span><span =
+style=3D"font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color=
+:#1f497d"> : Godfrey.d</span><span =
+style=3D"font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color=
+:#222222"><u></u><u></u></span></p><p class=3D"MsoNormal" =
+style=3D"background:white"><span =
+style=3D"font-size:8.0pt;color:#006699">=C2=A0</span><span =
+style=3D"font-size:9.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#=
+222222"><u></u><u></u></span></p><p class=3D"MsoNormal" =
+style=3D"margin-right:9.0pt;text-align:justify;background:white"><span =
+style=3D"font-size:9.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#=
+222222"><u></u>=C2=A0<u></u></span></p><p class=3D"MsoNormal" =
+style=3D"margin-right:9.0pt;text-align:justify"><b><span lang=3D"EN-GB" =
+style=3D"font-size:8.0pt;color:#1f497d;background:white">=C2=A0</span></b=
+><span =
+style=3D"font-size:9.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#=
+500050;background:white"><u></u><u></u></span></p><p class=3D"MsoNormal" =
+style=3D"margin-right:9.0pt;text-align:justify"><b><span lang=3D"EN-GB" =
+style=3D"font-size:6.0pt;color:#1f497d;background:white">=C2=A0</span></b=
+><span =
+style=3D"font-size:9.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#=
+500050;background:white"><u></u><u></u></span></p><p class=3D"MsoNormal" =
+style=3D"margin-right:9.0pt"><b><span =
+style=3D"font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:=
+red;background:white">DISCLAIMER:</span></b><span =
+style=3D"font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:=
+red;background:white"><u></u><u></u></span></p><p class=3D"MsoNormal" =
+style=3D"margin-right:9.0pt;text-align:justify"><span =
+style=3D"font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:=
+#333333;background:white">The information contained in this electronic =
+message and in any attachments to this message is intended only for the =
+person or entity to which this electronic message is addressed. If you =
+are not the intended recipient, you are hereby notified that any =
+distribution, copying, review, re-transmission, dissemination or other =
+use of this electronic transmission or the information contained in it =
+is strictly prohibited. This message has been scanned for viruses and =
+dangerous content, and is believed to be clean. DSA Tech will not be =
+liable for any damage caused by any virus transmitted by this =
+email.</span><span lang=3D"EN-GB" =
+style=3D"font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:=
+#333333;background:white">=C2=A0The contents of this email do not =
+necessarily represent the views or policies of DSA Tech.</span><span =
+style=3D"font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:=
+#500050;background:white"><u></u><u></u></span></p><p =
+class=3D"MsoNormal"><u></u>=C2=A0<u></u></p></div></div></div></div></div=
+>
+
+------=_NextPart_001_0A2D_01DC1917.593AA4F0--
+
+------=_NextPart_000_0A2C_01DC1917.593AA4F0
+Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;
+	name="Minutes of meet on 030321 and changes required.xlsx"
+Content-Transfer-Encoding: base64
+Content-ID: <196198d1b4cbc8e4dd71>
+Content-Disposition: attachment;
+	filename="Minutes of meet on 030321 and changes required.xlsx"
+
+UEsDBBQABgAIAAAAIQBBN4LPbgEAAAQFAAATAAgCW0NvbnRlbnRfVHlwZXNdLnhtbCCiBAIooAAC
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACs
+VMluwjAQvVfqP0S+Vomhh6qqCBy6HFsk6AeYeJJYJLblGSj8fSdmUVWxCMElUWzPWybzPBit2iZZ
+QkDjbC76WU8kYAunja1y8T39SJ9FgqSsVo2zkIs1oBgN7+8G07UHTLjaYi5qIv8iJRY1tAoz58Hy
+TulCq4g/QyW9KuaqAvnY6z3JwlkCSyl1GGI4eINSLRpK3le8vFEyM1Ykr5tzHVUulPeNKRSxULm0
++h9J6srSFKBdsWgZOkMfQGmsAahtMh8MM4YJELExFPIgZ4AGLyPdusq4MgrD2nh8YOtHGLqd4662
+dV/8O4LRkIxVoE/Vsne5auSPC/OZc/PsNMilrYktylpl7E73Cf54GGV89W8spPMXgc/oIJ4xkPF5
+vYQIc4YQad0A3rrtEfQcc60C6Anx9FY3F/AX+5QOjtQ4OI+c2gCXd2EXka469QwEgQzsQ3Jo2PaM
+HPmr2w7dnaJBH+CW8Q4b/gIAAP//AwBQSwMEFAAGAAgAAAAhALVVMCP0AAAATAIAAAsACAJfcmVs
+cy8ucmVscyCiBAIooAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAACskk1PwzAMhu9I/IfI99XdkBBCS3dBSLshVH6ASdwPtY2jJBvdvyccEFQa
+gwNHf71+/Mrb3TyN6sgh9uI0rIsSFDsjtnethpf6cXUHKiZylkZxrOHEEXbV9dX2mUdKeSh2vY8q
+q7iooUvJ3yNG0/FEsRDPLlcaCROlHIYWPZmBWsZNWd5i+K4B1UJT7a2GsLc3oOqTz5t/15am6Q0/
+iDlM7NKZFchzYmfZrnzIbCH1+RpVU2g5abBinnI6InlfZGzA80SbvxP9fC1OnMhSIjQS+DLPR8cl
+oPV/WrQ08cudecQ3CcOryPDJgosfqN4BAAD//wMAUEsDBBQABgAIAAAAIQBQ48zmkQMAAJMIAAAP
+AAAAeGwvd29ya2Jvb2sueG1srFVrb6M4FP2+0v4Hi+8UmwABVDoiPHY6m3aiNNNqpUgjF5xglUfW
+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
+
+------=_NextPart_000_0A2C_01DC1917.593AA4F0--
