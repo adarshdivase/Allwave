@@ -674,7 +674,7 @@ class EnhancedProductDatabase:
             }
         }
 
-# --- NEW: Budget Management ---
+# --- Budget Management ---
 class BudgetManager:
     def __init__(self, budget_tier):
         self.tier_limits = {
@@ -1061,16 +1061,14 @@ class MaximizedAVRecommender:
 
 # --- Visualization Engine ---
 class EnhancedVisualizationEngine:
-    # --- NEW: Method to calculate table requirements ---
     def calculate_table_requirements(self, room_specs):
         capacity = room_specs['capacity']
         # Standard space per person (in meters) along the perimeter
         space_per_person_perimeter = 0.75 
         
         # Calculate minimum table dimensions based on capacity
-        # Assume at least 0.6m length and 0.3m width per person for area calculation
-        min_table_length = max(capacity * 0.6, 2.0)  # At least 2m
-        min_table_width = max(capacity * 0.3, 1.0)   # At least 1m
+        min_table_length = max(capacity * 0.6, 2.0)
+        min_table_width = max(capacity * 0.3, 1.0)
         
         # Adjust for room constraints (leave clearance around the table)
         max_length = room_specs['length'] * 0.7
@@ -1079,7 +1077,6 @@ class EnhancedVisualizationEngine:
         table_length = min(min_table_length, max_length)
         table_width = min(min_table_width, max_width)
         
-        # Calculate seats based on perimeter, capped by room capacity
         perimeter_seats = int((table_length * 2 + table_width * 2) / space_per_person_perimeter)
 
         return {
@@ -1092,43 +1089,36 @@ class EnhancedVisualizationEngine:
     def create_3d_room_visualization(self, room_specs, recommendations, viz_config):
         fig = go.Figure()
 
-        # Room dimensions
         length, width, height = room_specs['length'], room_specs['width'], room_specs['ceiling_height']
 
-        # Floor, walls, and ceiling rendering (code remains the same)
-        # Floor
+        # Floor, walls, and ceiling rendering
         fig.add_trace(go.Surface(
-            x=[[0, length], [0, length]],
-            y=[[0, 0], [width, width]],
-            z=[[0, 0], [0, 0]],
+            x=[[0, length], [0, length]], y=[[0, 0], [width, width]], z=[[0, 0], [0, 0]],
             colorscale=[[0, 'rgb(245, 245, 240)'], [1, 'rgb(245, 245, 240)']],
             showscale=False, name='Floor', hoverinfo='skip'
         ))
-        # Back wall (display wall)
         fig.add_trace(go.Surface(
             x=[[0, 0], [0, 0]], y=[[0, width], [0, width]], z=[[0, 0], [height, height]],
             colorscale=[[0, 'rgb(210, 220, 215)'], [1, 'rgb(210, 220, 215)']],
             showscale=False, name='Back Wall', hoverinfo='skip'
         ))
-        # Left wall
         fig.add_trace(go.Surface(
             x=[[0, length], [0, length]], y=[[0, 0], [0, 0]], z=[[0, 0], [height, height]],
             colorscale=[[0, 'rgb(225, 230, 225)'], [1, 'rgb(225, 230, 225)']],
             showscale=False, name='Left Wall', opacity=0.8, hoverinfo='skip'
         ))
-        # Right wall
         fig.add_trace(go.Surface(
             x=[[0, length], [0, length]], y=[[width, width], [width, width]], z=[[0, 0], [height, height]],
             colorscale=[[0, 'rgb(225, 230, 225)'], [1, 'rgb(225, 230, 225)']],
             showscale=False, name='Right Wall', opacity=0.8, hoverinfo='skip'
         ))
-        # Ceiling
         fig.add_trace(go.Surface(
             x=[[0, length], [0, length]], y=[[0, 0], [width, width]], z=[[height, height], [height, height]],
             colorscale=[[0, 'rgb(230, 230, 240)'], [1, 'rgb(230, 230, 240)']],
             showscale=False, name='Ceiling', opacity=0.9, hoverinfo='skip'
         ))
-        # Display Screen and Frame (code remains the same)
+        
+        # Display Screen and Frame
         screen_width = min(3, width * 0.6)
         screen_height = screen_width * 9 / 16
         screen_y_start = (width - screen_width) / 2
@@ -1152,12 +1142,12 @@ class EnhancedVisualizationEngine:
             colorscale=[[0, 'rgb(50, 50, 50)'], [1, 'rgb(50, 50, 50)']], showscale=False, name='Display Frame', hoverinfo='skip'
         ))
         
-        # Conference Table - USING DYNAMIC DATA FROM SESSION STATE
+        # Conference Table
         table_config = st.session_state.app_state.get('table_config')
         if table_config:
             table_length = table_config['length']
             table_width = table_config['width']
-        else: # Fallback for initial render
+        else:
             table_length = min(length * 0.7, 4)
             table_width = min(width * 0.4, 1.5)
 
@@ -1178,8 +1168,7 @@ class EnhancedVisualizationEngine:
             customdata=np.full((2, 2), table_customdata_str)
         ))
 
-        # Other elements (Camera, Chairs, Speakers, etc.) (code remains the same)
-        # Camera System
+        # Other elements (Camera, Chairs, Speakers, etc.)
         camera_width = screen_width * 0.8; camera_y_center = width * 0.5; camera_z = screen_z_start + screen_height + 0.15
         camera_y_coords = np.linspace(camera_y_center - camera_width / 2, camera_y_center + camera_width / 2, 20)
         camera_x = np.full_like(camera_y_coords, 0.1); camera_z_coords = np.full_like(camera_y_coords, camera_z)
@@ -1189,7 +1178,6 @@ class EnhancedVisualizationEngine:
             marker=dict(size=4, color='rgb(60, 60, 60)', symbol='square'), name='Camera System',
             hovertemplate='<b>Camera System</b><br>Model: %{customdata}<extra></extra>', customdata=[camera_model] * len(camera_x)
         ))
-        # Chair positions
         capacity = min(room_specs['capacity'], 12); chairs_per_side = min(6, capacity // 2)
         chair_x_positions = []; chair_y_positions = []; chair_z_positions = []
         if chairs_per_side > 0:
@@ -1203,7 +1191,6 @@ class EnhancedVisualizationEngine:
             marker=dict(size=8, color='rgb(70, 130, 180)', symbol='square', opacity=0.8),
             name=f'Seating ({len(chair_x_positions)} chairs)', hovertemplate='<b>Chair</b><br>Position: %{x:.1f}, %{y:.1f}<extra></extra>'
         ))
-        # Ceiling Speakers
         speaker_positions = [(length * 0.25, width * 0.25), (length * 0.75, width * 0.25), (length * 0.25, width * 0.75), (length * 0.75, width * 0.75)]
         speaker_x = [p[0] for p in speaker_positions]; speaker_y = [p[1] for p in speaker_positions]; speaker_z = [height - 0.1] * 4
         fig.add_trace(go.Scatter3d(
@@ -1211,7 +1198,6 @@ class EnhancedVisualizationEngine:
             marker=dict(size=6, color='rgb(220, 220, 220)', symbol='circle', line=dict(color='rgb(100, 100, 100)', width=1)),
             name='Ceiling Speakers', hovertemplate='<b>Ceiling Speaker</b><br>Zone Coverage<extra></extra>'
         ))
-        # LED Lighting
         light_rows = 2; light_cols = 3; light_x = []; light_y = []; light_z = []
         for i in range(light_rows):
             for j in range(light_cols):
@@ -1221,29 +1207,20 @@ class EnhancedVisualizationEngine:
             marker=dict(size=5, color='rgb(255, 255, 200)', symbol='circle', opacity=0.8),
             name='LED Lighting', hovertemplate='<b>LED Light</b><br>Recessed Ceiling Mount<extra></extra>'
         ))
-        # Touch Control Panel
         fig.add_trace(go.Scatter3d(
             x=[length - 0.1], y=[width * 0.85], z=[height * 0.35], mode='markers',
             marker=dict(size=10, color='rgb(240, 240, 240)', symbol='square', line=dict(color='rgb(150, 150, 150)', width=2)),
             name='Touch Control Panel', hovertemplate='<b>Control Panel</b><br>Wall-mounted Touch Interface<extra></extra>'
         ))
 
-        # --- MODIFIED: Set default camera position that persists ---
         default_camera = dict(
-            eye=dict(x=-1.5*room_specs['length'], 
-                     y=-1.5*room_specs['width'], 
-                     z=1.2*room_specs['ceiling_height']),
-            center=dict(x=room_specs['length']/2, 
-                        y=room_specs['width']/2, 
-                        z=room_specs['ceiling_height']/3),
+            eye=dict(x=-1.5*room_specs['length'], y=-1.5*room_specs['width'], z=1.2*room_specs['ceiling_height']),
+            center=dict(x=room_specs['length']/2, y=room_specs['width']/2, z=room_specs['ceiling_height']/3),
             up=dict(x=0, y=0, z=1)
         )
         
         fig.update_layout(
-            title=dict(
-                text="Professional Conference Room - 3D Layout",
-                x=0.5, font=dict(size=16, color='#2c3e50', family='Arial, sans-serif')
-            ),
+            title=dict(text="Professional Conference Room - 3D Layout", x=0.5, font=dict(size=16, color='#2c3e50')),
             scene=dict(
                 xaxis=dict(title=dict(text=f"Length ({length:.1f}m)", font=dict(size=12)), showgrid=False, showbackground=False, showline=False, showticklabels=True, range=[0, length + 0.5]),
                 yaxis=dict(title=dict(text=f"Width ({width:.1f}m)", font=dict(size=12)), showgrid=False, showbackground=False, showline=False, showticklabels=True, range=[0, width + 0.5]),
@@ -1252,20 +1229,24 @@ class EnhancedVisualizationEngine:
                 aspectmode='data'
             ),
             height=600, showlegend=True,
-            legend=dict(x=1.02, y=0.8, bgcolor='rgba(255, 255, 255, 0.9)', bordercolor='rgba(0, 0, 0, 0.1)', borderwidth=1, font=dict(size=11)),
+            legend=dict(
+                x=1.02, y=0.8,
+                bgcolor='rgba(255, 255, 255, 0.9)',
+                bordercolor='rgba(0, 0, 0, 0.1)',
+                borderwidth=1,
+                # --- MODIFIED: Added color to font for visibility ---
+                font=dict(size=11, color='black')
+            ),
             margin=dict(l=0, r=120, t=50, b=0),
             paper_bgcolor='rgb(255, 255, 255)', plot_bgcolor='rgb(255, 255, 255)',
-            # --- MODIFIED: Apply persistent camera and uirevision ---
             scene_camera=default_camera,
-            uirevision='True'  # This makes the camera position persist
+            uirevision='True'
         )
 
         return fig
 
-    # This static method is preserved from previous versions for 2D layout
     @staticmethod
     def create_equipment_layout_2d(room_specs, recommendations):
-        # ... (Method code remains the same as provided) ...
         fig = go.Figure()
         
         length, width = room_specs['length'], room_specs['width']
@@ -1329,7 +1310,6 @@ class EnhancedVisualizationEngine:
     
     @staticmethod
     def create_cost_breakdown_chart(recommendations):
-        # ... (Method code remains the same as provided) ...
         categories = ['Display', 'Camera', 'Audio', 'Control', 'Lighting']
         costs = [recommendations['display']['price'], recommendations['camera']['price'], recommendations['audio']['price'], recommendations['control']['price'], recommendations['lighting']['price']]
         colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6']
@@ -1342,7 +1322,6 @@ class EnhancedVisualizationEngine:
     
     @staticmethod
     def create_feature_comparison_radar(recommendations, alternatives):
-        # ... (Method code remains the same as provided) ...
         categories = ['Performance', 'Features', 'Reliability', 'Integration', 'Value']
         current_scores = [4.5, 4.2, 4.6, 4.4, 4.3]
         
@@ -1352,23 +1331,18 @@ class EnhancedVisualizationEngine:
         
         return fig
 
-# --- NEW: Configuration Validation Function ---
+# --- Configuration Validation Function ---
 def validate_configuration(room_specs, budget_manager):
     warnings = []
     errors = []
     
     # Check room dimensions for capacity
-    min_area_per_person = 1.5  # square meters
+    min_area_per_person = 1.5
     room_area = room_specs['length'] * room_specs['width']
     required_area = room_specs['capacity'] * min_area_per_person
     
     if room_area < required_area:
         errors.append(f"Room too small for {room_specs['capacity']} people. Minimum {required_area:.1f}m² required.")
-    
-    # Check budget constraints (running total is checked by the recommender, but we can check the tier min here)
-    if budget_manager.tier_limits[budget_manager.current_tier]['min'] > 0:
-        # This is more of a conceptual check, actual over-budget is handled during recommendation
-        pass
     
     # Check aspect ratio for usability
     if room_specs['width'] > 0:
@@ -1383,12 +1357,11 @@ def main():
     st.title("🏢 AI Room Configurator Pro Max")
     st.markdown("### Transform Your Space with Intelligent AV Design")
     
-    # --- MODIFIED: Initialize session state for new features ---
     if 'app_state' not in st.session_state:
         st.session_state.app_state = {
             'camera_position': None,
             'current_budget': 0,
-            'active_features': set(['table_space', 'budget_tracking', 'camera_angles']), # Default to on
+            'active_features': set(['table_space', 'budget_tracking', 'camera_angles']),
             'table_config': None
         }
     if 'recommendations' not in st.session_state:
@@ -1399,7 +1372,6 @@ def main():
     with st.sidebar:
         st.markdown('<div class="premium-card" style="margin-top: -50px;"><h2>🎛️ Room Configuration</h2></div>', unsafe_allow_html=True)
         
-        # Room template and dimensions (code remains the same)
         template = st.selectbox("Room Template", list(EnhancedProductDatabase().room_templates.keys()), help="Choose a template to start.")
         template_info = EnhancedProductDatabase().room_templates[template]
         
@@ -1412,36 +1384,34 @@ def main():
         
         st.markdown("---")
         st.subheader("🌟 Environment & Atmosphere")
-        # Environment inputs (code remains the same)
         env_col1, env_col2 = st.columns(2)
         with env_col1:
             windows = st.slider("Windows (%)", 0, 80, 20, 5, help="Percentage of wall space with windows")
-            natural_light = st.select_slider("Natural Light Level", options=["Very Low", "Low", "Moderate", "High", "Very High"], value="Moderate", help="Amount of natural light entering the room")
+            natural_light = st.select_slider("Natural Light Level", options=["Very Low", "Low", "Moderate", "High", "Very High"], value="Moderate")
         with env_col2:
-            ceiling_type = st.selectbox("Ceiling Type", ["Standard", "Drop Ceiling", "Open Plenum", "Acoustic Tiles"], help="Type of ceiling construction")
-            wall_material = st.selectbox("Wall Material", ["Drywall", "Glass", "Concrete", "Wood Panels", "Acoustic Panels"], help="Primary wall material")
+            ceiling_type = st.selectbox("Ceiling Type", ["Standard", "Drop Ceiling", "Open Plenum", "Acoustic Tiles"])
+            wall_material = st.selectbox("Wall Material", ["Drywall", "Glass", "Concrete", "Wood Panels", "Acoustic Panels"])
         st.markdown("##### 🎯 Room Purpose & Acoustics")
-        room_purpose = st.multiselect("Primary Activities", ["Video Conferencing", "Presentations", "Training", "Board Meetings", "Collaborative Work", "Hybrid Meetings", "Social Events"], default=["Video Conferencing", "Presentations"], help="Select all typical activities")
-        acoustic_features = st.multiselect("Acoustic Considerations", ["Sound Absorption Needed", "Echo Control Required", "External Noise Issues", "Speech Privacy Important", "Music Playback Required"], help="Select acoustic challenges to address")
+        room_purpose = st.multiselect("Primary Activities", ["Video Conferencing", "Presentations", "Training", "Board Meetings", "Collaborative Work", "Hybrid Meetings"], default=["Video Conferencing", "Presentations"])
+        acoustic_features = st.multiselect("Acoustic Considerations", ["Sound Absorption Needed", "Echo Control Required", "External Noise Issues", "Speech Privacy Important"])
         st.markdown("##### 🎛️ Environmental Controls")
-        env_controls = st.multiselect("Control Systems", ["Automated Lighting", "Motorized Shades", "Climate Control", "Air Quality Monitoring", "Occupancy Sensors", "Daylight Harvesting"], help="Select desired environmental control features")
+        env_controls = st.multiselect("Control Systems", ["Automated Lighting", "Motorized Shades", "Climate Control", "Occupancy Sensors", "Daylight Harvesting"])
         st.markdown("##### 🎨 Ambiance & Design")
-        color_scheme_temp = st.select_slider("Color Temperature", options=["Warm", "Neutral Warm", "Neutral", "Neutral Cool", "Cool"], value="Neutral", help="Preferred lighting color temperature")
-        design_style = st.selectbox("Interior Design Style", ["Modern Corporate", "Executive", "Creative/Tech", "Traditional", "Industrial", "Minimalist"], help="Overall design aesthetic")
+        color_scheme_temp = st.select_slider("Color Temperature", options=["Warm", "Neutral", "Cool"], value="Neutral")
+        design_style = st.selectbox("Interior Design Style", ["Modern Corporate", "Executive", "Creative/Tech", "Minimalist"])
         st.markdown("##### ♿ Accessibility Features")
-        accessibility = st.multiselect("Accessibility Requirements", ["Wheelchair Access", "Hearing Loop System", "High Contrast Displays", "Voice Control", "Adjustable Furniture", "Braille Signage"], help="Select required accessibility features")
+        accessibility = st.multiselect("Accessibility Requirements", ["Wheelchair Access", "Hearing Loop System", "High Contrast Displays", "Voice Control"])
         
         st.markdown("---")
         st.subheader("💰 Budget & Brands")
         budget_tier = st.selectbox("Budget Tier", ['Budget', 'Professional', 'Premium'], index=1)
-        preferred_brands = st.multiselect("Preferred Brands", ['Samsung', 'LG', 'Sony', 'Crestron', 'Cisco', 'Logitech', 'QSC', 'Shure'], help="Leave empty for best overall recommendations")
+        preferred_brands = st.multiselect("Preferred Brands", ['Samsung', 'LG', 'Sony', 'Crestron', 'Cisco', 'Logitech', 'QSC', 'Shure'])
         
         st.subheader("✨ Special Features")
-        special_features = st.multiselect("Required Features", ['Wireless Presentation', 'Digital Whiteboard', 'Room Scheduling', 'Noise Reduction', 'Circadian Lighting', 'AI Analytics'])
+        special_features = st.multiselect("Required Features", ['Wireless Presentation', 'Digital Whiteboard', 'Room Scheduling', 'Noise Reduction', 'AI Analytics'])
 
         st.markdown("---")
         
-        # --- NEW: Feature toggles with state tracking ---
         st.markdown("### 🎯 Feature Controls")
         def update_feature_state(feature_name, state):
             if state:
@@ -1456,7 +1426,6 @@ def main():
             )
             update_feature_state(feature, is_active)
 
-    # --- MODIFIED: Main button logic with validation and new features ---
     if st.button("🚀 Generate AI Recommendation"):
         environment_config = {
             'windows': windows, 'natural_light': natural_light, 'ceiling_type': ceiling_type,
@@ -1469,14 +1438,11 @@ def main():
             'capacity': capacity, 'environment': environment_config, 'special_requirements': [] 
         }
         user_preferences = {
-            'budget_tier': budget_tier, 'preferred_brands': preferred_brands, 'special_features': special_features,
-            'design_style': design_style, 'color_scheme': color_scheme_temp
+            'budget_tier': budget_tier, 'preferred_brands': preferred_brands, 'special_features': special_features
         }
         
-        # Create budget manager instance
         budget_manager = BudgetManager(budget_tier)
         
-        # Validate configuration before proceeding
         warnings, errors = validate_configuration(room_specs, budget_manager)
         
         if errors:
@@ -1485,22 +1451,16 @@ def main():
             if warnings:
                 st.warning("⚠️ Consider these design warnings:\n\n* " + "\n* ".join(warnings))
             
-            # --- Initialize engines and get recommendations ---
             recommender = MaximizedAVRecommender()
             viz_engine = EnhancedVisualizationEngine()
             
-            # Calculate table requirements and store in state
             table_config = viz_engine.calculate_table_requirements(room_specs)
             st.session_state.app_state['table_config'] = table_config
             
-            # Generate recommendations with budget tracking
             recommendations = recommender.get_comprehensive_recommendations(
-                room_specs, 
-                user_preferences, 
-                budget_manager=budget_manager
+                room_specs, user_preferences, budget_manager=budget_manager
             )
             
-            # Check if budget was exceeded during recommendation
             if budget_manager.running_total > budget_manager.tier_limits[budget_manager.current_tier]['max']:
                  st.error(f"Configuration cost of ${budget_manager.running_total:,.0f} exceeds the limit for the {budget_tier} tier (${budget_manager.tier_limits[budget_manager.current_tier]['max']:,}).")
             else:
@@ -1528,7 +1488,6 @@ def main():
         
         with tab1:
             st.header("AI-Powered Equipment Recommendations")
-            # Display logic remains the same
             col1, col2 = st.columns(2)
             with col1:
                 for cat, icon in [('display', '📺'), ('camera', '🎥'), ('audio', '🔊')]:
@@ -1547,7 +1506,6 @@ def main():
 
         with tab2:
             st.header("Room Analysis & Performance Metrics")
-            # Display logic remains the same, with added Table Analysis if toggled
             col1, col2 = st.columns([1, 1])
             with col1:
                 st.markdown("#### Room Characteristics")
@@ -1561,11 +1519,15 @@ def main():
                 
                 if 'table_space' in st.session_state.app_state['active_features']:
                     st.markdown("#### Table & Seating Analysis")
-                    table_config = st.session_state.app_state['table_config']
-                    st.markdown(f"""<div class="comparison-card">
-                        <p><strong>Recommended Table Size:</strong> {table_config['length']:.1f}m × {table_config['width']:.1f}m</p>
-                        <p><strong>Calculated Seating:</strong> {table_config['seats']} seats</p>
-                    </div>""", unsafe_allow_html=True)
+                    table_config = st.session_state.app_state.get('table_config')
+                    
+                    if table_config:
+                        st.markdown(f"""<div class="comparison-card">
+                            <p><strong>Recommended Table Size:</strong> {table_config['length']:.1f}m × {table_config['width']:.1f}m</p>
+                            <p><strong>Calculated Seating:</strong> {table_config['seats']} seats</p>
+                        </div>""", unsafe_allow_html=True)
+                    else:
+                        st.info("Table analysis will be shown after generating a recommendation.")
 
             with col2:
                 st.markdown("#### Investment & Performance")
@@ -1574,7 +1536,6 @@ def main():
 
         with tab3:
             st.header("Interactive Room Visualization")
-            # Viz config is now just for legacy/2D plot
             viz_config = {}
             viz_engine = EnhancedVisualizationEngine()
             fig_3d = viz_engine.create_3d_room_visualization(room_specs, recommendations, viz_config)
@@ -1583,7 +1544,6 @@ def main():
 
         with tab4:
             st.header("Alternative Configurations & Smart Upgrade Planner")
-            # Display logic remains the same
             if recommendations.get('alternatives'):
                 st.markdown("#### Alternative Configurations")
                 for tier_name, alt_config in recommendations['alternatives'].items():
@@ -1624,7 +1584,6 @@ def main():
 
         with tab5:
             st.header("Professional Report Summary")
-            # Display logic remains the same
             st.markdown(f"""<div class="premium-card">
                 <h3>Executive Summary</h3>
                 <p>AI-generated AV solution for a <strong>{room_specs['template']}</strong> ({room_specs['length']}m × {room_specs['width']}m) for <strong>{room_specs['capacity']} people</strong>.</p>
