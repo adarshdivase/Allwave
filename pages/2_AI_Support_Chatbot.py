@@ -1,4 +1,4 @@
-# app.py - Complete Enhanced version with quota management and fallback systems
+# app.py - Enhanced Versatile AI Assistant with Multi-API Key Management
 import streamlit as st
 import pandas as pd
 import os
@@ -8,7 +8,7 @@ import faiss
 import numpy as np
 import warnings
 import re
-from typing import List, Dict, Any, Generator, Optional
+from typing import List, Dict, Any, Generator, Optional, Tuple
 import fitz  # PyMuPDF
 from datetime import datetime, timedelta
 import random
@@ -22,12 +22,13 @@ import io
 import time
 import json
 from functools import wraps
+import traceback
 
-# --- Enhanced Configuration with Quota Management ---
+# --- Enhanced Configuration ---
 warnings.filterwarnings("ignore")
 st.set_page_config(
-    page_title="Smart Equipment Diagnostic AI",
-    page_icon="🔧",
+    page_title="Versatile AI Assistant",
+    page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -40,15 +41,176 @@ class RAGConfig:
 
 @dataclass
 class QuotaConfig:
-    daily_limit: int = 50
-    requests_per_hour: int = 10
+    daily_limit: int = 100
+    requests_per_hour: int = 20
     retry_delay: int = 60
     use_fallback_on_limit: bool = True
+    api_key_rotation: bool = True
 
 config = RAGConfig()
 quota_config = QuotaConfig()
 
-# --- Smart Equipment Knowledge Base ---
+# --- Multi-API Key Management System ---
+class MultiAPIManager:
+    def __init__(self):
+        self.api_keys = self._load_api_keys()
+        self.current_key_index = 0
+        self.key_status = {i: {'active': True, 'error_count': 0, 'last_error': None} 
+                          for i in range(len(self.api_keys))}
+        self.current_model = None
+        self._initialize_current_model()
+    
+    def _load_api_keys(self) -> List[str]:
+        """Load all available API keys from secrets"""
+        keys = []
+        for i in range(1, 6):  # Check for GEMINI_API_KEY_1 through GEMINI_API_KEY_5
+            key_name = f"GEMINI_API_KEY_{i}" if i > 1 else "GEMINI_API_KEY"
+            if key_name in st.secrets:
+                keys.append(st.secrets[key_name])
+        
+        if not keys:
+            st.error("❌ No API keys found. Please add GEMINI_API_KEY_1 through GEMINI_API_KEY_5 to secrets.")
+        
+        return keys
+    
+    def _initialize_current_model(self):
+        """Initialize the current model with the active API key"""
+        if self.api_keys and self.current_key_index < len(self.api_keys):
+            try:
+                genai.configure(api_key=self.api_keys[self.current_key_index])
+                self.current_model = genai.GenerativeModel('gemini-1.5-flash')
+                return True
+            except Exception as e:
+                st.error(f"Failed to initialize API key {self.current_key_index + 1}: {e}")
+                return False
+        return False
+    
+    def get_working_model(self):
+        """Get a working model, rotating through API keys if needed"""
+        max_attempts = len(self.api_keys)
+        
+        for attempt in range(max_attempts):
+            if self.key_status[self.current_key_index]['active']:
+                try:
+                    if not self.current_model:
+                        self._initialize_current_model()
+                    
+                    # Test the current model with a simple request
+                    test_response = self.current_model.generate_content("Test")
+                    
+                    # Reset error count on successful test
+                    self.key_status[self.current_key_index]['error_count'] = 0
+                    return self.current_model
+                    
+                except Exception as e:
+                    self._handle_api_error(e)
+            
+            # Move to next API key
+            self._rotate_to_next_key()
+        
+        # All keys failed
+        st.error("🚫 All API keys exhausted. Using fallback mode.")
+        return None
+    
+    def _handle_api_error(self, error: Exception):
+        """Handle API errors and update key status"""
+        error_str = str(error).lower()
+        current_status = self.key_status[self.current_key_index]
+        
+        current_status['error_count'] += 1
+        current_status['last_error'] = str(error)
+        
+        # Disable key if too many errors or quota exceeded
+        if (current_status['error_count'] >= 3 or 
+            'quota' in error_str or 
+            '429' in error_str or 
+            'rate limit' in error_str):
+            
+            current_status['active'] = False
+            st.warning(f"⚠️ API Key {self.current_key_index + 1} disabled due to: {error}")
+    
+    def _rotate_to_next_key(self):
+        """Rotate to the next available API key"""
+        self.current_key_index = (self.current_key_index + 1) % len(self.api_keys)
+        self.current_model = None
+        self._initialize_current_model()
+    
+    def get_api_status(self) -> Dict:
+        """Get current API key status"""
+        active_keys = sum(1 for status in self.key_status.values() if status['active'])
+        return {
+            'total_keys': len(self.api_keys),
+            'active_keys': active_keys,
+            'current_key': self.current_key_index + 1,
+            'key_status': self.key_status
+        }
+    
+    def reset_key_status(self, key_index: int = None):
+        """Reset error status for a specific key or all keys"""
+        if key_index is not None:
+            self.key_status[key_index] = {'active': True, 'error_count': 0, 'last_error': None}
+        else:
+            self.key_status = {i: {'active': True, 'error_count': 0, 'last_error': None} 
+                              for i in range(len(self.api_keys))}
+        st.success("✅ API key status reset!")
+
+# --- Enhanced Query Classification System ---
+class QueryClassifier:
+    def __init__(self):
+        self.equipment_keywords = {
+            'hvac': ['hvac', 'air conditioning', 'heating', 'cooling', 'thermostat', 'ac', 'heat pump'],
+            'electrical': ['electrical', 'power', 'circuit', 'breaker', 'outlet', 'wiring', 'voltage'],
+            'network': ['network', 'internet', 'wifi', 'router', 'switch', 'connection', 'ip'],
+            'server': ['server', 'computer', 'pc', 'laptop', 'cpu', 'memory', 'disk', 'hardware'],
+            'industrial': ['motor', 'pump', 'valve', 'sensor', 'controller', 'industrial', 'machinery'],
+            'automotive': ['car', 'auto', 'engine', 'brake', 'transmission', 'vehicle', 'motor'],
+            'medical': ['medical', 'hospital', 'mri', 'x-ray', 'ultrasound', 'equipment', 'device']
+        }
+        
+        self.technical_keywords = ['code', 'programming', 'software', 'debug', 'error', 'syntax', 'function', 'algorithm']
+        self.general_keywords = ['how to', 'what is', 'explain', 'help me', 'tutorial', 'guide', 'recipe', 'cook']
+    
+    def classify_query(self, query: str) -> Dict:
+        """Classify query into equipment, technical, or general category"""
+        query_lower = query.lower()
+        
+        # Check for equipment-related queries
+        for equipment_type, keywords in self.equipment_keywords.items():
+            if any(keyword in query_lower for keyword in keywords):
+                return {
+                    'category': 'equipment_diagnostic',
+                    'subcategory': equipment_type,
+                    'confidence': 0.9,
+                    'keywords': [kw for kw in keywords if kw in query_lower]
+                }
+        
+        # Check for technical support queries
+        if any(keyword in query_lower for keyword in self.technical_keywords):
+            return {
+                'category': 'technical_support',
+                'subcategory': 'software',
+                'confidence': 0.8,
+                'keywords': [kw for kw in self.technical_keywords if kw in query_lower]
+            }
+        
+        # Check for general queries
+        if any(keyword in query_lower for keyword in self.general_keywords):
+            return {
+                'category': 'general_inquiry',
+                'subcategory': 'information',
+                'confidence': 0.7,
+                'keywords': [kw for kw in self.general_keywords if kw in query_lower]
+            }
+        
+        # Default classification
+        return {
+            'category': 'general_inquiry',
+            'subcategory': 'unknown',
+            'confidence': 0.5,
+            'keywords': []
+        }
+
+# --- Smart Equipment Knowledge Base (Enhanced) ---
 EQUIPMENT_KNOWLEDGE = {
     'hvac': {
         'name': 'HVAC System',
@@ -74,10 +236,20 @@ EQUIPMENT_KNOWLEDGE = {
         'name': 'Industrial Equipment',
         'components': ['motors', 'pumps', 'valves', 'sensors', 'controllers', 'drives'],
         'common_issues': ['motor failures', 'pump problems', 'sensor malfunctions', 'control system errors', 'mechanical wear']
+    },
+    'automotive': {
+        'name': 'Automotive Systems',
+        'components': ['engine', 'transmission', 'brakes', 'electrical system', 'cooling system', 'fuel system'],
+        'common_issues': ['engine won\'t start', 'overheating', 'brake problems', 'transmission issues', 'electrical faults']
+    },
+    'medical': {
+        'name': 'Medical Equipment',
+        'components': ['imaging systems', 'monitors', 'pumps', 'ventilators', 'sensors', 'power supplies'],
+        'common_issues': ['calibration errors', 'connectivity issues', 'power failures', 'sensor malfunctions', 'software errors']
     }
 }
 
-# --- Quota Management System ---
+# --- Enhanced Quota Management System ---
 class QuotaManager:
     def __init__(self):
         self.request_log = self._load_request_log()
@@ -91,7 +263,8 @@ class QuotaManager:
                 'hourly_count': 0,
                 'last_reset_date': datetime.now().date(),
                 'last_reset_hour': datetime.now().hour,
-                'total_requests': 0
+                'total_requests': 0,
+                'api_key_usage': {i: 0 for i in range(5)}  # Track usage per API key
             }
         return st.session_state.quota_log
     
@@ -119,12 +292,13 @@ class QuotaManager:
         
         return True, "OK"
     
-    def record_request(self, success: bool = True):
+    def record_request(self, success: bool = True, api_key_index: int = 0):
         """Record a request attempt"""
         if success:
             self.request_log['daily_count'] += 1
             self.request_log['hourly_count'] += 1
             self.request_log['total_requests'] += 1
+            self.request_log['api_key_usage'][api_key_index] = self.request_log['api_key_usage'].get(api_key_index, 0) + 1
             self.session_requests += 1
             st.session_state.quota_log = self.request_log
     
@@ -136,17 +310,24 @@ class QuotaManager:
             'hourly_used': self.request_log['hourly_count'],
             'hourly_limit': quota_config.requests_per_hour,
             'session_requests': self.session_requests,
-            'total_requests': self.request_log['total_requests']
+            'total_requests': self.request_log['total_requests'],
+            'api_key_usage': self.request_log.get('api_key_usage', {})
         }
 
-# --- Rate Limiting Decorator ---
-def rate_limit(func):
+# --- Rate Limiting Decorator (Enhanced) ---
+def rate_limit_with_rotation(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         quota_manager = st.session_state.get('quota_manager')
+        api_manager = st.session_state.get('api_manager')
+        
         if not quota_manager:
             quota_manager = QuotaManager()
             st.session_state.quota_manager = quota_manager
+        
+        if not api_manager:
+            api_manager = MultiAPIManager()
+            st.session_state.api_manager = api_manager
         
         can_request, message = quota_manager.can_make_request()
         if not can_request:
@@ -158,313 +339,254 @@ def rate_limit(func):
         
         try:
             result = func(*args, **kwargs)
-            quota_manager.record_request(success=True)
+            quota_manager.record_request(success=True, api_key_index=api_manager.current_key_index)
             return result
         except Exception as e:
-            if "429" in str(e) or "quota" in str(e).lower():
-                quota_manager.record_request(success=False)
-                st.error(f"🚫 API Quota Exceeded: {e}")
+            error_str = str(e).lower()
+            if "429" in error_str or "quota" in error_str or "rate limit" in error_str:
+                quota_manager.record_request(success=False, api_key_index=api_manager.current_key_index)
+                st.error(f"🚫 API Error: {e}")
                 if quota_config.use_fallback_on_limit:
                     return None  # Signal to use fallback
             raise e
     return wrapper
 
-# --- Enhanced Smart Diagnostic Engine with Fallback ---
-class SmartDiagnosticEngine:
-    def __init__(self, gemini_model):
-        self.gemini_model = gemini_model
-        self.diagnostic_history = []
+# --- Enhanced Versatile AI Engine ---
+class VersatileAIEngine:
+    def __init__(self, api_manager: MultiAPIManager):
+        self.api_manager = api_manager
+        self.query_classifier = QueryClassifier()
         self.fallback_solutions = self._load_fallback_solutions()
     
     def _load_fallback_solutions(self) -> Dict:
-        """Load pre-built diagnostic solutions for common issues"""
+        """Load comprehensive fallback solutions for all categories"""
         return {
-            'hvac': {
-                'no cooling': """**HVAC No Cooling - Diagnostic Steps:**
+            'equipment_diagnostic': {
+                'hvac': {
+                    'no cooling': """**HVAC No Cooling - Diagnostic Steps:**
 1. **Safety First**: Turn off system at breaker
 2. **Check Thermostat**: Verify settings, replace batteries
 3. **Air Filter**: Check and replace if dirty/clogged
 4. **Circuit Breaker**: Ensure HVAC breaker hasn't tripped
 5. **Outdoor Unit**: Check for debris around condenser
-6. **Refrigerant Lines**: Look for ice buildup or leaks
 **Tools Needed**: Multimeter, replacement filter, basic tools
-**Call Professional If**: Electrical issues, refrigerant problems, compressor failure""",
-                
-                'strange noises': """**HVAC Strange Noises - Diagnostic Steps:**
-1. **Identify Noise Type**: Grinding, squealing, banging, or clicking
-2. **Location**: Indoor unit, outdoor unit, or ductwork
-3. **Check Loose Parts**: Tighten panels and components
-4. **Belt Inspection**: Check for wear or misalignment
-5. **Fan Blades**: Ensure they're clean and balanced
-**Immediate Actions**: Turn off if grinding sounds occur
-**Professional Help**: Motor bearing issues, compressor problems"""
-            },
-            'electrical': {
-                'power outages': """**Electrical Power Outage - Diagnostic Steps:**
+**Call Professional If**: Electrical issues, refrigerant problems""",
+                    'general': """**HVAC System Troubleshooting:**
+1. Check power supply and circuit breakers
+2. Inspect thermostat settings and batteries
+3. Examine air filters for clogs
+4. Look for unusual noises or vibrations
+5. Check for proper airflow from vents"""
+                },
+                'electrical': {
+                    'power outages': """**Electrical Power Issues:**
 1. **Safety Warning**: Never touch exposed wires
-2. **Check Circuit Breakers**: Look for tripped breakers
-3. **GFCI Outlets**: Press test/reset buttons
-4. **Main Electrical Panel**: Verify main breaker position
-5. **Neighbor Check**: Confirm if it's localized issue
-6. **Utility Company**: Contact if widespread outage
-**Call Professional**: Any burning smells, sparks, or complex wiring issues""",
-                
-                'flickering lights': """**Flickering Lights - Diagnostic Steps:**
-1. **Bulb Check**: Try different bulb in same fixture
-2. **Switch Inspection**: Toggle switch firmly
-3. **Circuit Load**: Turn off other devices on same circuit
-4. **Connection Check**: Ensure bulb is properly seated
-5. **Dimmer Issues**: Replace if using dimmer switches
-**Professional Help**: Loose wiring, voltage fluctuations"""
+2. Check circuit breakers for trips
+3. Test GFCI outlets (reset if needed)
+4. Verify main electrical panel
+5. Contact utility if widespread outage""",
+                    'general': """**Electrical System Diagnosis:**
+1. Safety first - turn off power at breaker
+2. Check for visible damage or burning smell
+3. Test outlets and switches
+4. Inspect wiring connections
+5. Call professional for complex issues"""
+                }
             },
-            'network': {
-                'connection timeout': """**Network Connection Timeout - Diagnostic Steps:**
-1. **Physical Check**: Verify all cables are connected
-2. **Reboot Sequence**: Modem → Router → Device (wait 30 sec between)
-3. **LED Status**: Check link lights on network equipment
-4. **Cable Test**: Try different Ethernet cable
-5. **WiFi Signal**: Check signal strength and interference
-6. **DNS Settings**: Try 8.8.8.8 or 1.1.1.1
-**Tools**: Network cable tester, WiFi analyzer app""",
-                
-                'slow speeds': """**Slow Network Speeds - Diagnostic Steps:**
-1. **Speed Test**: Use speedtest.net from multiple devices
-2. **Bandwidth Usage**: Check for heavy downloads/streaming
-3. **Device Limit**: Test with single device connected
-4. **WiFi Channel**: Switch to less congested channel
-5. **Router Location**: Ensure central, elevated position
-6. **Firmware Update**: Update router firmware
-**Professional Help**: ISP issues, infrastructure problems"""
+            'technical_support': {
+                'software': """**Software Troubleshooting Guide:**
+1. **Identify the Issue**: Note exact error messages
+2. **Basic Steps**: Restart application/system
+3. **Check Logs**: Look for error details in logs
+4. **Update Software**: Ensure latest version installed
+5. **Reinstall**: Uninstall and reinstall if needed
+6. **Check Dependencies**: Verify required components
+7. **Search Documentation**: Check official docs/forums""",
+                'code_debug': """**Code Debugging Process:**
+1. **Read Error Messages**: Understand what went wrong
+2. **Check Syntax**: Look for typos, missing brackets
+3. **Print/Log Values**: Add debug output
+4. **Test Small Parts**: Isolate problematic sections
+5. **Use Debugger**: Step through code line by line
+6. **Check Documentation**: Verify correct usage
+7. **Ask Community**: Stack Overflow, forums"""
+            },
+            'general_inquiry': {
+                'how_to': """**General Problem-Solving Approach:**
+1. **Define the Goal**: What exactly do you want to achieve?
+2. **Research**: Look up reliable sources and tutorials
+3. **Break It Down**: Divide into smaller, manageable steps
+4. **Start Simple**: Begin with basic version, then improve
+5. **Practice**: Hands-on experience is crucial
+6. **Ask for Help**: Use forums, communities, experts
+7. **Document**: Keep notes of what works""",
+                'information': """**Information Research Strategy:**
+1. **Use Reliable Sources**: Academic, official websites
+2. **Cross-Reference**: Check multiple sources
+3. **Check Dates**: Ensure information is current
+4. **Consider Context**: Understand the full picture
+5. **Fact-Check**: Verify claims with evidence
+6. **Note Sources**: Keep track of where info came from"""
             }
         }
     
-    @rate_limit
-    def analyze_user_query_with_ai(self, query: str, equipment_context: Optional[Dict] = None) -> Dict:
-        """AI-powered query analysis with rate limiting"""
-        system_prompt = """You are an expert equipment diagnostic AI. Analyze the user's query and extract:
-1. Equipment type (hvac, electrical, network, server, industrial, etc.)
-2. Specific component mentioned (if any)
-3. Problem description
-4. Urgency level (low, medium, high, critical)
-5. Keywords that indicate the issue type
-Respond in JSON format:
-{
-    "equipment_type": "detected equipment type",
-    "component": "specific component or null",
-    "problem_summary": "brief problem description",
-    "urgency": "urgency level",
-    "keywords": ["keyword1", "keyword2"],
-    "confidence": "confidence percentage as integer"
-}"""
+    @rate_limit_with_rotation
+    def analyze_and_respond(self, query: str) -> str:
+        """Main method to analyze query and generate appropriate response"""
+        # Classify the query
+        classification = self.query_classifier.classify_query(query)
         
-        response = self.gemini_model.generate_content(f"{system_prompt}\n\nUser Query: {query}")
-        response_text = response.text
-        json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
-        if json_match:
-            return json.loads(json_match.group())
-        else:
-            return self._fallback_analysis(query)
-    
-    def analyze_user_query(self, query: str, equipment_context: Optional[Dict] = None) -> Dict:
-        """Main analysis method with fallback"""
+        # Get working model
+        model = self.api_manager.get_working_model()
+        if not model:
+            return self._generate_fallback_response(query, classification)
+        
+        # Generate response based on classification
         try:
-            # Try AI analysis first
-            result = self.analyze_user_query_with_ai(query, equipment_context)
-            if result:
-                return result
+            if classification['category'] == 'equipment_diagnostic':
+                return self._generate_equipment_response(query, classification, model)
+            elif classification['category'] == 'technical_support':
+                return self._generate_technical_response(query, classification, model)
+            else:
+                return self._generate_general_response(query, classification, model)
+        
         except Exception as e:
-            st.warning(f"AI analysis unavailable: Using fallback analysis.")
-        
-        # Use fallback analysis
-        return self._fallback_analysis(query)
+            st.warning(f"AI generation failed: {e}. Using fallback.")
+            return self._generate_fallback_response(query, classification)
     
-    def _fallback_analysis(self, query: str) -> Dict:
-        """Rule-based fallback analysis"""
-        query_lower = query.lower()
-        equipment_type = "general"
+    def _generate_equipment_response(self, query: str, classification: Dict, model) -> str:
+        """Generate equipment diagnostic response"""
+        equipment_type = classification.get('subcategory', 'general')
+        equipment_info = EQUIPMENT_KNOWLEDGE.get(equipment_type, {})
         
-        # Equipment type detection
-        for eq_type, eq_data in EQUIPMENT_KNOWLEDGE.items():
-            if any(keyword in query_lower for keyword in [eq_type, eq_data['name'].lower()]):
-                equipment_type = eq_type
-                break
-        
-        # Problem classification
-        problem_patterns = {
-            'no cooling': ['not cool', 'no cool', 'warm air', 'hot air'],
-            'strange noises': ['noise', 'sound', 'grinding', 'squealing', 'banging'],
-            'power outages': ['no power', 'power out', 'electricity out'],
-            'flickering lights': ['flicker', 'dim', 'bright'],
-            'connection timeout': ['timeout', 'connect', 'internet down'],
-            'slow speeds': ['slow', 'speed', 'laggy', 'performance']
-        }
-        
-        detected_problem = 'general issue'
-        for problem, patterns in problem_patterns.items():
-            if any(pattern in query_lower for pattern in patterns):
-                detected_problem = problem
-                break
-        
-        # Urgency detection
-        urgency = "medium"
-        if any(word in query_lower for word in ['urgent', 'critical', 'emergency', 'fire', 'smoke', 'sparks']):
-            urgency = "critical"
-        elif any(word in query_lower for word in ['broken', 'failed', 'dead', 'not working', 'stopped']):
-            urgency = "high"
-        elif any(word in query_lower for word in ['slow', 'intermittent', 'sometimes']):
-            urgency = "low"
-        
-        return {
-            "equipment_type": equipment_type,
-            "component": None,
-            "problem_summary": detected_problem,
-            "urgency": urgency,
-            "keywords": query_lower.split()[:5],
-            "confidence": 75,
-            "analysis_method": "fallback"
-        }
-    
-    @rate_limit
-    def generate_diagnostic_solution_with_ai(self, query: str, analysis: Dict, rag_context: str = "") -> str:
-        """AI-powered solution generation with rate limiting"""
-        equipment_info = EQUIPMENT_KNOWLEDGE.get(analysis.get('equipment_type', 'general'), {})
-        diagnostic_prompt = f"""You are an expert equipment diagnostic technician. Provide a comprehensive diagnostic solution for the following issue:
-**Equipment Type**: {analysis.get('equipment_type', 'Unknown')}
-**Problem**: {analysis.get('problem_summary', query)}
-**Urgency**: {analysis.get('urgency', 'medium')}
-**Component**: {analysis.get('component', 'Not specified')}
-**Equipment Knowledge**:
-- Components: {equipment_info.get('components', [])}
-- Common Issues: {equipment_info.get('common_issues', [])}
-**Additional Context from Knowledge Base**:
-{rag_context}
-**User's Original Query**: {query}
-Please provide:
-1. **Immediate Safety Checks** (if applicable)
-2. **Diagnostic Steps** (step-by-step troubleshooting)
-3. **Possible Causes** (ranked by likelihood)
-4. **Solutions** (detailed repair/fix instructions)
+        prompt = f"""You are an expert equipment diagnostic technician. Analyze this equipment issue and provide a comprehensive solution:
+
+**Query**: {query}
+**Equipment Type**: {equipment_info.get('name', 'Equipment')}
+**Components**: {equipment_info.get('components', [])}
+**Common Issues**: {equipment_info.get('common_issues', [])}
+
+Provide a structured response with:
+1. **Safety Checks** (if applicable)
+2. **Diagnostic Steps** (step-by-step)
+3. **Possible Causes** (ranked by likelihood)  
+4. **Solutions** (detailed instructions)
 5. **Tools/Parts Needed**
 6. **Prevention Tips**
-7. **When to Call Professional** (if applicable)
-Format your response in clear sections with actionable steps. Be specific and practical."""
-        
-        response = self.gemini_model.generate_content(diagnostic_prompt)
-        return response.text
+7. **When to Call Professional**
+
+Be specific, practical, and safety-focused."""
+
+        response = model.generate_content(prompt)
+        return f"🔧 **Equipment Diagnostic Solution**\n\n{response.text}"
     
-    def generate_diagnostic_solution(self, query: str, analysis: Dict, rag_context: str = "") -> str:
-        """Main solution generation with fallback"""
-        try:
-            # Try AI solution first
-            result = self.generate_diagnostic_solution_with_ai(query, analysis, rag_context)
-            if result:
-                return result
-        except Exception as e:
-            st.warning(f"AI solution generation unavailable. Using fallback solution.")
-        
-        # Use fallback solution
-        return self._get_fallback_solution(analysis, query)
+    def _generate_technical_response(self, query: str, classification: Dict, model) -> str:
+        """Generate technical support response"""
+        prompt = f"""You are an experienced technical support specialist. Help solve this technical issue:
+
+**Query**: {query}
+**Category**: Technical Support - {classification.get('subcategory', 'General')}
+
+Provide a structured response with:
+1. **Problem Analysis** (what's likely happening)
+2. **Quick Fixes** (simple solutions to try first)
+3. **Detailed Troubleshooting** (step-by-step process)
+4. **Root Cause Investigation** (deeper analysis)
+5. **Prevention Strategies** (avoid future issues)
+6. **Additional Resources** (documentation, tools, communities)
+
+Be clear, practical, and include relevant code examples if applicable."""
+
+        response = model.generate_content(prompt)
+        return f"💻 **Technical Support Solution**\n\n{response.text}"
     
-    def _get_fallback_solution(self, analysis: Dict, query: str) -> str:
-        """Get pre-built solution based on analysis"""
-        equipment_type = analysis.get('equipment_type', 'general')
-        problem = analysis.get('problem_summary', 'general issue')
-        
-        # Try to find specific solution
-        equipment_solutions = self.fallback_solutions.get(equipment_type, {})
-        for known_problem, solution in equipment_solutions.items():
-            if known_problem in problem.lower():
-                return f"🤖 **Fallback Diagnostic Solution** (AI temporarily unavailable)\n\n{solution}"
-        
-        # Generic fallback solution
-        equipment_info = EQUIPMENT_KNOWLEDGE.get(equipment_type, {})
-        return f"""🤖 **Basic Diagnostic Solution** (AI temporarily unavailable)
+    def _generate_general_response(self, query: str, classification: Dict, model) -> str:
+        """Generate general inquiry response"""
+        prompt = f"""You are a knowledgeable and helpful AI assistant. Provide a comprehensive answer to this query:
 
-**Equipment**: {equipment_info.get('name', 'Equipment')}
-**Issue**: {problem}
+**Query**: {query}
+**Type**: {classification.get('subcategory', 'General Information')}
 
-**Basic Troubleshooting Steps:**
-1. **Safety First**: Turn off power to the equipment if electrical
-2. **Visual Inspection**: Look for obvious damage, loose connections, or wear
-3. **Check Power**: Verify equipment is receiving power
-4. **Reset/Restart**: Try turning equipment off and on
-5. **Check Connections**: Ensure all cables/connections are secure
-6. **User Manual**: Consult equipment manual for specific troubleshooting
+Structure your response appropriately based on the query type:
+- For "how-to" questions: Provide step-by-step instructions
+- For informational queries: Give comprehensive, factual information
+- For explanations: Break down complex topics clearly
+- For advice: Offer practical, actionable guidance
 
-**Common Components to Check:**
-{', '.join(equipment_info.get('components', ['Basic components']))}
+Make your response:
+- Clear and well-organized
+- Practical and actionable
+- Include examples where helpful
+- Provide additional resources if relevant"""
 
-**When to Call Professional:**
-- Any electrical work beyond basic checks
-- Gas-related equipment issues  
-- Safety concerns or unusual odors
-- Equipment under warranty
-
-**Prevention:**
-- Regular maintenance and cleaning
-- Replace filters and consumables as scheduled
-- Keep equipment area clean and ventilated
-
-*Note: This is a basic solution. AI-powered detailed diagnostics will be available when quota resets.*
-"""
+        response = model.generate_content(prompt)
+        return f"🤖 **AI Assistant Response**\n\n{response.text}"
     
-    def generate_followup_questions(self, query: str, analysis: Dict) -> List[str]:
-        """Generate follow-up questions with fallback"""
-        equipment_type = analysis.get('equipment_type', 'general')
-        try:
-            if hasattr(self, 'gemini_model') and self.gemini_model:
-                # Try AI generation (without rate limiting for questions - they're less critical)
-                followup_prompt = f"""Based on this equipment issue, generate 3-4 specific diagnostic questions to better understand the problem:
-Equipment Type: {equipment_type}
-Issue: {analysis.get('problem_summary', query)}
-Generate practical questions that a technician would ask to diagnose the issue. Return only the questions, one per line, starting with '- '."""
-                response = self.gemini_model.generate_content(followup_prompt)
-                questions = [line.strip()[2:] for line in response.text.split('\n') if line.strip().startswith('- ')]
-                if questions:
-                    return questions[:4]
-        except Exception:
-            pass
+    def _generate_fallback_response(self, query: str, classification: Dict) -> str:
+        """Generate fallback response when AI is unavailable"""
+        category = classification['category']
+        subcategory = classification.get('subcategory', 'general')
         
-        # Fallback questions
-        return self._get_fallback_questions(equipment_type)
+        # Try to find specific fallback solution
+        category_solutions = self.fallback_solutions.get(category, {})
+        
+        if isinstance(category_solutions, dict):
+            # Look for subcategory-specific solution
+            if subcategory in category_solutions:
+                solution = category_solutions[subcategory]
+            else:
+                # Look for general solution in this category
+                solution = category_solutions.get('general', "")
+            
+            if solution:
+                return f"🤖 **Fallback Solution** (AI temporarily unavailable)\n\n{solution}"
+        
+        # Generic fallback
+        return f"""🤖 **Basic Assistant Response** (AI temporarily unavailable)
+
+**Your Query**: {query}
+**Category**: {category.replace('_', ' ').title()}
+
+**General Guidance:**
+1. **Break Down the Problem**: Identify specific aspects of your issue
+2. **Research Reliable Sources**: Use official documentation, reputable websites
+3. **Start with Basics**: Try simple solutions before complex ones
+4. **Safety First**: If dealing with equipment, ensure power is off
+5. **Document Steps**: Keep track of what you try
+6. **Seek Expert Help**: For complex or safety-critical issues
+
+**Next Steps:**
+- Try rephrasing your question for more specific help
+- Check relevant documentation or manuals
+- Consider consulting with domain experts
+
+*Note: Full AI-powered responses will be available when API services are restored.*"""
     
-    def _get_fallback_questions(self, equipment_type: str) -> List[str]:
-        """Fallback diagnostic questions"""
-        common_questions = [
-            "When did the problem first occur?",
-            "Are there any error messages or warning lights?",
-            "Has anything changed recently (maintenance, updates, etc.)?",
-            "Is the problem constant or intermittent?"
-        ]
+    def generate_followup_questions(self, query: str, classification: Dict) -> List[str]:
+        """Generate context-appropriate follow-up questions"""
+        category = classification['category']
         
-        equipment_specific = {
-            'hvac': [
-                "What is the current temperature reading?", 
-                "Are all vents blowing air?",
-                "Do you hear any unusual noises?",
-                "When was the air filter last changed?"
-            ],
-            'electrical': [
-                "Are any circuit breakers tripped?", 
-                "Do you smell anything burning?",
-                "Are other electrical devices working on the same circuit?",
-                "When did you first notice the electrical issue?"
-            ],
-            'network': [
-                "Are the status LEDs on the device lit?", 
-                "Can you ping the device?",
-                "Are other devices on the network working?",
-                "Have you tried restarting the router?"
-            ],
-            'server': [
-                "What error messages appear during boot?", 
-                "Are the fans running?",
-                "Is the server accessible remotely?",
-                "When did you last restart the server?"
+        if category == 'equipment_diagnostic':
+            return [
+                "When did the problem first start?",
+                "Are there any error messages or warning lights?",
+                "Has any maintenance been performed recently?",
+                "Is the issue constant or intermittent?"
             ]
-        }
-        
-        return common_questions + equipment_specific.get(equipment_type, [])
+        elif category == 'technical_support':
+            return [
+                "What error messages do you see exactly?",
+                "What were you doing when the problem occurred?",
+                "Have you made any recent changes to your system?",
+                "Does the problem happen consistently?"
+            ]
+        else:
+            return [
+                "Can you provide more specific details?",
+                "What's your experience level with this topic?",
+                "Are there particular aspects you'd like to focus on?",
+                "Do you need step-by-step instructions or general overview?"
+            ]
 
 # --- Enhanced Maintenance Pipeline ---
 class MaintenancePipeline:
@@ -474,30 +596,33 @@ class MaintenancePipeline:
 
     def _load_maintenance_data(self) -> Dict:
         equipment_data = {}
-        equipment_types = ['HVAC', 'IT_EQUIPMENT', 'ELECTRICAL', 'FIRE_SAFETY', 'Network Switch', 'Server', 'Industrial Motor']
-        for i in range(30):
+        equipment_types = ['HVAC', 'IT_EQUIPMENT', 'ELECTRICAL', 'FIRE_SAFETY', 'Network Switch', 
+                          'Server', 'Industrial Motor', 'Medical Device', 'Automotive System']
+        
+        for i in range(35):
             eq_type = random.choice(equipment_types)
             fail_prob = random.uniform(0.1, 0.9)
             equipment_data[f"{eq_type.replace(' ','_')}_{i+1}"] = {
                 'type': eq_type,
-                'location': f"Building A - Floor {random.randint(1,4)} - Rack {chr(65+i%4)}",
+                'location': f"Building {random.choice(['A', 'B', 'C'])} - Floor {random.randint(1,5)} - {random.choice(['Room', 'Rack', 'Bay'])} {random.randint(100, 599)}",
                 'failure_probability': fail_prob,
                 'risk_level': 'HIGH' if fail_prob > 0.7 else 'MEDIUM' if fail_prob > 0.4 else 'LOW',
                 'next_maintenance': (datetime.now() + timedelta(days=random.randint(7, 90))).strftime('%Y-%m-%d'),
-                'maintenance_cost': random.randint(200, 5000),
-                'last_issue': random.choice(['Overheating', 'Power failure', 'Network timeout', 'Mechanical wear', 'Software error'])
+                'maintenance_cost': random.randint(200, 8000),
+                'last_issue': random.choice(['Overheating', 'Power failure', 'Network timeout', 'Mechanical wear', 'Software error', 'Calibration drift'])
             }
         return equipment_data
 
     def simulate_real_time_alert(self) -> Dict:
         alert_types = [
-            "Device Offline", "High Temperature", "High CPU Usage", 
-            "Memory Error", "Disk Failure", "Network Timeout",
-            "Power Supply Failure", "Cooling Fan Error", "Configuration Error"
+            "Device Offline", "High Temperature", "High CPU Usage", "Memory Error", 
+            "Disk Failure", "Network Timeout", "Power Supply Failure", "Cooling Fan Error", 
+            "Configuration Error", "Sensor Malfunction", "Software Crash", "Security Alert"
         ]
         alert_type = random.choice(alert_types)
         device = random.choice(self.equipment_list)
         device_info = self.maintenance_data[device]
+        
         return {
             "alert_type": alert_type,
             "device_id": device,
@@ -505,520 +630,427 @@ class MaintenancePipeline:
             "location": device_info['location'],
             "severity": random.choice(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "description": f"{alert_type} detected on {device_info['type']} at {device_info['location']}"
+            "description": f"{alert_type} detected on {device_info['type']} at {device_info['location']}",
+            "recommended_action": self._get_recommended_action(alert_type)
         }
+    
+    def _get_recommended_action(self, alert_type: str) -> str:
+        actions = {
+            "Device Offline": "Check network connectivity and power supply",
+            "High Temperature": "Verify cooling systems and clean air filters", 
+            "High CPU Usage": "Check for resource-intensive processes",
+            "Memory Error": "Run memory diagnostics and check RAM modules",
+            "Disk Failure": "Backup data immediately and replace disk",
+            "Network Timeout": "Check network cables and switch ports",
+            "Power Supply Failure": "Check power connections and replace PSU",
+            "Cooling Fan Error": "Inspect and replace faulty fans",
+            "Configuration Error": "Review and correct system settings",
+            "Sensor Malfunction": "Calibrate or replace faulty sensors",
+            "Software Crash": "Check logs and restart services",
+            "Security Alert": "Investigate and secure system"
+        }
+        return actions.get(alert_type, "Investigate and take appropriate action")
 
-# --- Tool: Data Analysis Tool ---
-def analyze_csv_data(query: str) -> str:
-    try:
-        csv_files = glob.glob("*.csv")
-        if not csv_files:
-            return "No CSV files found in the current directory."
-        
-        ticket_file = None
-        for file in csv_files:
-            if any(keyword in file.lower() for keyword in ['ticket', 'maintenance', 'issue', 'problem']):
-                ticket_file = file
-                break
-        if not ticket_file:
-            ticket_file = csv_files[0]
-
-        df = pd.read_csv(ticket_file)
-        return f"CSV file '{ticket_file}' loaded with {len(df)} records. Basic analysis available in fallback mode."
-    except Exception as e:
-        return f"Error analyzing CSV data: {e}"
-
-# --- Enhanced LLM Configuration with Error Handling ---
-def initialize_gemini():
-    """Initialize Gemini with proper error handling"""
-    try:
-        if "GEMINI_API_KEY" in st.secrets:
-            genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-            model = genai.GenerativeModel('gemini-1.5-flash')
-            return model
-        else:
-            st.error("❌ GEMINI_API_KEY not found in secrets. Please add it to use AI features.")
-            return None
-    except Exception as e:
-        st.error(f"❌ Error configuring Gemini API: {e}")
-        if "quota" in str(e).lower() or "429" in str(e):
-            st.error("🚫 API quota exceeded. Please check your billing or wait for quota reset.")
-        return None
-
-# --- Document Processing Functions (Basic versions for fallback) ---
-def clean_text(text: str) -> str:
-    return re.sub(r'\s+', ' ', text.strip())
-
-def smart_chunking(text: str, chunk_size: int) -> List[str]:
-    sentences = re.split(r'(?<=[.!?])\s+', text)
-    chunks, current_chunk = [], ""
-    for sentence in sentences:
-        if len(current_chunk) + len(sentence) < chunk_size:
-            current_chunk += sentence + " "
-        else:
-            if current_chunk: chunks.append(current_chunk.strip())
-            current_chunk = sentence + " "
-    if current_chunk: chunks.append(current_chunk.strip())
-    return [c for c in chunks if len(c) > 30]
-
-# --- Enhanced Quota Display Component ---
-def display_quota_status():
-    """Display current quota usage in sidebar"""
-    if 'quota_manager' in st.session_state:
-        status = st.session_state.quota_manager.get_quota_status()
+# --- Enhanced UI Components ---
+def display_api_status():
+    """Display API status and management in sidebar"""
+    if 'api_manager' in st.session_state:
+        api_status = st.session_state.api_manager.get_api_status()
         
         with st.sidebar:
-            st.markdown("### 📊 API Quota Status")
+            st.markdown("### 🔑 API Key Status")
             
-            # Daily quota
-            daily_pct = (status['daily_used'] / status['daily_limit']) * 100
-            st.progress(daily_pct / 100, text=f"Daily: {status['daily_used']}/{status['daily_limit']} ({daily_pct:.1f}%)")
-            
-            # Hourly quota
-            hourly_pct = (status['hourly_used'] / status['hourly_limit']) * 100
-            st.progress(hourly_pct / 100, text=f"Hourly: {status['hourly_used']}/{status['hourly_limit']} ({hourly_pct:.1f}%)")
-            
-            # Session info
-            st.metric("Session Requests", status['session_requests'])
-            st.metric("Total Requests", status['total_requests'])
-            
-            # Status indicators
-            if daily_pct > 90:
-                st.error("🚫 Daily quota nearly exhausted!")
-            elif daily_pct > 70:
-                st.warning("⚠️ High daily quota usage")
-            else:
-                st.success("✅ Quota healthy")
-            
-            # Configuration options
-            with st.expander("⚙️ Quota Settings"):
-                new_fallback = st.checkbox(
-                    "Use fallback when quota exceeded", 
-                    value=quota_config.use_fallback_on_limit,
-                    help="Enable fallback solutions when API quota is reached"
-                )
-                if new_fallback != quota_config.use_fallback_on_limit:
-                    quota_config.use_fallback_on_limit = new_fallback
-                    st.success("Setting updated!")
+            # Overall status
+            status_color = "🟢" if api_status['active_keys'] > 2 else "🟡" if api_status['active_keys'] > 0 else "🔴"
+            st.markdown(f"{status_color} **{api_status['active_keys']}/{api_status['total_keys']} Keys Active**")
+            st.markdown(f"**Current Key**: #{api_status['current_key']}")
+# Continuation of app.py - Enhanced Versatile AI Assistant
 
-# --- Session State Initialization ---
-def initialize_session_state():
-    if "messages" not in st.session_state:
-        st.session_state.messages = [
-            {
-                "role": "assistant", 
-                "content": """<span style="font-size:1.3em">🔧 <b>Smart Equipment Diagnostic AI Ready!</b></span>
-Welcome! I can help you with:
-- <b>Any equipment issue</b> (HVAC, electrical, network, servers, industrial)
-- <b>Intelligent problem analysis</b>
-- <b>Step-by-step solutions</b>
-- <b>Safety recommendations</b>
-- <b>Preventive maintenance</b>
-<b>Just describe your problem in plain English!</b>  
-<i>e.g. "My air conditioner stopped working"</i>
-""", 
-                "timestamp": datetime.now()
-            }
-        ]
-    defaults = {
-        "current_analysis": None,
-        "diagnostic_engine": None,
-        "followup_questions": [],
-        "maintenance_pipeline": None,
-        "chat_history": []
-    }
-    for key, value in defaults.items():
-        if key not in st.session_state:
-            st.session_state[key] = value
-
-# --- Response Handling Function ---
-def handle_user_prompt(prompt: str):
-    with st.spinner("🤖 Analyzing issue and generating solution..."):
-        try:
-            response_content = ""
-            if st.session_state.diagnostic_engine:
-                analysis = st.session_state.diagnostic_engine.analyze_user_query(prompt)
-                
-                if analysis.get('equipment_type') != 'general':
-                     st.session_state.current_analysis = {
-                         'equipment_name': EQUIPMENT_KNOWLEDGE.get(analysis['equipment_type'], {}).get('name', 'Unknown'),
-                         'confidence': analysis.get('confidence', 75),
-                         'components': EQUIPMENT_KNOWLEDGE.get(analysis['equipment_type'], {}).get('components', [])
-                     }
-                
-                # Generate solution (with automatic fallback)
-                response_content = st.session_state.diagnostic_engine.generate_diagnostic_solution(
-                    prompt, analysis, ""
-                )
-                
-                # Generate follow-up questions
-                st.session_state.followup_questions = st.session_state.diagnostic_engine.generate_followup_questions(
-                    prompt, analysis
-                )
-            else:
-                response_content = "Diagnostic engine not available. Operating in basic mode."
-                
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": response_content,
-                "timestamp": datetime.now()
-            })
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": f"❌ An error occurred while processing your request: {e}",
-                "timestamp": datetime.now()
-            })
-
-# --- Main Application ---
-def main():
-    st.markdown(
-        """
-        <style>
-        .stChatMessage.user {background-color: #e3f2fd;}
-        .stChatMessage.assistant {background-color: #f1f8e9;}
-        .stMetric {background: #f5f5f5; border-radius: 8px;}
-        .stButton>button {width: 100%;}
-        .quota-warning {background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;}
-        </style>
-        """, unsafe_allow_html=True
-    )
-
-    initialize_session_state()
-
-# Continuation of app.py - Complete Enhanced version with quota management and fallback systems
-
-    # Initialize quota manager
-    if 'quota_manager' not in st.session_state:
-        st.session_state.quota_manager = QuotaManager()
-
-    # Initialize components
-    gemini_model = initialize_gemini()
-    
-    if 'diagnostic_engine' not in st.session_state or st.session_state.diagnostic_engine is None:
-        st.session_state.diagnostic_engine = SmartDiagnosticEngine(gemini_model)
-    
-    if 'maintenance_pipeline' not in st.session_state:
-        st.session_state.maintenance_pipeline = MaintenancePipeline()
-
-    # Title and Header
-    st.title("🔧 Smart Equipment Diagnostic AI")
-    st.markdown("### Intelligent Equipment Troubleshooting & Maintenance Assistant")
-    
-    # Display quota status in sidebar
-    display_quota_status()
-
-    # Sidebar Configuration
-    with st.sidebar:
-        st.markdown("## 🛠️ System Status")
-        
-        # AI Status Indicator
-        if gemini_model:
-            st.success("✅ AI Engine Active")
-        else:
-            st.error("❌ AI Engine Unavailable")
-            st.info("🔄 Using Fallback Mode")
-        
-        st.markdown("---")
-        
-        # Equipment Type Filter
-        st.markdown("### 🏭 Equipment Categories")
-        for eq_type, eq_data in EQUIPMENT_KNOWLEDGE.items():
-            with st.expander(f"🔹 {eq_data['name']}"):
-                st.write(f"**Components:** {', '.join(eq_data['components'][:3])}...")
-                st.write(f"**Common Issues:** {len(eq_data['common_issues'])} types")
-        
-        st.markdown("---")
-        
-        # Current Analysis Display
-        if st.session_state.current_analysis:
-            st.markdown("### 🔍 Current Analysis")
-            st.success(f"**Equipment:** {st.session_state.current_analysis['equipment_name']}")
-            st.info(f"**Confidence:** {st.session_state.current_analysis['confidence']}%")
-            
-            if st.session_state.current_analysis['components']:
-                st.markdown("**Key Components:**")
-                for comp in st.session_state.current_analysis['components'][:5]:
-                    st.write(f"• {comp.title()}")
-        
-        st.markdown("---")
-        
-        # Tools Section
-        st.markdown("### 🧰 Additional Tools")
-        
-        if st.button("📊 Generate Maintenance Report"):
-            with st.spinner("Generating maintenance report..."):
-                st.markdown("#### 📋 Equipment Status Report")
-                
-                # Sample data for demonstration
-                high_risk_count = sum(1 for eq in st.session_state.maintenance_pipeline.maintenance_data.values() if eq['risk_level'] == 'HIGH')
-                medium_risk_count = sum(1 for eq in st.session_state.maintenance_pipeline.maintenance_data.values() if eq['risk_level'] == 'MEDIUM')
-                
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.metric("High Risk", high_risk_count, delta=f"+{high_risk_count-5}" if high_risk_count > 5 else f"{high_risk_count-5}")
-                with col2:
-                    st.metric("Medium Risk", medium_risk_count, delta=f"+{medium_risk_count-8}" if medium_risk_count > 8 else f"{medium_risk_count-8}")
-                
-                st.success("✅ Report generated successfully!")
-        
-        if st.button("🚨 Simulate Real-time Alert"):
-            alert = st.session_state.maintenance_pipeline.simulate_real_time_alert()
-            severity_color = {
-                "LOW": "🟢", "MEDIUM": "🟡", 
-                "HIGH": "🟠", "CRITICAL": "🔴"
-            }
-            
-            st.markdown(f"""
-            **Alert Generated:**
-            
-            {severity_color.get(alert['severity'], '⚪')} **{alert['alert_type']}**
-            
-            **Device:** {alert['device_id']}
-            
-            **Location:** {alert['location']}
-            
-            **Time:** {alert['timestamp']}
-            
-            **Description:** {alert['description']}
-            """)
-        
-        if st.button("📈 Analyze CSV Data"):
-            result = analyze_csv_data("analyze maintenance data")
-            st.info(result)
-
-    # Main Chat Interface
-    st.markdown("## 💬 Diagnostic Chat")
-    
-    # Display chat messages
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"], unsafe_allow_html=True)
-            
-            # Display timestamp for recent messages
-            if message.get("timestamp"):
-                time_diff = datetime.now() - message["timestamp"]
-                if time_diff.total_seconds() < 3600:  # Within last hour
-                    st.caption(f"⏰ {message['timestamp'].strftime('%H:%M:%S')}")
-
-    # Follow-up Questions Section
-    if st.session_state.followup_questions:
-        st.markdown("### ❓ Follow-up Questions")
-        st.info("Click on any question to get more specific help:")
-        
-        cols = st.columns(min(len(st.session_state.followup_questions), 3))
-        for idx, question in enumerate(st.session_state.followup_questions[:3]):
-            with cols[idx]:
-                if st.button(f"❓ {question}", key=f"followup_{idx}"):
-                    # Add question as user message
-                    st.session_state.messages.append({
-                        "role": "user",
-                        "content": question,
-                        "timestamp": datetime.now()
-                    })
+            # Individual key status (continuing from where the code was cut off)
+            with st.expander("🔍 Detailed Key Status"):
+                for i, (key_idx, status) in enumerate(api_status['key_status'].items()):
+                    key_status_icon = "✅" if status['active'] else "❌"
+                    current_marker = " 👈" if i == api_status['current_key'] - 1 else ""
                     
-                    # Process the follow-up question
-                    handle_user_prompt(question)
+                    st.markdown(f"{key_status_icon} **Key {key_idx + 1}**{current_marker}")
+                    if not status['active'] and status['last_error']:
+                        st.markdown(f"   ⚠️ *{status['last_error'][:50]}...*")
+                    st.markdown(f"   Errors: {status['error_count']}")
+                    
+            # Reset buttons
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("🔄 Reset Current", help="Reset current API key status"):
+                    st.session_state.api_manager.reset_key_status(api_status['current_key'] - 1)
+                    st.rerun()
+            
+            with col2:
+                if st.button("🔄 Reset All", help="Reset all API keys"):
+                    st.session_state.api_manager.reset_key_status()
                     st.rerun()
 
-    # Chat Input
-    if prompt := st.chat_input("Describe your equipment issue (e.g., 'My HVAC system is making strange noises')"):
-        # Add user message
-        st.session_state.messages.append({
-            "role": "user",
-            "content": prompt,
-            "timestamp": datetime.now()
-        })
+def display_quota_status():
+    """Display quota management in sidebar"""
+    if 'quota_manager' in st.session_state:
+        quota_status = st.session_state.quota_manager.get_quota_status()
         
-        # Handle the user prompt
-        handle_user_prompt(prompt)
-        st.rerun()
+        with st.sidebar:
+            st.markdown("### 📊 Usage Quota")
+            
+            # Daily quota
+            daily_pct = (quota_status['daily_used'] / quota_status['daily_limit']) * 100
+            daily_color = "🔴" if daily_pct >= 90 else "🟡" if daily_pct >= 70 else "🟢"
+            st.markdown(f"{daily_color} **Daily**: {quota_status['daily_used']}/{quota_status['daily_limit']}")
+            st.progress(daily_pct / 100)
+            
+            # Hourly quota
+            hourly_pct = (quota_status['hourly_used'] / quota_status['hourly_limit']) * 100
+            hourly_color = "🔴" if hourly_pct >= 90 else "🟡" if hourly_pct >= 70 else "🟢"
+            st.markdown(f"{hourly_color} **Hourly**: {quota_status['hourly_used']}/{quota_status['hourly_limit']}")
+            st.progress(hourly_pct / 100)
+            
+            # Session and total
+            st.markdown(f"**Session**: {quota_status['session_requests']}")
+            st.markdown(f"**Total**: {quota_status['total_requests']}")
+            
+            # API key usage distribution
+            if quota_status.get('api_key_usage'):
+                with st.expander("🔑 Key Usage Distribution"):
+                    for key_idx, usage_count in quota_status['api_key_usage'].items():
+                        st.markdown(f"Key {key_idx + 1}: {usage_count} requests")
 
-    # Quick Action Buttons
-    st.markdown("## 🚀 Quick Actions")
+def display_equipment_monitor():
+    """Display equipment monitoring dashboard"""
+    st.markdown("## 🏭 Equipment Health Monitor")
     
-    col1, col2, col3, col4 = st.columns(4)
+    maintenance_pipeline = MaintenancePipeline()
+    
+    # Real-time alert simulation
+    col1, col2, col3 = st.columns([2, 1, 1])
     
     with col1:
-        if st.button("❄️ HVAC Issues"):
-            quick_prompt = "My HVAC system is not cooling properly"
-            st.session_state.messages.append({
-                "role": "user",
-                "content": quick_prompt,
-                "timestamp": datetime.now()
-            })
-            handle_user_prompt(quick_prompt)
-            st.rerun()
+        st.markdown("### 🚨 Live Alerts")
     
     with col2:
-        if st.button("⚡ Electrical Problems"):
-            quick_prompt = "I'm having electrical issues with flickering lights"
-            st.session_state.messages.append({
-                "role": "user",
-                "content": quick_prompt,
-                "timestamp": datetime.now()
-            })
-            handle_user_prompt(quick_prompt)
+        if st.button("🔄 Refresh Alerts"):
             st.rerun()
     
     with col3:
-        if st.button("🌐 Network Issues"):
-            quick_prompt = "My network connection keeps timing out"
-            st.session_state.messages.append({
-                "role": "user",
-                "content": quick_prompt,
-                "timestamp": datetime.now()
-            })
-            handle_user_prompt(quick_prompt)
-            st.rerun()
+        auto_refresh = st.checkbox("Auto-refresh", key="auto_refresh_alerts")
     
+    # Generate and display alerts
+    for i in range(3):  # Show 3 recent alerts
+        alert = maintenance_pipeline.simulate_real_time_alert()
+        severity_colors = {
+            "LOW": "🟢", "MEDIUM": "🟡", "HIGH": "🟠", "CRITICAL": "🔴"
+        }
+        
+        with st.container():
+            st.markdown(f"""
+            **{severity_colors[alert['severity']]} {alert['alert_type']}** - {alert['severity']}
+            - **Device**: {alert['device_id']} ({alert['device_type']})
+            - **Location**: {alert['location']}
+            - **Time**: {alert['timestamp']}
+            - **Action**: {alert['recommended_action']}
+            """)
+            st.markdown("---")
+    
+    # Equipment overview
+    st.markdown("### 📋 Equipment Overview")
+    
+    # Create equipment dataframe
+    equipment_df = pd.DataFrame.from_dict(maintenance_pipeline.maintenance_data, orient='index')
+    equipment_df.reset_index(inplace=True)
+    equipment_df.rename(columns={'index': 'equipment_id'}, inplace=True)
+    
+    # Filter controls
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        risk_filter = st.multiselect("Risk Level", ['HIGH', 'MEDIUM', 'LOW'], default=['HIGH', 'MEDIUM', 'LOW'])
+    with col2:
+        type_filter = st.multiselect("Equipment Type", equipment_df['type'].unique())
+    with col3:
+        location_filter = st.selectbox("Location Filter", ['All'] + sorted(equipment_df['location'].unique()))
+    
+    # Apply filters
+    filtered_df = equipment_df.copy()
+    if risk_filter:
+        filtered_df = filtered_df[filtered_df['risk_level'].isin(risk_filter)]
+    if type_filter:
+        filtered_df = filtered_df[filtered_df['type'].isin(type_filter)]
+    if location_filter != 'All':
+        filtered_df = filtered_df[filtered_df['location'] == location_filter]
+    
+    # Display filtered results
+    st.dataframe(
+        filtered_df[['equipment_id', 'type', 'location', 'risk_level', 'failure_probability', 
+                    'next_maintenance', 'maintenance_cost', 'last_issue']],
+        use_container_width=True
+    )
+    
+    # Summary statistics
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Total Equipment", len(filtered_df))
+    with col2:
+        high_risk_count = len(filtered_df[filtered_df['risk_level'] == 'HIGH'])
+        st.metric("High Risk", high_risk_count)
+    with col3:
+        avg_failure_prob = filtered_df['failure_probability'].mean()
+        st.metric("Avg Failure Prob", f"{avg_failure_prob:.1%}")
     with col4:
-        if st.button("🖥️ Server Problems"):
-            quick_prompt = "My server is showing high CPU usage and overheating"
-            st.session_state.messages.append({
-                "role": "user",
-                "content": quick_prompt,
-                "timestamp": datetime.now()
-            })
-            handle_user_prompt(quick_prompt)
-            st.rerun()
+        total_maintenance_cost = filtered_df['maintenance_cost'].sum()
+        st.metric("Total Maint. Cost", f"${total_maintenance_cost:,}")
 
-    # Additional Features Section
-    st.markdown("---")
-    st.markdown("## 🔧 Advanced Features")
+def display_diagnostic_helper():
+    """Display diagnostic helper interface"""
+    st.markdown("## 🔧 Smart Diagnostic Assistant")
     
-    tab1, tab2, tab3 = st.tabs(["📊 Analytics", "📚 Knowledge Base", "⚙️ Settings"])
+    # Initialize AI engine
+    if 'ai_engine' not in st.session_state:
+        if 'api_manager' not in st.session_state:
+            st.session_state.api_manager = MultiAPIManager()
+        st.session_state.ai_engine = VersatileAIEngine(st.session_state.api_manager)
+    
+    ai_engine = st.session_state.ai_engine
+    
+    # Query input
+    st.markdown("### 💬 Describe your issue or question")
+    
+    # Predefined quick options
+    st.markdown("**Quick Examples:**")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("🌡️ HVAC not cooling properly"):
+            st.session_state.diagnostic_query = "My HVAC system is not cooling properly. The unit runs but no cold air comes out."
+    
+    with col2:
+        if st.button("💻 Server high CPU usage"):
+            st.session_state.diagnostic_query = "Server showing consistently high CPU usage above 90%. System is slow to respond."
+    
+    with col3:
+        if st.button("⚡ Electrical outlet not working"):
+            st.session_state.diagnostic_query = "Electrical outlet stopped working suddenly. No power to devices plugged in."
+    
+    # Main query input
+    query = st.text_area(
+        "Enter your detailed question or issue description:",
+        value=st.session_state.get('diagnostic_query', ''),
+        height=100,
+        placeholder="Describe your problem in detail. Include symptoms, when it started, any error messages, etc."
+    )
+    
+    # Analysis options
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        include_followup = st.checkbox("Include follow-up questions", value=True)
+    with col2:
+        if st.button("🔍 Analyze & Get Solution", disabled=not query.strip()):
+            with st.spinner("🤖 Analyzing your issue..."):
+                # Classify query
+                classification = ai_engine.query_classifier.classify_query(query)
+                
+                # Display classification
+                st.markdown("### 📊 Issue Classification")
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.markdown(f"**Category**: {classification['category'].replace('_', ' ').title()}")
+                with col2:
+                    st.markdown(f"**Type**: {classification['subcategory'].replace('_', ' ').title()}")
+                with col3:
+                    st.markdown(f"**Confidence**: {classification['confidence']:.1%}")
+                
+                if classification['keywords']:
+                    st.markdown(f"**Keywords Detected**: {', '.join(classification['keywords'])}")
+                
+                st.markdown("---")
+                
+                # Generate response
+                try:
+                    response = ai_engine.analyze_and_respond(query)
+                    
+                    if response:
+                        st.markdown("### 🎯 Diagnostic Solution")
+                        st.markdown(response)
+                        
+                        # Generate follow-up questions if requested
+                        if include_followup:
+                            st.markdown("### ❓ Follow-up Questions")
+                            followup_questions = ai_engine.generate_followup_questions(query, classification)
+                            for i, question in enumerate(followup_questions, 1):
+                                st.markdown(f"{i}. {question}")
+                    else:
+                        st.error("Failed to generate response. Please try again or check API status.")
+                        
+                except Exception as e:
+                    st.error(f"Error generating response: {e}")
+                    # Show fallback
+                    fallback_response = ai_engine._generate_fallback_response(query, classification)
+                    st.markdown("### 🤖 Fallback Solution")
+                    st.markdown(fallback_response)
+    
+    # Clear query button
+    if st.button("🗑️ Clear Query"):
+        if 'diagnostic_query' in st.session_state:
+            del st.session_state.diagnostic_query
+        st.rerun()
+
+def display_configuration_panel():
+    """Display system configuration panel"""
+    st.markdown("## ⚙️ System Configuration")
+    
+    with st.expander("🔧 RAG Configuration", expanded=False):
+        st.markdown("### Retrieval Settings")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            chunk_size = st.slider("Chunk Size", 100, 1000, config.chunk_size, 50)
+            top_k = st.slider("Top K Retrieval", 1, 10, config.top_k_retrieval)
+        
+        with col2:
+            similarity_threshold = st.slider("Similarity Threshold", 0.0, 1.0, config.similarity_threshold, 0.05)
+        
+        if st.button("💾 Update RAG Config"):
+            config.chunk_size = chunk_size
+            config.top_k_retrieval = top_k
+            config.similarity_threshold = similarity_threshold
+            st.success("✅ RAG configuration updated!")
+    
+    with st.expander("📊 Quota Management", expanded=False):
+        st.markdown("### Quota Limits")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            daily_limit = st.number_input("Daily Request Limit", 1, 1000, quota_config.daily_limit)
+            hourly_limit = st.number_input("Hourly Request Limit", 1, 100, quota_config.requests_per_hour)
+        
+        with col2:
+            retry_delay = st.number_input("Retry Delay (seconds)", 30, 300, quota_config.retry_delay)
+            use_fallback = st.checkbox("Use Fallback on Limit", quota_config.use_fallback_on_limit)
+            api_rotation = st.checkbox("Enable API Key Rotation", quota_config.api_key_rotation)
+        
+        if st.button("💾 Update Quota Config"):
+            quota_config.daily_limit = daily_limit
+            quota_config.requests_per_hour = hourly_limit
+            quota_config.retry_delay = retry_delay
+            quota_config.use_fallback_on_limit = use_fallback
+            quota_config.api_key_rotation = api_rotation
+            st.success("✅ Quota configuration updated!")
+    
+    with st.expander("🔑 API Key Management", expanded=False):
+        st.markdown("### Current API Key Status")
+        
+        if 'api_manager' in st.session_state:
+            api_status = st.session_state.api_manager.get_api_status()
+            
+            # Display detailed key information
+            for key_idx, status in api_status['key_status'].items():
+                with st.container():
+                    col1, col2, col3, col4 = st.columns([1, 2, 2, 1])
+                    
+                    with col1:
+                        st.markdown(f"**Key {key_idx + 1}**")
+                    
+                    with col2:
+                        status_text = "🟢 Active" if status['active'] else "🔴 Disabled"
+                        st.markdown(status_text)
+                    
+                    with col3:
+                        st.markdown(f"Errors: {status['error_count']}")
+                    
+                    with col4:
+                        if st.button(f"Reset {key_idx + 1}", key=f"reset_key_{key_idx}"):
+                            st.session_state.api_manager.reset_key_status(key_idx)
+                            st.rerun()
+                    
+                    if status['last_error']:
+                        st.markdown(f"   ⚠️ Last Error: {status['last_error']}")
+                    
+                    st.markdown("---")
+        else:
+            st.warning("API Manager not initialized.")
+
+def main():
+    """Main application function"""
+    # Initialize session state
+    if 'api_manager' not in st.session_state:
+        st.session_state.api_manager = MultiAPIManager()
+    
+    if 'quota_manager' not in st.session_state:
+        st.session_state.quota_manager = QuotaManager()
+    
+    # Main header
+    st.title("🤖 Enhanced Versatile AI Assistant")
+    st.markdown("*Advanced multi-API, equipment diagnostics, and intelligent support system*")
+    
+    # Sidebar with status displays
+    display_api_status()
+    display_quota_status()
+    
+    # Main navigation
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "🔧 Diagnostic Assistant", 
+        "🏭 Equipment Monitor", 
+        "⚙️ Configuration", 
+        "📊 System Status"
+    ])
     
     with tab1:
-        st.markdown("### 📈 System Analytics")
-        
-        # Create sample analytics data
-        if st.session_state.maintenance_pipeline:
-            equipment_data = st.session_state.maintenance_pipeline.maintenance_data
-            
-            # Risk level distribution
-            risk_counts = {'HIGH': 0, 'MEDIUM': 0, 'LOW': 0}
-            for eq_data in equipment_data.values():
-                risk_counts[eq_data['risk_level']] += 1
-            
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("🔴 High Risk", risk_counts['HIGH'])
-            with col2:
-                st.metric("🟡 Medium Risk", risk_counts['MEDIUM'])
-            with col3:
-                st.metric("🟢 Low Risk", risk_counts['LOW'])
-            
-            # Equipment type distribution
-            st.markdown("#### Equipment Distribution")
-            type_counts = {}
-            for eq_data in equipment_data.values():
-                eq_type = eq_data['type']
-                type_counts[eq_type] = type_counts.get(eq_type, 0) + 1
-            
-            for eq_type, count in type_counts.items():
-                st.write(f"**{eq_type}:** {count} units")
+        display_diagnostic_helper()
     
     with tab2:
-        st.markdown("### 📖 Equipment Knowledge Base")
-        
-        selected_equipment = st.selectbox(
-            "Select equipment type for details:",
-            options=list(EQUIPMENT_KNOWLEDGE.keys()),
-            format_func=lambda x: EQUIPMENT_KNOWLEDGE[x]['name']
-        )
-        
-        if selected_equipment:
-            eq_info = EQUIPMENT_KNOWLEDGE[selected_equipment]
-            
-            st.markdown(f"#### {eq_info['name']}")
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown("**Components:**")
-                for component in eq_info['components']:
-                    st.write(f"• {component.title()}")
-            
-            with col2:
-                st.markdown("**Common Issues:**")
-                for issue in eq_info['common_issues']:
-                    st.write(f"• {issue.title()}")
+        display_equipment_monitor()
     
     with tab3:
-        st.markdown("### ⚙️ System Configuration")
+        display_configuration_panel()
+    
+    with tab4:
+        st.markdown("## 📊 System Status Overview")
         
-        # Configuration options
-        st.markdown("#### Chat Settings")
+        # API Status Summary
+        if 'api_manager' in st.session_state:
+            api_status = st.session_state.api_manager.get_api_status()
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.metric("Total API Keys", api_status['total_keys'])
+            with col2:
+                st.metric("Active Keys", api_status['active_keys'])
+            with col3:
+                st.metric("Current Key", api_status['current_key'])
         
-        col1, col2 = st.columns(2)
+        # Quota Status Summary
+        if 'quota_manager' in st.session_state:
+            quota_status = st.session_state.quota_manager.get_quota_status()
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                st.metric("Daily Used", f"{quota_status['daily_used']}/{quota_status['daily_limit']}")
+            with col2:
+                st.metric("Hourly Used", f"{quota_status['hourly_used']}/{quota_status['hourly_limit']}")
+            with col3:
+                st.metric("Session Requests", quota_status['session_requests'])
+            with col4:
+                st.metric("Total Requests", quota_status['total_requests'])
         
-        with col1:
-            new_chunk_size = st.slider(
-                "Text Chunk Size", 
-                min_value=200, 
-                max_value=1000, 
-                value=config.chunk_size,
-                step=50,
-                help="Size of text chunks for processing"
-            )
-            if new_chunk_size != config.chunk_size:
-                config.chunk_size = new_chunk_size
-                st.success("✅ Chunk size updated!")
+        # System Health Indicators
+        st.markdown("### 🏥 System Health")
         
-        with col2:
-            new_top_k = st.slider(
-                "Top-K Retrieval", 
-                min_value=1, 
-                max_value=10, 
-                value=config.top_k_retrieval,
-                help="Number of relevant chunks to retrieve"
-            )
-            if new_top_k != config.top_k_retrieval:
-                config.top_k_retrieval = new_top_k
-                st.success("✅ Top-K updated!")
+        health_metrics = {
+            "API Connectivity": "🟢 Healthy" if 'api_manager' in st.session_state else "🔴 Error",
+            "Quota Management": "🟢 Active" if 'quota_manager' in st.session_state else "🔴 Inactive",
+            "Diagnostic Engine": "🟢 Ready" if 'ai_engine' in st.session_state else "🟡 Initializing",
+            "Equipment Monitor": "🟢 Online"
+        }
         
-        st.markdown("#### System Actions")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            if st.button("🗑️ Clear Chat History"):
-                st.session_state.messages = [st.session_state.messages[0]]  # Keep welcome message
-                st.session_state.current_analysis = None
-                st.session_state.followup_questions = []
-                st.success("✅ Chat history cleared!")
-                st.rerun()
-        
-        with col2:
-            if st.button("🔄 Reset System State"):
-                for key in ['current_analysis', 'followup_questions', 'chat_history']:
-                    if key in st.session_state:
-                        st.session_state[key] = None if key != 'followup_questions' else []
-                st.success("✅ System state reset!")
-                st.rerun()
-
+        for metric, status in health_metrics.items():
+            st.markdown(f"**{metric}**: {status}")
+    
     # Footer
     st.markdown("---")
-    st.markdown("""
-    <div style='text-align: center; color: #666; padding: 20px;'>
-        🔧 <b>Smart Equipment Diagnostic AI</b> | 
-        Powered by Advanced AI & Machine Learning | 
-        ⚡ Real-time Diagnostics & Preventive Maintenance
-        <br>
-        <small>Version 2.0 | Enhanced with Quota Management & Fallback Systems</small>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("*🚀 Enhanced Versatile AI Assistant - Multi-API Management System*")
+    st.markdown("*Built with Streamlit, Google Gemini API, and advanced diagnostics*")
 
-# --- Application Entry Point ---
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        st.error(f"❌ Application Error: {e}")
-        st.info("🔄 Please refresh the page or contact support if the issue persists.")
-        
-        # Show debug info in development
-        if st.checkbox("Show Debug Info"):
-            st.exception(e)
+    main()
