@@ -56,7 +56,7 @@ class MultiAPIManager:
         self.api_keys = self._load_api_keys()
         self.current_key_index = 0
         self.key_status = {i: {'active': True, 'error_count': 0, 'last_error': None} 
-                          for i in range(len(self.api_keys))}
+                           for i in range(len(self.api_keys))}
         self.current_model = None
         self._initialize_current_model()
     
@@ -151,7 +151,7 @@ class MultiAPIManager:
             self.key_status[key_index] = {'active': True, 'error_count': 0, 'last_error': None}
         else:
             self.key_status = {i: {'active': True, 'error_count': 0, 'last_error': None} 
-                              for i in range(len(self.api_keys))}
+                               for i in range(len(self.api_keys))}
         st.success("✅ API key status reset!")
 
 # --- Enhanced Query Classification System ---
@@ -631,7 +631,7 @@ class MaintenancePipeline:
     def _load_maintenance_data(self) -> Dict:
         equipment_data = {}
         equipment_types = ['HVAC', 'IT_EQUIPMENT', 'ELECTRICAL', 'FIRE_SAFETY', 'Network Switch', 
-                          'Server', 'Industrial Motor', 'Medical Device', 'Automotive System']
+                           'Server', 'Industrial Motor', 'Medical Device', 'Automotive System']
         
         for i in range(35):
             eq_type = random.choice(equipment_types)
@@ -657,8 +657,6 @@ class MaintenancePipeline:
         device = random.choice(self.equipment_list)
         device_info = self.maintenance_data[device]
         
-# Continuing from the MaintenancePipeline class...
-
         return {
             "alert_type": alert_type,
             "device_id": device,
@@ -985,7 +983,7 @@ def main():
             st.session_state.api_manager.reset_key_status()
         
         st.subheader("📈 Usage Quota")
-        st.progress(quota_status['daily_used'] / quota_status['daily_limit'])
+        st.progress(quota_status['daily_used'] / (quota_status['daily_limit'] or 1))
         st.text(f"Daily: {quota_status['daily_used']}/{quota_status['daily_limit']}")
         st.text(f"Hourly: {quota_status['hourly_used']}/{quota_status['hourly_limit']}")
         st.text(f"Session: {quota_status['session_requests']}")
@@ -1010,7 +1008,7 @@ def main():
         
         # Query input
         user_query = st.text_area("Ask me anything:", height=100, 
-                                 placeholder="Example: My TV is flickering, what should I check?")
+                                  placeholder="Example: My TV is flickering, what should I check?")
         
         col1, col2 = st.columns([1, 4])
         with col1:
@@ -1167,6 +1165,7 @@ Provide a comprehensive answer based on the context provided."""
         
         # Equipment risk distribution
         st.subheader("🔧 Equipment Risk Distribution")
+        dashboard = st.session_state.maintenance_pipeline.get_maintenance_dashboard()
         risk_data = {
             'Risk Level': ['High', 'Medium', 'Low'],
             'Count': [dashboard['high_risk'], dashboard['medium_risk'], dashboard['low_risk']]
