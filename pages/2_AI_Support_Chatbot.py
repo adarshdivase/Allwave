@@ -1,4 +1,4 @@
-# app.py - Enhanced version with quota management and fallback systems
+# app.py - Complete Enhanced version with quota management and fallback systems
 import streamlit as st
 import pandas as pd
 import os
@@ -21,7 +21,6 @@ from PIL import Image
 import io
 import time
 import json
-import requests
 from functools import wraps
 
 # --- Enhanced Configuration with Quota Management ---
@@ -48,6 +47,35 @@ class QuotaConfig:
 
 config = RAGConfig()
 quota_config = QuotaConfig()
+
+# --- Smart Equipment Knowledge Base ---
+EQUIPMENT_KNOWLEDGE = {
+    'hvac': {
+        'name': 'HVAC System',
+        'components': ['compressor', 'condenser', 'evaporator', 'expansion valve', 'refrigerant lines', 'thermostat', 'blower motor', 'air filter', 'ductwork'],
+        'common_issues': ['no cooling', 'poor airflow', 'strange noises', 'high energy bills', 'water leaks', 'frozen coils', 'thermostat issues']
+    },
+    'electrical': {
+        'name': 'Electrical System',
+        'components': ['circuit breakers', 'outlets', 'switches', 'wiring', 'panels', 'meters', 'transformers'],
+        'common_issues': ['power outages', 'flickering lights', 'tripped breakers', 'burning smell', 'shock hazards', 'overheating']
+    },
+    'network': {
+        'name': 'Network Equipment',
+        'components': ['switches', 'routers', 'cables', 'ports', 'access points', 'firewalls'],
+        'common_issues': ['connection timeout', 'slow speeds', 'intermittent connectivity', 'device offline', 'high latency']
+    },
+    'server': {
+        'name': 'Server Hardware',
+        'components': ['cpu', 'memory', 'storage', 'power supply', 'cooling fans', 'motherboard'],
+        'common_issues': ['high cpu usage', 'memory errors', 'disk failures', 'overheating', 'boot failures', 'network issues']
+    },
+    'industrial': {
+        'name': 'Industrial Equipment',
+        'components': ['motors', 'pumps', 'valves', 'sensors', 'controllers', 'drives'],
+        'common_issues': ['motor failures', 'pump problems', 'sensor malfunctions', 'control system errors', 'mechanical wear']
+    }
+}
 
 # --- Quota Management System ---
 class QuotaManager:
@@ -245,7 +273,7 @@ Respond in JSON format:
             if result:
                 return result
         except Exception as e:
-            st.warning(f"AI analysis unavailable: {e}. Using fallback analysis.")
+            st.warning(f"AI analysis unavailable: Using fallback analysis.")
         
         # Use fallback analysis
         return self._fallback_analysis(query)
@@ -438,6 +466,101 @@ Generate practical questions that a technician would ask to diagnose the issue. 
         
         return common_questions + equipment_specific.get(equipment_type, [])
 
+# --- Enhanced Maintenance Pipeline ---
+class MaintenancePipeline:
+    def __init__(self):
+        self.maintenance_data = self._load_maintenance_data()
+        self.equipment_list = list(self.maintenance_data.keys())
+
+    def _load_maintenance_data(self) -> Dict:
+        equipment_data = {}
+        equipment_types = ['HVAC', 'IT_EQUIPMENT', 'ELECTRICAL', 'FIRE_SAFETY', 'Network Switch', 'Server', 'Industrial Motor']
+        for i in range(30):
+            eq_type = random.choice(equipment_types)
+            fail_prob = random.uniform(0.1, 0.9)
+            equipment_data[f"{eq_type.replace(' ','_')}_{i+1}"] = {
+                'type': eq_type,
+                'location': f"Building A - Floor {random.randint(1,4)} - Rack {chr(65+i%4)}",
+                'failure_probability': fail_prob,
+                'risk_level': 'HIGH' if fail_prob > 0.7 else 'MEDIUM' if fail_prob > 0.4 else 'LOW',
+                'next_maintenance': (datetime.now() + timedelta(days=random.randint(7, 90))).strftime('%Y-%m-%d'),
+                'maintenance_cost': random.randint(200, 5000),
+                'last_issue': random.choice(['Overheating', 'Power failure', 'Network timeout', 'Mechanical wear', 'Software error'])
+            }
+        return equipment_data
+
+    def simulate_real_time_alert(self) -> Dict:
+        alert_types = [
+            "Device Offline", "High Temperature", "High CPU Usage", 
+            "Memory Error", "Disk Failure", "Network Timeout",
+            "Power Supply Failure", "Cooling Fan Error", "Configuration Error"
+        ]
+        alert_type = random.choice(alert_types)
+        device = random.choice(self.equipment_list)
+        device_info = self.maintenance_data[device]
+        return {
+            "alert_type": alert_type,
+            "device_id": device,
+            "device_type": device_info['type'],
+            "location": device_info['location'],
+            "severity": random.choice(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "description": f"{alert_type} detected on {device_info['type']} at {device_info['location']}"
+        }
+
+# --- Tool: Data Analysis Tool ---
+def analyze_csv_data(query: str) -> str:
+    try:
+        csv_files = glob.glob("*.csv")
+        if not csv_files:
+            return "No CSV files found in the current directory."
+        
+        ticket_file = None
+        for file in csv_files:
+            if any(keyword in file.lower() for keyword in ['ticket', 'maintenance', 'issue', 'problem']):
+                ticket_file = file
+                break
+        if not ticket_file:
+            ticket_file = csv_files[0]
+
+        df = pd.read_csv(ticket_file)
+        return f"CSV file '{ticket_file}' loaded with {len(df)} records. Basic analysis available in fallback mode."
+    except Exception as e:
+        return f"Error analyzing CSV data: {e}"
+
+# --- Enhanced LLM Configuration with Error Handling ---
+def initialize_gemini():
+    """Initialize Gemini with proper error handling"""
+    try:
+        if "GEMINI_API_KEY" in st.secrets:
+            genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            return model
+        else:
+            st.error("❌ GEMINI_API_KEY not found in secrets. Please add it to use AI features.")
+            return None
+    except Exception as e:
+        st.error(f"❌ Error configuring Gemini API: {e}")
+        if "quota" in str(e).lower() or "429" in str(e):
+            st.error("🚫 API quota exceeded. Please check your billing or wait for quota reset.")
+        return None
+
+# --- Document Processing Functions (Basic versions for fallback) ---
+def clean_text(text: str) -> str:
+    return re.sub(r'\s+', ' ', text.strip())
+
+def smart_chunking(text: str, chunk_size: int) -> List[str]:
+    sentences = re.split(r'(?<=[.!?])\s+', text)
+    chunks, current_chunk = [], ""
+    for sentence in sentences:
+        if len(current_chunk) + len(sentence) < chunk_size:
+            current_chunk += sentence + " "
+        else:
+            if current_chunk: chunks.append(current_chunk.strip())
+            current_chunk = sentence + " "
+    if current_chunk: chunks.append(current_chunk.strip())
+    return [c for c in chunks if len(c) > 30]
+
 # --- Enhanced Quota Display Component ---
 def display_quota_status():
     """Display current quota usage in sidebar"""
@@ -478,58 +601,77 @@ def display_quota_status():
                     quota_config.use_fallback_on_limit = new_fallback
                     st.success("Setting updated!")
 
-# --- Enhanced LLM Configuration with Error Handling ---
-def initialize_gemini():
-    """Initialize Gemini with proper error handling"""
-    try:
-        if "GEMINI_API_KEY" in st.secrets:
-            genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-            model = genai.GenerativeModel('gemini-1.5-flash')
-            # Test the connection
-            test_response = model.generate_content("Hello")
-            return model
-        else:
-            st.error("❌ GEMINI_API_KEY not found in secrets. Please add it to use AI features.")
-            return None
-    except Exception as e:
-        st.error(f"❌ Error configuring Gemini API: {e}")
-        if "quota" in str(e).lower() or "429" in str(e):
-            st.error("🚫 API quota exceeded. Please check your billing or wait for quota reset.")
-        return None
-
-# --- Rest of the original code (EQUIPMENT_KNOWLEDGE, MaintenancePipeline, etc.) remains the same ---
-EQUIPMENT_KNOWLEDGE = {
-    'hvac': {
-        'name': 'HVAC System',
-        'components': ['compressor', 'condenser', 'evaporator', 'expansion valve', 'refrigerant lines', 'thermostat', 'blower motor', 'air filter', 'ductwork'],
-        'common_issues': ['no cooling', 'poor airflow', 'strange noises', 'high energy bills', 'water leaks', 'frozen coils', 'thermostat issues']
-    },
-    'electrical': {
-        'name': 'Electrical System',
-        'components': ['circuit breakers', 'outlets', 'switches', 'wiring', 'panels', 'meters', 'transformers'],
-        'common_issues': ['power outages', 'flickering lights', 'tripped breakers', 'burning smell', 'shock hazards', 'overheating']
-    },
-    'network': {
-        'name': 'Network Equipment',
-        'components': ['switches', 'routers', 'cables', 'ports', 'access points', 'firewalls'],
-        'common_issues': ['connection timeout', 'slow speeds', 'intermittent connectivity', 'device offline', 'high latency']
-    },
-    'server': {
-        'name': 'Server Hardware',
-        'components': ['cpu', 'memory', 'storage', 'power supply', 'cooling fans', 'motherboard'],
-        'common_issues': ['high cpu usage', 'memory errors', 'disk failures', 'overheating', 'boot failures', 'network issues']
-    },
-    'industrial': {
-        'name': 'Industrial Equipment',
-        'components': ['motors', 'pumps', 'valves', 'sensors', 'controllers', 'drives'],
-        'common_issues': ['motor failures', 'pump problems', 'sensor malfunctions', 'control system errors', 'mechanical wear']
+# --- Session State Initialization ---
+def initialize_session_state():
+    if "messages" not in st.session_state:
+        st.session_state.messages = [
+            {
+                "role": "assistant", 
+                "content": """<span style="font-size:1.3em">🔧 <b>Smart Equipment Diagnostic AI Ready!</b></span>
+Welcome! I can help you with:
+- <b>Any equipment issue</b> (HVAC, electrical, network, servers, industrial)
+- <b>Intelligent problem analysis</b>
+- <b>Step-by-step solutions</b>
+- <b>Safety recommendations</b>
+- <b>Preventive maintenance</b>
+<b>Just describe your problem in plain English!</b>  
+<i>e.g. "My air conditioner stopped working"</i>
+""", 
+                "timestamp": datetime.now()
+            }
+        ]
+    defaults = {
+        "current_analysis": None,
+        "diagnostic_engine": None,
+        "followup_questions": [],
+        "maintenance_pipeline": None,
+        "chat_history": []
     }
-}
+    for key, value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
 
-# [Include all other original classes and functions here - MaintenancePipeline, document processing functions, etc.]
-# For brevity, I'm focusing on the quota management additions
+# --- Response Handling Function ---
+def handle_user_prompt(prompt: str):
+    with st.spinner("🤖 Analyzing issue and generating solution..."):
+        try:
+            response_content = ""
+            if st.session_state.diagnostic_engine:
+                analysis = st.session_state.diagnostic_engine.analyze_user_query(prompt)
+                
+                if analysis.get('equipment_type') != 'general':
+                     st.session_state.current_analysis = {
+                         'equipment_name': EQUIPMENT_KNOWLEDGE.get(analysis['equipment_type'], {}).get('name', 'Unknown'),
+                         'confidence': analysis.get('confidence', 75),
+                         'components': EQUIPMENT_KNOWLEDGE.get(analysis['equipment_type'], {}).get('components', [])
+                     }
+                
+                # Generate solution (with automatic fallback)
+                response_content = st.session_state.diagnostic_engine.generate_diagnostic_solution(
+                    prompt, analysis, ""
+                )
+                
+                # Generate follow-up questions
+                st.session_state.followup_questions = st.session_state.diagnostic_engine.generate_followup_questions(
+                    prompt, analysis
+                )
+            else:
+                response_content = "Diagnostic engine not available. Operating in basic mode."
+                
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": response_content,
+                "timestamp": datetime.now()
+            })
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": f"❌ An error occurred while processing your request: {e}",
+                "timestamp": datetime.now()
+            })
 
-# --- Enhanced Main Function ---
+# --- Main Application ---
 def main():
     st.markdown(
         """
@@ -545,48 +687,338 @@ def main():
 
     initialize_session_state()
 
+# Continuation of app.py - Complete Enhanced version with quota management and fallback systems
+
     # Initialize quota manager
     if 'quota_manager' not in st.session_state:
         st.session_state.quota_manager = QuotaManager()
 
-    # Initialize Gemini with enhanced error handling
-    if 'gemini_initialized' not in st.session_state:
-        GEMINI_MODEL = initialize_gemini()
-        st.session_state.gemini_model = GEMINI_MODEL
-        st.session_state.gemini_initialized = True
-    else:
-        GEMINI_MODEL = st.session_state.gemini_model
+    # Initialize components
+    gemini_model = initialize_gemini()
+    
+    if 'diagnostic_engine' not in st.session_state or st.session_state.diagnostic_engine is None:
+        st.session_state.diagnostic_engine = SmartDiagnosticEngine(gemini_model)
+    
+    if 'maintenance_pipeline' not in st.session_state:
+        st.session_state.maintenance_pipeline = MaintenancePipeline()
 
-    # Initialize diagnostic engine
-    if GEMINI_MODEL and not st.session_state.diagnostic_engine:
-        st.session_state.diagnostic_engine = SmartDiagnosticEngine(GEMINI_MODEL)
-    elif not GEMINI_MODEL and not st.session_state.diagnostic_engine:
-        # Create engine without Gemini for fallback mode
-        st.session_state.diagnostic_engine = SmartDiagnosticEngine(None)
-
+    # Title and Header
+    st.title("🔧 Smart Equipment Diagnostic AI")
+    st.markdown("### Intelligent Equipment Troubleshooting & Maintenance Assistant")
+    
     # Display quota status in sidebar
     display_quota_status()
 
-    # Enhanced status display
-    quota_status = st.session_state.quota_manager.get_quota_status()
-    quota_color = "green" if quota_status['daily_used'] < quota_status['daily_limit'] * 0.8 else "orange" if quota_status['daily_used'] < quota_status['daily_limit'] else "red"
+    # Sidebar Configuration
+    with st.sidebar:
+        st.markdown("## 🛠️ System Status")
+        
+        # AI Status Indicator
+        if gemini_model:
+            st.success("✅ AI Engine Active")
+        else:
+            st.error("❌ AI Engine Unavailable")
+            st.info("🔄 Using Fallback Mode")
+        
+        st.markdown("---")
+        
+        # Equipment Type Filter
+        st.markdown("### 🏭 Equipment Categories")
+        for eq_type, eq_data in EQUIPMENT_KNOWLEDGE.items():
+            with st.expander(f"🔹 {eq_data['name']}"):
+                st.write(f"**Components:** {', '.join(eq_data['components'][:3])}...")
+                st.write(f"**Common Issues:** {len(eq_data['common_issues'])} types")
+        
+        st.markdown("---")
+        
+        # Current Analysis Display
+        if st.session_state.current_analysis:
+            st.markdown("### 🔍 Current Analysis")
+            st.success(f"**Equipment:** {st.session_state.current_analysis['equipment_name']}")
+            st.info(f"**Confidence:** {st.session_state.current_analysis['confidence']}%")
+            
+            if st.session_state.current_analysis['components']:
+                st.markdown("**Key Components:**")
+                for comp in st.session_state.current_analysis['components'][:5]:
+                    st.write(f"• {comp.title()}")
+        
+        st.markdown("---")
+        
+        # Tools Section
+        st.markdown("### 🧰 Additional Tools")
+        
+        if st.button("📊 Generate Maintenance Report"):
+            with st.spinner("Generating maintenance report..."):
+                st.markdown("#### 📋 Equipment Status Report")
+                
+                # Sample data for demonstration
+                high_risk_count = sum(1 for eq in st.session_state.maintenance_pipeline.maintenance_data.values() if eq['risk_level'] == 'HIGH')
+                medium_risk_count = sum(1 for eq in st.session_state.maintenance_pipeline.maintenance_data.values() if eq['risk_level'] == 'MEDIUM')
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("High Risk", high_risk_count, delta=f"+{high_risk_count-5}" if high_risk_count > 5 else f"{high_risk_count-5}")
+                with col2:
+                    st.metric("Medium Risk", medium_risk_count, delta=f"+{medium_risk_count-8}" if medium_risk_count > 8 else f"{medium_risk_count-8}")
+                
+                st.success("✅ Report generated successfully!")
+        
+        if st.button("🚨 Simulate Real-time Alert"):
+            alert = st.session_state.maintenance_pipeline.simulate_real_time_alert()
+            severity_color = {
+                "LOW": "🟢", "MEDIUM": "🟡", 
+                "HIGH": "🟠", "CRITICAL": "🔴"
+            }
+            
+            st.markdown(f"""
+            **Alert Generated:**
+            
+            {severity_color.get(alert['severity'], '⚪')} **{alert['alert_type']}**
+            
+            **Device:** {alert['device_id']}
+            
+            **Location:** {alert['location']}
+            
+            **Time:** {alert['timestamp']}
+            
+            **Description:** {alert['description']}
+            """)
+        
+        if st.button("📈 Analyze CSV Data"):
+            result = analyze_csv_data("analyze maintenance data")
+            st.info(result)
+
+    # Main Chat Interface
+    st.markdown("## 💬 Diagnostic Chat")
     
-    st.markdown(
-        f"""
-        <div style="background:#e3f2fd;padding:0.7em 1em;border-radius:10px;margin-bottom:1em;">
-            <b>Status:</b> <span style="color:green">Online</span> &nbsp;|&nbsp;
-            <b>AI Mode:</b> <span style="color:{quota_color}">{'Premium' if GEMINI_MODEL and quota_status['daily_used'] < quota_status['daily_limit'] else 'Fallback'}</span> &nbsp;|&nbsp;
-            <b>Daily Quota:</b> <span style="color:{quota_color}">{quota_status['daily_used']}/{quota_status['daily_limit']}</span>
-        </div>
-        """, unsafe_allow_html=True
-    )
+    # Display chat messages
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"], unsafe_allow_html=True)
+            
+            # Display timestamp for recent messages
+            if message.get("timestamp"):
+                time_diff = datetime.now() - message["timestamp"]
+                if time_diff.total_seconds() < 3600:  # Within last hour
+                    st.caption(f"⏰ {message['timestamp'].strftime('%H:%M:%S')}")
 
-    # Show quota warning if needed
-    if quota_status['daily_used'] >= quota_status['daily_limit'] * 0.9:
-        st.warning("⚠️ **High API usage detected!** The app will automatically switch to fallback mode when quota is exceeded. Fallback solutions are still comprehensive but not AI-generated.")
+    # Follow-up Questions Section
+    if st.session_state.followup_questions:
+        st.markdown("### ❓ Follow-up Questions")
+        st.info("Click on any question to get more specific help:")
+        
+        cols = st.columns(min(len(st.session_state.followup_questions), 3))
+        for idx, question in enumerate(st.session_state.followup_questions[:3]):
+            with cols[idx]:
+                if st.button(f"❓ {question}", key=f"followup_{idx}"):
+                    # Add question as user message
+                    st.session_state.messages.append({
+                        "role": "user",
+                        "content": question,
+                        "timestamp": datetime.now()
+                    })
+                    
+                    # Process the follow-up question
+                    handle_user_prompt(question)
+                    st.rerun()
 
-    # Rest of the main function remains the same...
-    # [Include the rest of your original main() function here]
+    # Chat Input
+    if prompt := st.chat_input("Describe your equipment issue (e.g., 'My HVAC system is making strange noises')"):
+        # Add user message
+        st.session_state.messages.append({
+            "role": "user",
+            "content": prompt,
+            "timestamp": datetime.now()
+        })
+        
+        # Handle the user prompt
+        handle_user_prompt(prompt)
+        st.rerun()
 
+    # Quick Action Buttons
+    st.markdown("## 🚀 Quick Actions")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        if st.button("❄️ HVAC Issues"):
+            quick_prompt = "My HVAC system is not cooling properly"
+            st.session_state.messages.append({
+                "role": "user",
+                "content": quick_prompt,
+                "timestamp": datetime.now()
+            })
+            handle_user_prompt(quick_prompt)
+            st.rerun()
+    
+    with col2:
+        if st.button("⚡ Electrical Problems"):
+            quick_prompt = "I'm having electrical issues with flickering lights"
+            st.session_state.messages.append({
+                "role": "user",
+                "content": quick_prompt,
+                "timestamp": datetime.now()
+            })
+            handle_user_prompt(quick_prompt)
+            st.rerun()
+    
+    with col3:
+        if st.button("🌐 Network Issues"):
+            quick_prompt = "My network connection keeps timing out"
+            st.session_state.messages.append({
+                "role": "user",
+                "content": quick_prompt,
+                "timestamp": datetime.now()
+            })
+            handle_user_prompt(quick_prompt)
+            st.rerun()
+    
+    with col4:
+        if st.button("🖥️ Server Problems"):
+            quick_prompt = "My server is showing high CPU usage and overheating"
+            st.session_state.messages.append({
+                "role": "user",
+                "content": quick_prompt,
+                "timestamp": datetime.now()
+            })
+            handle_user_prompt(quick_prompt)
+            st.rerun()
+
+    # Additional Features Section
+    st.markdown("---")
+    st.markdown("## 🔧 Advanced Features")
+    
+    tab1, tab2, tab3 = st.tabs(["📊 Analytics", "📚 Knowledge Base", "⚙️ Settings"])
+    
+    with tab1:
+        st.markdown("### 📈 System Analytics")
+        
+        # Create sample analytics data
+        if st.session_state.maintenance_pipeline:
+            equipment_data = st.session_state.maintenance_pipeline.maintenance_data
+            
+            # Risk level distribution
+            risk_counts = {'HIGH': 0, 'MEDIUM': 0, 'LOW': 0}
+            for eq_data in equipment_data.values():
+                risk_counts[eq_data['risk_level']] += 1
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("🔴 High Risk", risk_counts['HIGH'])
+            with col2:
+                st.metric("🟡 Medium Risk", risk_counts['MEDIUM'])
+            with col3:
+                st.metric("🟢 Low Risk", risk_counts['LOW'])
+            
+            # Equipment type distribution
+            st.markdown("#### Equipment Distribution")
+            type_counts = {}
+            for eq_data in equipment_data.values():
+                eq_type = eq_data['type']
+                type_counts[eq_type] = type_counts.get(eq_type, 0) + 1
+            
+            for eq_type, count in type_counts.items():
+                st.write(f"**{eq_type}:** {count} units")
+    
+    with tab2:
+        st.markdown("### 📖 Equipment Knowledge Base")
+        
+        selected_equipment = st.selectbox(
+            "Select equipment type for details:",
+            options=list(EQUIPMENT_KNOWLEDGE.keys()),
+            format_func=lambda x: EQUIPMENT_KNOWLEDGE[x]['name']
+        )
+        
+        if selected_equipment:
+            eq_info = EQUIPMENT_KNOWLEDGE[selected_equipment]
+            
+            st.markdown(f"#### {eq_info['name']}")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("**Components:**")
+                for component in eq_info['components']:
+                    st.write(f"• {component.title()}")
+            
+            with col2:
+                st.markdown("**Common Issues:**")
+                for issue in eq_info['common_issues']:
+                    st.write(f"• {issue.title()}")
+    
+    with tab3:
+        st.markdown("### ⚙️ System Configuration")
+        
+        # Configuration options
+        st.markdown("#### Chat Settings")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            new_chunk_size = st.slider(
+                "Text Chunk Size", 
+                min_value=200, 
+                max_value=1000, 
+                value=config.chunk_size,
+                step=50,
+                help="Size of text chunks for processing"
+            )
+            if new_chunk_size != config.chunk_size:
+                config.chunk_size = new_chunk_size
+                st.success("✅ Chunk size updated!")
+        
+        with col2:
+            new_top_k = st.slider(
+                "Top-K Retrieval", 
+                min_value=1, 
+                max_value=10, 
+                value=config.top_k_retrieval,
+                help="Number of relevant chunks to retrieve"
+            )
+            if new_top_k != config.top_k_retrieval:
+                config.top_k_retrieval = new_top_k
+                st.success("✅ Top-K updated!")
+        
+        st.markdown("#### System Actions")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("🗑️ Clear Chat History"):
+                st.session_state.messages = [st.session_state.messages[0]]  # Keep welcome message
+                st.session_state.current_analysis = None
+                st.session_state.followup_questions = []
+                st.success("✅ Chat history cleared!")
+                st.rerun()
+        
+        with col2:
+            if st.button("🔄 Reset System State"):
+                for key in ['current_analysis', 'followup_questions', 'chat_history']:
+                    if key in st.session_state:
+                        st.session_state[key] = None if key != 'followup_questions' else []
+                st.success("✅ System state reset!")
+                st.rerun()
+
+    # Footer
+    st.markdown("---")
+    st.markdown("""
+    <div style='text-align: center; color: #666; padding: 20px;'>
+        🔧 <b>Smart Equipment Diagnostic AI</b> | 
+        Powered by Advanced AI & Machine Learning | 
+        ⚡ Real-time Diagnostics & Preventive Maintenance
+        <br>
+        <small>Version 2.0 | Enhanced with Quota Management & Fallback Systems</small>
+    </div>
+    """, unsafe_allow_html=True)
+
+# --- Application Entry Point ---
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        st.error(f"❌ Application Error: {e}")
+        st.info("🔄 Please refresh the page or contact support if the issue persists.")
+        
+        # Show debug info in development
+        if st.checkbox("Show Debug Info"):
+            st.exception(e)
