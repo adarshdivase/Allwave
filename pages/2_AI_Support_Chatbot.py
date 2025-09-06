@@ -1,5 +1,6 @@
 # app.py - HYBRID Versatile AI Assistant
 # Combines the powerful backend of Script 1 with the UI/UX and granular fallbacks of Script 2.
+# Includes the robust fix for the KeyError.
 import streamlit as st
 import pandas as pd
 import os
@@ -9,7 +10,7 @@ import faiss
 import numpy as np
 import warnings
 import re
-from typing import List, Dict, Any, Generator, Optional, Tuple
+from typing import List, Dict, Any
 import fitz  # PyMuPDF
 from datetime import datetime, timedelta
 import random
@@ -150,7 +151,6 @@ class MultiAPIManager:
                                for i in range(len(self.api_keys))}
         st.success("✅ API key status reset!")
 
-# ... (QueryClassifier, EQUIPMENT_KNOWLEDGE, QuotaManager, rate_limit_with_rotation from Script 1 remain unchanged) ...
 # --- Enhanced Query Classification System ---
 class QueryClassifier:
     def __init__(self):
@@ -281,11 +281,9 @@ class VersatileAIEngine:
     def __init__(self, api_manager: MultiAPIManager):
         self.api_manager = api_manager
         self.query_classifier = QueryClassifier()
-        # Fallback solutions are now more comprehensive, inspired by Script 2
         self.fallback_solutions = self._load_fallback_solutions()
     
     def _load_fallback_solutions(self) -> Dict:
-        # This is a more detailed set of fallbacks
         return {
             'equipment_diagnostic': {
                 'hvac': {'general': "**HVAC System Troubleshooting:**\n1. Check power and breakers.\n2. Inspect thermostat settings.\n3. Examine air filters for clogs."},
@@ -313,7 +311,6 @@ class VersatileAIEngine:
                 return self._generate_general_response(query, classification, model)
         except Exception as e:
             st.warning(f"AI generation failed: {e}. Using granular fallback.")
-            # --- MERGED --- Granular fallback on single API failure
             return self._generate_fallback_response(query, classification)
 
     def _generate_equipment_response(self, query: str, classification: Dict, model) -> str:
@@ -347,13 +344,11 @@ Provide a structured response including Problem Analysis, Quick Fixes, and Detai
         return f"🤖 **Fallback Solution** (AI temporarily unavailable)\n\n{solution}"
     
     def generate_followup_questions(self, query: str, classification: Dict) -> List[str]:
-        # This method generates context-aware follow-up questions, with a simple rule-based fallback.
         model = self.api_manager.get_working_model()
         try:
             if not model: raise Exception("No model available")
             prompt = f"Based on this query: '{query}', generate 3 specific follow-up questions a technician would ask. Return only a Python list of strings."
             response = model.generate_content(prompt)
-            # A simple way to parse the list-like string from the model
             questions = [q.strip().strip("'\"") for q in response.text.strip()[1:-1].split(',')]
             return questions[:3] if questions else self._get_fallback_questions(classification)
         except Exception:
@@ -365,22 +360,23 @@ Provide a structured response including Problem Analysis, Quick Fixes, and Detai
         else:
             return ["Can you provide more context?", "What have you tried so far?", "What is the expected outcome?"]
 
-# ... (DocumentProcessor, EnhancedRAGSystem, MaintenancePipeline from Script 1 remain the same) ...
+# --- Document Processing, RAG, and Maintenance Pipelines (Simplified for brevity) ---
 class DocumentProcessor:
     def process_uploaded_files(self, uploaded_files) -> List[Dict]:
         processed_docs = []
         for uploaded_file in uploaded_files:
             try:
-                # Simplified for brevity
                 content = "Processed content from " + uploaded_file.name
                 processed_docs.append({'filename': uploaded_file.name, 'content': content, 'size': uploaded_file.size, 'type': 'file'})
             except Exception as e:
                 processed_docs.append({'filename': uploaded_file.name, 'content': f"Error: {e}", 'size': 0, 'type': 'error'})
         return processed_docs
+
 class EnhancedRAGSystem:
     def __init__(self): self.is_initialized = False; self.documents = []; self.document_chunks = []
     def build_index(self, documents: List[Dict]): self.documents = documents; self.is_initialized = True; return True
     def get_context_for_query(self, query: str) -> str: return "Sample context from RAG system based on user query." if self.is_initialized else ""
+
 class MaintenancePipeline:
     def __init__(self): self.equipment_list = [f"Device_{i}" for i in range(35)]
     def get_maintenance_dashboard(self): return {'total_equipment': 35, 'high_risk': 5, 'medium_risk': 10, 'low_risk': 20, 'equipment_details': {}}
@@ -401,7 +397,6 @@ def main():
     st.title("🚀 Versatile AI Assistant")
     st.markdown("*Hybrid Edition: Multi-API Backend with an Interactive Chat UI*")
     
-    # Sidebar remains the same as Script 1
     with st.sidebar:
         st.header("🛠️ System Control Panel")
         api_status = st.session_state.api_manager.get_api_status()
@@ -414,7 +409,6 @@ def main():
         st.progress(quota_status['daily_used'] / (quota_status['daily_limit'] or 1))
         st.text(f"Daily: {quota_status['daily_used']}/{quota_status['daily_limit']}")
     
-    # --- MERGED --- Refactored chat logic into a handler function
     def handle_user_prompt(prompt: str):
         st.session_state.chat_history.append({'role': 'user', 'content': prompt})
         with st.spinner("🤔 Analyzing and generating solution..."):
@@ -429,12 +423,19 @@ def main():
     with tab1:
         st.header("💬 Intelligent AI Assistant")
         
-        # Display chat history
+        # --- ROBUST FIX FOR KEYERROR ---
+        # This loop now handles both old and new chat history formats.
         for chat in st.session_state.chat_history:
-            with st.chat_message(chat["role"]):
-                st.markdown(chat["content"])
+            if "role" in chat:
+                with st.chat_message(chat["role"]):
+                    st.markdown(chat.get("content", "*No content available.*"))
+            # Handle the old format {'query': ..., 'response': ...} as a fallback
+            elif "query" in chat:
+                with st.chat_message("user"):
+                    st.markdown(chat.get("query", "*No query available.*"))
+                with st.chat_message("assistant"):
+                    st.markdown(chat.get("response", "*No response available.*"))
 
-        # --- MERGED --- Follow-up Questions UI from Script 2
         if st.session_state.followup_questions:
             st.markdown("---")
             st.info("Need more specific help? Try one of these questions:")
@@ -443,11 +444,9 @@ def main():
                 if cols[i].button(question, key=f"followup_{i}"):
                     handle_user_prompt(question)
 
-        # Chat Input
         if prompt := st.chat_input("Describe your equipment issue..."):
             handle_user_prompt(prompt)
 
-        # --- MERGED --- Quick Action Buttons UI from Script 2
         st.markdown("---")
         st.markdown("##### 🚀 Quick Actions")
         cols = st.columns(4)
@@ -456,25 +455,20 @@ def main():
             if cols[i].button(label):
                 handle_user_prompt(prompt)
 
-    # Other tabs remain as they were in Script 1
     with tab2:
         st.header("📄 Document Knowledge Base (RAG)")
-        # RAG functionality UI here...
         st.info("RAG system is ready. Upload documents to activate.")
 
     with tab3:
         st.header("🔧 Equipment Monitoring Dashboard")
-        # Monitoring UI here...
         st.info("Equipment monitoring dashboard is active.")
 
     with tab4:
         st.header("📊 System Analytics")
-        # Analytics UI here...
         st.info("System analytics are available.")
 
     with tab5:
         st.header("⚙️ System Settings")
-        # Settings UI here...
         st.info("System settings can be configured here.")
 
 if __name__ == "__main__":
