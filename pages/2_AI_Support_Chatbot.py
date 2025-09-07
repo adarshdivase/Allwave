@@ -120,6 +120,12 @@ def load_custom_css():
         padding-bottom: 0.5rem;
         border-bottom: 2px solid var(--primary-color);
     }
+
+    /* --- ADDED RULE FOR DATA USAGE TEXT --- */
+    .card-content {
+        color: #000000;
+        font-weight: 500;
+    }
     
     /* Status cards */
     .status-card {
@@ -378,6 +384,12 @@ def load_custom_css():
         text-align: center;
         border: 1px solid var(--border-color);
     }
+
+    /* --- ADDED RULE FOR FOOTER TEXT --- */
+    .custom-footer p {
+        color: #000000;
+        margin: 0.25rem 0;
+    }
     
     /* Animation keyframes */
     @keyframes fadeIn {
@@ -465,7 +477,7 @@ def create_custom_card(title, content, card_type="default"):
     st.markdown(f"""
     <div class="custom-card {type_classes.get(card_type, '')} fade-in">
         <div class="card-header">{title}</div>
-        <div>{content}</div>
+        <div class="card-content">{content}</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -501,7 +513,7 @@ def create_status_indicator(status, label):
     st.markdown(f"""
     <div style="display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0;">
         <div style="width: 10px; height: 10px; border-radius: 50%; background: {color};" class="pulse"></div>
-        <span style="font-weight: 500; color: var(--text-primary);">{label}</span>
+        <span style="font-weight: 500; color: #FFFFFF;">{label}</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -537,6 +549,7 @@ class MultiAPIManager:
     
     def _load_api_keys(self) -> List[str]:
         keys = []
+        # Check for GEMINI_API_KEY_1 through GEMINI_API_KEY_5
         for i in range(1, 6):
             key_name = f"GEMINI_API_KEY_{i}" if i > 1 else "GEMINI_API_KEY"
             if key_name in st.secrets:
@@ -563,6 +576,7 @@ class MultiAPIManager:
                 try:
                     if not self.current_model:
                         self._initialize_current_model()
+                    # Test the current model with a simple request
                     _ = self.current_model.generate_content("Test")
                     self.key_status[self.current_key_index]['error_count'] = 0
                     return self.current_model
